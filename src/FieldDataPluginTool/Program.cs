@@ -1,13 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Xml;
 using log4net;
+using ServiceStack;
 
 namespace FieldDataPluginTool
 {
     static class Program
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static ILog _log;
 
         /// <summary>
         /// The main entry point for the application.
@@ -15,6 +18,8 @@ namespace FieldDataPluginTool
         [STAThread]
         static void Main()
         {
+            ConfigureLogging();
+
             AppDomain.CurrentDomain.UnhandledException +=
                 (sender, args) => HandleUnhandledException(args.ExceptionObject as Exception);
             Application.ThreadException +=
@@ -28,8 +33,40 @@ namespace FieldDataPluginTool
 
         private static void HandleUnhandledException(Exception argsException)
         {
-            Log.Error(argsException);
+            _log.Error(argsException);
             MessageBox.Show(argsException.Message, @"Oops");
+        }
+
+        private static void ConfigureLogging()
+        {
+            using (var stream = new MemoryStream(LoadEmbeddedResource("log4net.config")))
+            using (var reader = new StreamReader(stream))
+            {
+                var xml = new XmlDocument();
+                xml.LoadXml(reader.ReadToEnd());
+
+                log4net.Config.XmlConfigurator.Configure(xml.DocumentElement);
+
+                _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+            }
+        }
+
+        private static byte[] LoadEmbeddedResource(string path)
+        {
+            var resourceName = $"{GetProgramName()}.{path}";
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    throw new Exception($"Can't load '{resourceName}' as embedded resource.");
+
+                return stream.ReadFully();
+            }
+        }
+
+        private static string GetProgramName()
+        {
+            return Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
         }
     }
 }
