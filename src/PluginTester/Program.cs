@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Results;
 using log4net;
@@ -14,7 +15,7 @@ namespace PluginTester
 {
     public class Program
     {
-        private static readonly log4net.ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static log4net.ILog Log;
 
         public static void Main(string[] args)
         {
@@ -22,6 +23,8 @@ namespace PluginTester
 
             try
             {
+                ConfigureLogging();
+
                 ConfigureJson();
 
                 var program = new Program();
@@ -37,6 +40,33 @@ namespace PluginTester
             catch (Exception exception)
             {
                 Log.Error("Unhandled exception", exception);
+            }
+        }
+
+        private static void ConfigureLogging()
+        {
+            using (var stream = new MemoryStream(LoadEmbeddedResource("log4net.config")))
+            using (var reader = new StreamReader(stream))
+            {
+                var xml = new XmlDocument();
+                xml.LoadXml(reader.ReadToEnd());
+
+                log4net.Config.XmlConfigurator.Configure(xml.DocumentElement);
+
+                Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+            }
+        }
+
+        private static byte[] LoadEmbeddedResource(string path)
+        {
+            var resourceName = $"{GetProgramName()}.{path}";
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    throw new ExpectedException($"Can't load '{resourceName}' as embedded resource.");
+
+                return stream.ReadFully();
             }
         }
 
