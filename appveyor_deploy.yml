@@ -1,0 +1,9 @@
+# This configuration will be used by a manual AppVeyor build used:
+# Build the tools
+# Deploy to NuGet
+# Deploy to GitHub releases
+
+# The version here should match the framework assembly version.
+version: 1.0.0.0
+
+# TODO Fill this in and figure it out
