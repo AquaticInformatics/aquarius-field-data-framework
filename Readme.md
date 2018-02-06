@@ -1,5 +1,7 @@
 # AQUARIUS Time-Series Field Data Framework
 
+[![Build status](https://ci.appveyor.com/api/projects/status/eyoi121elrhtynw3/branch/master?svg=true)](https://ci.appveyor.com/project/SystemsAdministrator/aquarius-field-data-framework/branch/master)
+
 The Field Data Framework for AQUARIUS Time-Series provides an SDK which can be used to develop custom field visit file parsers to work with AQUARIUS Time-Series 2017.4-and-higher.
 
 ## Installing the framework SDK
