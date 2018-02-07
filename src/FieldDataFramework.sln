@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor_deploy.yml = ..\appveyor_deploy.yml
 		..\appveyor_prbuilds.yml = ..\appveyor_prbuilds.yml
+		Aquarius.FieldDataFramework.nuspec = Aquarius.FieldDataFramework.nuspec
 		..\Readme.md = ..\Readme.md
 	EndProjectSection
 EndProject
