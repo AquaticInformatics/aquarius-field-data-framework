@@ -47,7 +47,7 @@ artifacts:
     name: PluginTester
     type: zip
 
-  - path: '**\*.nupkg'
+  - path: 'Aquarius.FieldDataFramework.*.nupkg'
     name: AllPackages
     type: NuGetPackage
 
