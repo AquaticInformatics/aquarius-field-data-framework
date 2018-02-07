@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+    <!-- The identifier that must be unique within the hosting gallery -->
+    <id>Aquarius.FieldDataFramework</id>
+
+    <!-- The package version number that is used when resolving dependencies -->
+    <version>1.0.0</version>
+
+    <!-- Authors contain text that appears directly on the gallery -->
+    <authors>OpenSource-AI</authors>
+
+    <!-- Owners are typically nuget.org identities that allow gallery
+            users to easily find other packages by the same owners.  -->
+    <owners>OpenSource-AI</owners>
+
+    <!-- License and project URLs provide links for the gallery -->
+    <licenseUrl>https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/AquaticInformatics/aquarius-field-data-framework</projectUrl>
+
+    <!-- The icon is used in Visual Studio's package manager UI -->
+    <iconUrl>https://raw.githubusercontent.com/AquaticInformatics/aquarius-sdk-net/develop/images/icon.png</iconUrl>
+
+    <!-- If true, this value prompts the user to accept the license when
+            installing the package. -->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
+    <!-- Any details about this particular release -->
+    <releaseNotes>Supports AQTS 2017.4+</releaseNotes>
+
+    <!-- The description can be used in package manager UI. Note that the
+            nuget.org gallery uses information you add in the portal. -->
+    <description>Framework for developing field data plugins for AQUARIUS Time-Series</description>
+
+    <!-- Copyright information -->
+    <copyright>Copyright ©2018 Aquatic Informatics Inc.</copyright>
+
+    <!-- Tags appear in the gallery and can be used for tag searches -->
+    <tags>Aquatic Informatics AQUARIUS Time-Series field data plugin</tags>
+
+    </metadata>
+
+    <files>
+        <file src="Library\FieldDataPluginFramework.dll" target="lib\net47" />
+        <file src="FieldDataPluginTool\bin\Release\FieldDataPluginTool.exe" target="tools" />
+        <file src="PluginPackager\bin\Release\PluginPackager.exe" target="tools" />
+        <file src="PluginTester\bin\Release\PluginTester.exe" target="tools" />
+    </files>
+</package>
