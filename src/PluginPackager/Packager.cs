@@ -61,15 +61,61 @@ namespace PluginPackager
 
         private void ResolveAssemblyPath()
         {
+            AllowReflectionLoadsFromAssemblyFolder();
+
             if (!string.IsNullOrEmpty(Context.AssemblyPath))
             {
-                Plugin = FindAllPluginImplementations(Assembly.LoadFile(Context.AssemblyPath)).Single();
+                var assembly = LoadAssembly(Context.AssemblyPath, message => Log.Error($"Can't load '{Context.AssemblyPath}': {message}"));
+
+                if (assembly == null)
+                    throw new ExpectedException($"Can't load plugin assembly.");
+
+                Plugin = FindAllPluginImplementations(assembly).Single();
                 return;
             }
 
             Plugin = GetSinglePluginOrThrow();
 
             Context.AssemblyPath = Plugin.GetType().GetAssemblyPath();
+        }
+
+        private void AllowReflectionLoadsFromAssemblyFolder()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += LoadFromPluginFolder;
+        }
+
+        private Assembly LoadFromPluginFolder(object sender, ResolveEventArgs args)
+        {
+            var assemblyPath = Path.Combine(Context.AssemblyFolder, new AssemblyName(args.Name).Name + ".dll");
+
+            if (!File.Exists(assemblyPath)) return null;
+
+            return Assembly.LoadFrom(assemblyPath);
+        }
+
+        private Assembly LoadAssembly(string path, Action<string> exceptionAction)
+        {
+            try
+            {
+                return Assembly.LoadFile(path);
+            }
+            catch (Exception exception)
+            {
+                if (exception is ReflectionTypeLoadException loadException)
+                {
+                    exceptionAction(string.Join("\n", loadException.LoaderExceptions.Select(e => e.Message)));
+                }
+                else if (exception is BadImageFormatException || exception is FileLoadException || exception is SecurityException)
+                {
+                    exceptionAction(exception.Message);
+                }
+                else
+                {
+                    throw;
+                }
+
+                return null;
+            }
         }
 
         private IFieldDataPlugin GetSinglePluginOrThrow()
@@ -80,23 +126,12 @@ namespace PluginPackager
 
             foreach (var file in directory.GetFiles("*.dll"))
             {
-                try
-                {
-                    var assembly = Assembly.LoadFile(file.FullName);
+                var assembly = LoadAssembly(file.FullName, message => Log.Warn($"Skipping '{file.FullName}': {message}"));
 
-                    plugins.AddRange(FindAllPluginImplementations(assembly));
-                }
-                catch (Exception exception)
-                {
-                    if (exception is BadImageFormatException || exception is FileLoadException ||
-                        exception is SecurityException)
-                    {
-                        Log.Warn($"Skipping '{file.FullName}': {exception.Message}");
-                        continue;
-                    }
+                if (assembly == null)
+                    continue;
 
-                    throw;
-                }
+                plugins.AddRange(FindAllPluginImplementations(assembly));
             }
 
             if (plugins.Count > 1)

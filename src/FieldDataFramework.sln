@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\appveyor_prbuilds.yml = ..\appveyor_prbuilds.yml
 		Aquarius.FieldDataFramework.nuspec = Aquarius.FieldDataFramework.nuspec
 		..\Readme.md = ..\Readme.md
+		..\ReleaseNotes.md = ..\ReleaseNotes.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginTester", "PluginTester\PluginTester.csproj", "{C429E4A0-DD6D-4701-93FF-ECDB2B59C2CD}"
