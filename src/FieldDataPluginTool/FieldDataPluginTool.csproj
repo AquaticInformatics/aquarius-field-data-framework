@@ -37,8 +37,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aquarius.Client, Version=17.4.15.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Aquarius.SDK.17.4.15\lib\net45\Aquarius.Client.dll</HintPath>
+    <Reference Include="Aquarius.Client, Version=18.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aquarius.SDK.18.1.1\lib\net45\Aquarius.Client.dll</HintPath>
     </Reference>
     <Reference Include="Costura, Version=1.6.2.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.1.6.2\lib\dotnet\Costura.dll</HintPath>
@@ -63,6 +63,7 @@
       <HintPath>..\packages\ServiceStack.Text.4.5.12\lib\net45\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
@@ -75,6 +76,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
