@@ -12,7 +12,7 @@ This framework is available as a NuGet package.
 PM> Install-Package Aquarius.FieldDataFramework
 ```
 
-Adding the `Aquarius.FieldDataFramework` as a dependency to your .NEt project will install:
+Adding the `Aquarius.FieldDataFramework` as a dependency to your .NET project will install:
 - The `FieldDataPluginFramework` assembly, which contains the `IFieldDataPlugin` interface every plugin must implement.
 - The `PluginTester.exe` tool, useful for testing your plugin from within Visual Studio.
 - The `PluginPackager.exe` tool, used during a build process to package your plugin into a single `*.plugin` file for easy deployment.
