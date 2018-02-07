@@ -28,7 +28,7 @@ build:
   project: src\FieldDataFramework.sln
 
 after_build:
-  - nuget pack src\
+  - nuget pack src\Aquarius.FieldDataFramework.nuspec
 
 artifacts:
   - path: src\Library
@@ -47,6 +47,10 @@ artifacts:
     name: PluginTester
     type: zip
 
+  - path: '**\*.nupkg'
+    name: AllPackages
+    type: NuGetPackage
+
 deploy:
   - provider: GitHub
     tag: v$(APPVEYOR_BUILD_VERSION)
@@ -61,4 +65,4 @@ deploy:
     api_key:
       secure: 2ysF04mVlBnibe56a/2jETvgEkTCV/ReYVdG8SmlKdlziv7STEEMYtenRU/jDyEa
     skip_symbols: false
-    artifact: /.*\.nupkg/
+    artifact: AllPackages
