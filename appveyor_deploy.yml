@@ -13,7 +13,7 @@ skip_tags: true
 
 environment:
   GITHUB_AUTH_TOKEN:
-    secure: qqcWMLwMGDkvUc+9Rucijjn7L5OCUeXbr9tBlryNqOV8fPv7DUOUm48CdLJrgsnS
+    secure: e24gj/T2VZ5R4XwbNUwj+eu4FbHEqWKUhuvNKXcp4dRPxj8lgW3AbWgSitK5kzek
 
 init:
   - ps: |
@@ -36,11 +36,11 @@ artifacts:
     name: FieldDataPluginTool
     type: zip
   
-  - path: src\FieldDataPluginTool\bin\Release
+  - path: src\PluginPackager\bin\Release
     name: PluginPackager
     type: zip
 
-  - path: src\FieldDataPluginTool\bin\Release
+  - path: src\PluginTester\bin\Release
     name: PluginTester
     type: zip
 
