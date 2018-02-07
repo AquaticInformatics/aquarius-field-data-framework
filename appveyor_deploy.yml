@@ -22,6 +22,9 @@ init:
       }
 
 before_build:
+  - ps: |
+      (Get-Content src\Aquarius.FieldDataFramework.nuspec).
+        Replace('0.0.0', $env:APPVEYOR_BUILD_VERSION) | Set-Content src\Aquarius.FieldDataFramework.nuspec
   - nuget restore src\FieldDataFramework.sln
 
 build:
