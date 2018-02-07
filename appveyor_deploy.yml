@@ -1,9 +1,55 @@
 # This configuration will be used by a manual AppVeyor build used:
 # Build the tools
-# Deploy to NuGet
 # Deploy to GitHub releases
+# Deploy to NuGet
 
-# The version here should match the framework assembly version.
-version: 1.0.0.0
+image: Visual Studio 2017
 
-# TODO Fill this in and figure it out
+platform: Any CPU
+configuration: Release
+
+shallow_clone: true
+skip_tags: true
+
+environment:
+  GITHUB_AUTH_TOKEN:
+    secure: qqcWMLwMGDkvUc+9Rucijjn7L5OCUeXbr9tBlryNqOV8fPv7DUOUm48CdLJrgsnS
+
+init:
+  - ps: |
+      If (-Not $env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        $env:IS_NOT_PR = "true"
+      }
+
+before_build:
+  - nuget restore src\FieldDataFramework.sln
+
+build:
+  project: src\FieldDataFramework.sln
+
+artifacts:
+  - path: src\Library
+    name: FieldDataPluginFramework
+    type: zip
+  
+  - path: src\FieldDataPluginTool\bin\Release
+    name: FieldDataPluginTool
+    type: zip
+  
+  - path: src\FieldDataPluginTool\bin\Release
+    name: PluginPackager
+    type: zip
+
+  - path: src\FieldDataPluginTool\bin\Release
+    name: PluginTester
+    type: zip
+
+deploy:
+  - provider: GitHub
+    tag: v$(APPVEYOR_BUILD_VERSION)
+    release: AQUARIUS Field Data Framework $(APPVEYOR_BUILD_VERSION)
+    description: ''
+    artifact: FieldDataPluginFramework,FieldDataPluginTool,PluginPackager,PluginTester
+    auth_token: $(GITHUB_AUTH_TOKEN)
+    on:
+      is_not_pr: true
