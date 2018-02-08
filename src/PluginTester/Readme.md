@@ -30,7 +30,21 @@ The tester uses `log4net` to log to both the console and to the `PluginTester.lo
 
 Log statements from the tester itself are easily distinguished from log statements from the plugin being tested.
 
-### Using PluginTester for integration tests
+## Invoking the tester as a post-build event in Visual Studio
+
+This post-build event will test that your plugin can successfully parse the `data\somefile.ext` file. If a parsing error is detected, the build will be marked as failed.
+
+```
+$(SolutionDir)packages\Aquarius.FieldDataFramework.17.4.1\tools\PluginTester.exe /Plugin=$(TargetPath) /Data=$(SolutionDir)..\data\somefile.ext
+```
+
+### How does my build know if the tester has failed?
+
+The `PluginTester.exe` tool follows standard exit code conventions. Zero means success, and any positive exit codes means an error occurred.
+
+Visual Studio post-build events will detect any non-zero exit codes and indicate a failed parse attempt by your plugin.
+
+## Using PluginTester for integration tests
 
 You can leverage two features of `PluginTester` to build an automated test suite for your plugin.
 
@@ -72,7 +86,7 @@ Use the `PluginTest.exe` to debug your plugin from within Visual Studio.
 
 1. Open your plugin's **Properties** page
 2. Select the **Debug** tab
-3. Select **Start external program:** as the start action and browse to `PluginTester.exe`
+3. Select **Start external program:** as the start action and browse to `packages\Aquarius.FieldDataFramework.17.4.1\tools\PluginTester.exe`
 4. Enter the **Command line arguments:** to launch your plugin
 
 ```

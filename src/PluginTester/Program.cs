@@ -181,6 +181,10 @@ namespace PluginTester
 
                     SummarizeResults(result, appender.AppendedResults);
                 }
+                catch (ExpectedException)
+                {
+                    throw;
+                }
                 catch (Exception exception)
                 {
                     Log.Error("Plugin has thrown an error", exception);
@@ -208,23 +212,23 @@ namespace PluginTester
                 {
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
-                        Log.Error($"Can't parse '{DataPath}'. {result.ErrorMessage}");
+                        throw new ExpectedException($"Can't parse '{DataPath}'. {result.ErrorMessage}");
                     }
                     else
                     {
-                        Log.Warn($"File '{DataPath}' is not parsed by the plugin.");
+                        throw new ExpectedException($"File '{DataPath}' is not parsed by the plugin.");
                     }
                 }
                 else
                 {
-                    Log.Error($"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
+                    throw new ExpectedException($"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
                 }
             }
             else
             {
                 if (!appendedResults.AppendedVisits.Any())
                 {
-                    Log.Warn("File was parsed but no visits were appended.");
+                    throw new ExpectedException("File was parsed but no visits were appended.");
                 }
                 else
                 {
