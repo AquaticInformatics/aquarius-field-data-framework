@@ -2,7 +2,10 @@
 
 This page highlights some changes in the field data framework.
 
-Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.0...v1.0.1) to see the full source code difference.
+Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
+
+### 17.4.1
+- Exit the `PluginTester.exe` with an error code if the plugin detects an error. This enables easy integration testing.
 
 ### 17.4.0
 - For simplicity, changed the package version scheme to match the compatible AQTS version.
