@@ -7,7 +7,7 @@ The Field Data Framework for AQUARIUS Time-Series provides an SDK which can be u
 ## Need to install a plugin on your AQTS app server?
 
 If you find yourself here because you need to install a plugin on your server, then you should: 
-- Download the latest `FieldDataPluginTool.zip` archive from [here](releases/latest)
+- Download the latest `FieldDataPluginTool.zip` archive from [here](../../releases/latest)
 - Extract the archive on your AQTS app server
 - Run the `FieldDataPluginTool.exe` as Administrator
 - Click the "Add..." button and select your plugin file to install
