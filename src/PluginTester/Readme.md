@@ -22,6 +22,8 @@ Supported -option=value settings (/option=value works too):
   -Data                 Path to the data file to be parsed
   -Location             Optional location identifier context
   -Json                 Optional path to write the appended results as JSON
+  -ExpectedError        Expected error message
+  -ExpectedStatus       Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
 ```
 
 ### Logging
@@ -48,7 +50,9 @@ Visual Studio post-build events will detect any non-zero exit codes and indicate
 
 You can leverage two features of `PluginTester` to build an automated test suite for your plugin.
 
-1. An exit code of 0 means "The plugin parsed the file".
+You can even test for error conditions using the `/ExpectedStatus` and `/ExpectedError` options.
+
+1. An exit code of 0 means "The plugin parsed the file as expected".
 
 Any other exit code means something went wrong. Use the exit code to determine if the file was parsed.
 

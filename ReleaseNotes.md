@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 17.4.2
+- Added `/ExpectedStatus` and `/ExpectedError` options to `PluginTester.exe`, so that failure conditions of a plugin can also be tested. This can be useful to confirm that your plugin quickly returns `CannotParse` when asked to parse `Kitten.jpg`.
+
 ### 17.4.1
 - Exit the `PluginTester.exe` with an error code if the plugin detects an error. This enables easy integration testing.
 
