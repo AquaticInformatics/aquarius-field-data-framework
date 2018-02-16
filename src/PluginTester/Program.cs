@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +16,7 @@ namespace PluginTester
 {
     public class Program
     {
-        private static log4net.ILog Log;
+        private static log4net.ILog _log;
 
         public static void Main(string[] args)
         {
@@ -35,11 +36,11 @@ namespace PluginTester
             }
             catch (ExpectedException exception)
             {
-                Log.Error(exception.Message);
+                _log.Error(exception.Message);
             }
             catch (Exception exception)
             {
-                Log.Error("Unhandled exception", exception);
+                _log.Error("Unhandled exception", exception);
             }
         }
 
@@ -53,7 +54,7 @@ namespace PluginTester
 
                 log4net.Config.XmlConfigurator.Configure(xml.DocumentElement);
 
-                Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+                _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
             }
         }
 
@@ -86,27 +87,38 @@ namespace PluginTester
             return Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
         }
 
-        private string PluginPath { get; set; }
-        private string DataPath { get; set; }
-        private string LocationIdentifier { get; set; }
-        private string JsonPath { get; set; }
+        private Context Context { get; set; } = new Context();
 
         private void ParseArgs(string[] args)
         {
+            var resolvedArgs = args
+                .SelectMany(ResolveOptionsFromFile)
+                .ToArray();
+
             var options = new[]
             {
-                new Option {Key = "Plugin", Setter = value => PluginPath = value, Getter = () => PluginPath, Description = "Path to the plugin assembly to debug"},
-                new Option {Key = "Data", Setter = value => DataPath = value, Getter = () => DataPath, Description = "Path to the data file to be parsed"},
-                new Option {Key = "Location", Setter = value => LocationIdentifier = value, Getter = () => LocationIdentifier, Description = "Optional location identifier context"},
-                new Option {Key = "Json", Setter = value => JsonPath = value, Getter = () => JsonPath, Description = "Optional path to write the appended results as JSON"},
+                new Option {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
+                new Option {Key = "Data", Setter = value => Context.DataPath = value, Getter = () => Context.DataPath, Description = "Path to the data file to be parsed"},
+                new Option {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
+                new Option {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
+                new Option {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
+                new Option {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
             };
 
             var usageMessage = $"Parse a file using a field data plugin, logging the results."
-                                   + $"\n\nusage: {GetProgramName()} [-option=value] ..."
-                                   + $"\n\nSupported -option=value settings (/option=value works too):\n\n  -{string.Join("\n  -", options.Select(o => o.UsageText()))}"
-                                   ;
+                               + $"\n"
+                               + $"\nusage: {GetProgramName()} [-option=value] ..."
+                               + $"\n"
+                               + $"\nSupported -option=value settings (/option=value works too):\n\n  -{string.Join("\n  -", options.Select(o => o.UsageText()))}"
+                               + $"\n"
+                               + $"\nUse the @optionsFile syntax to read more options from a file."
+                               + $"\n"
+                               + $"\n  Each line in the file is treated as a command line option."
+                               + $"\n  Blank lines and leading/trailing whitespace is ignored."
+                               + $"\n  Comment lines begin with a # or // marker."
+                               ;
 
-            foreach (var arg in args)
+            foreach (var arg in resolvedArgs)
             {
                 var match = ArgRegex.Match(arg);
 
@@ -129,29 +141,27 @@ namespace PluginTester
                 option.Setter(value);
             }
 
-            if (string.IsNullOrEmpty(PluginPath))
+            if (string.IsNullOrEmpty(Context.PluginPath))
                 throw new ExpectedException("No plugin assembly specified.");
 
-            if (string.IsNullOrEmpty(DataPath))
+            if (string.IsNullOrEmpty(Context.DataPath))
                 throw new ExpectedException("No data file specified.");
         }
 
-        private class Option
+        private static IEnumerable<string> ResolveOptionsFromFile(string arg)
         {
-            public string Key { get; set; }
-            public string Description { get; set; }
-            public Action<string> Setter { get; set; }
-            public Func<string> Getter { get; set; }
+            if (!arg.StartsWith("@"))
+                return new[] { arg };
 
-            public string UsageText()
-            {
-                var defaultValue = Getter();
+            var path = arg.Substring(1);
 
-                if (!string.IsNullOrEmpty(defaultValue))
-                    defaultValue = $" [default: {defaultValue}]";
+            if (!File.Exists(path))
+                throw new ExpectedException($"Options file '{path}' does not exist.");
 
-                return $"{Key,-20} {Description}{defaultValue}";
-            }
+            return File.ReadAllLines(path)
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Where(s => !s.StartsWith("#") && !s.StartsWith("//"));
         }
 
         private static readonly Regex ArgRegex = new Regex(@"^([/-])(?<key>[^=]+)=(?<value>.*)$", RegexOptions.Compiled);
@@ -160,8 +170,8 @@ namespace PluginTester
         {
             using (var stream = LoadDataStream())
             {
-                var locationInfo = !string.IsNullOrEmpty(LocationIdentifier)
-                    ? FieldDataResultsAppender.CreateLocationInfo(LocationIdentifier)
+                var locationInfo = !string.IsNullOrEmpty(Context.LocationIdentifier)
+                    ? FieldDataResultsAppender.CreateLocationInfo(Context.LocationIdentifier)
                     : null;
 
                 var plugin = LoadPlugin();
@@ -172,7 +182,7 @@ namespace PluginTester
                 {
                     appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
 
-                    var result = string.IsNullOrEmpty(LocationIdentifier)
+                    var result = string.IsNullOrEmpty(Context.LocationIdentifier)
                         ? plugin.ParseFile(stream, appender, logger)
                         : plugin.ParseFile(stream, locationInfo, appender, logger);
 
@@ -187,7 +197,7 @@ namespace PluginTester
                 }
                 catch (Exception exception)
                 {
-                    Log.Error("Plugin has thrown an error", exception);
+                    _log.Error("Plugin has thrown an error", exception);
 
                     throw new ExpectedException($"Unhandled plugin exception: {exception.Message}");
                 }
@@ -196,56 +206,77 @@ namespace PluginTester
 
         private void SaveAppendedResults(AppendedResults appendedResults)
         {
-            if (string.IsNullOrEmpty(JsonPath))
+            if (string.IsNullOrEmpty(Context.JsonPath))
                 return;
 
-            Log.Info($"Saving {appendedResults.AppendedVisits.Count} visits data to '{JsonPath}'");
+            _log.Info($"Saving {appendedResults.AppendedVisits.Count} visits data to '{Context.JsonPath}'");
 
-            File.WriteAllText(JsonPath, appendedResults.ToJson().IndentJson());
+            File.WriteAllText(Context.JsonPath, appendedResults.ToJson().IndentJson());
         }
 
         private void SummarizeResults(ParseFileResult result, AppendedResults appendedResults)
         {
-            if (!result.Parsed)
+            if (result.Status == Context.ExpectedStatus)
             {
-                if (result.Status == ParseFileStatus.CannotParse)
-                {
-                    if (!string.IsNullOrEmpty(result.ErrorMessage))
-                    {
-                        throw new ExpectedException($"Can't parse '{DataPath}'. {result.ErrorMessage}");
-                    }
-                    else
-                    {
-                        throw new ExpectedException($"File '{DataPath}' is not parsed by the plugin.");
-                    }
-                }
-                else
-                {
-                    throw new ExpectedException($"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
-                }
+                SummarizeExpectedResults(result, appendedResults);
             }
             else
+            {
+                SummarizeFailedResults(result, appendedResults);
+            }
+        }
+
+        private void SummarizeExpectedResults(ParseFileResult result, AppendedResults appendedResults)
+        {
+            if (result.Parsed)
             {
                 if (!appendedResults.AppendedVisits.Any())
                 {
                     throw new ExpectedException("File was parsed but no visits were appended.");
                 }
-                else
-                {
-                    Log.Info($"Successfully parsed {appendedResults.AppendedVisits.Count} visits.");
-                }
+
+                _log.Info($"Successfully parsed {appendedResults.AppendedVisits.Count} visits.");
             }
+            else
+            {
+                var actualError = result.ErrorMessage ?? string.Empty;
+                var expectedError = Context.ExpectedError ?? string.Empty;
+
+                if (!actualError.Equals(expectedError))
+                    throw new ExpectedException(
+                        $"Expected an error message of '{expectedError}' but received '{actualError}' instead.");
+
+                _log.Info($"ParsedResult.Status == {Context.ExpectedStatus} with Error='{Context.ExpectedError}' as expected.");
+            }
+        }
+
+        private void SummarizeFailedResults(ParseFileResult result, AppendedResults appendedResults)
+        {
+            if (result.Parsed)
+                throw new ExpectedException(
+                    $"File was parsed successfully with {appendedResults.AppendedVisits.Count} visits appended.");
+
+            if (result.Status != ParseFileStatus.CannotParse)
+                throw new ExpectedException(
+                    $"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
+
+            if (!string.IsNullOrEmpty(result.ErrorMessage))
+            {
+                throw new ExpectedException($"Can't parse '{Context.DataPath}'. {result.ErrorMessage}");
+            }
+
+            throw new ExpectedException($"File '{Context.DataPath}' is not parsed by the plugin.");
         }
 
         private Stream LoadDataStream()
         {
-            if (!File.Exists(DataPath))
-                throw new ExpectedException($"Data file '{DataPath}' does not exist.");
+            if (!File.Exists(Context.DataPath))
+                throw new ExpectedException($"Data file '{Context.DataPath}' does not exist.");
 
-            Log.Info($"Loading data file '{DataPath}'");
+            _log.Info($"Loading data file '{Context.DataPath}'");
 
-            using (var stream = new FileStream(DataPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using(var reader = new BinaryReader(stream))
+            using (var stream = new FileStream(Context.DataPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new BinaryReader(stream))
             {
                 return new MemoryStream(reader.ReadBytes((int)stream.Length));
             }
@@ -253,7 +284,7 @@ namespace PluginTester
 
         private IFieldDataPlugin LoadPlugin()
         {
-            var pluginPath = Path.GetFullPath(PluginPath);
+            var pluginPath = Path.GetFullPath(Context.PluginPath);
 
             if (!File.Exists(pluginPath))
                 throw new ExpectedException($"Plugin file '{pluginPath}' does not exist.");
@@ -291,7 +322,7 @@ namespace PluginTester
 
         private ILog CreateLogger()
         {
-            return Log4NetLogger.Create(LogManager.GetLogger(Path.GetFileNameWithoutExtension(PluginPath)));
+            return Log4NetLogger.Create(LogManager.GetLogger(Path.GetFileNameWithoutExtension(Context.PluginPath)));
         }
     }
 }
