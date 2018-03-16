@@ -171,12 +171,12 @@ namespace PluginTester
             using (var stream = LoadDataStream())
             {
                 var locationInfo = !string.IsNullOrEmpty(Context.LocationIdentifier)
-                    ? FieldDataResultsAppender.CreateLocationInfo(Context.LocationIdentifier)
+                    ? FieldDataResultsAppender.CreateDummyLocationInfoByIdentifier(Context.LocationIdentifier)
                     : null;
 
                 var plugin = LoadPlugin();
                 var logger = CreateLogger();
-                var appender = new FieldDataResultsAppender {LocationInfo = locationInfo};
+                var appender = new FieldDataResultsAppender {ForcedLocationInfo = locationInfo};
 
                 try
                 {
