@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
@@ -11,22 +13,39 @@ namespace PluginTester
 {
     public class FieldDataResultsAppender : IFieldDataResultsAppender
     {
-        private static readonly Guid DummyUniqueId = new Guid("{1BF7F45B-5361-474F-9210-FAC4F29FB4BB}");
+        public static LocationInfo CreateDummyLocationInfoByIdentifier(string locationIdentifier)
+        {
+            return CreateDummyLocationInfo(locationIdentifier, $"DummyNameFor-{locationIdentifier}", Guid.Empty);
+        }
 
-        public static LocationInfo CreateLocationInfo(string locationIdentifier)
+        public static LocationInfo CreateDummyLocationInfoByUniqueId(Guid uniqueId)
+        {
+            return CreateDummyLocationInfo($"DummyIdentifierFor-{uniqueId:N}", $"DummyNameFor-{uniqueId:N}", uniqueId);
+        }
+
+        private static LocationInfo CreateDummyLocationInfo(string identifier, string name, Guid uniqueId)
         {
             const long dummyLocationId = 0;
             const double dummyUtcOffset = 0;
 
-            return InternalConstructor<LocationInfo>.Invoke(
-                $"NameOf{locationIdentifier}",
-                locationIdentifier,
+            var locationInfo = InternalConstructor<LocationInfo>.Invoke(
+                name,
+                identifier,
                 dummyLocationId,
-                DummyUniqueId,
+                uniqueId,
                 dummyUtcOffset);
+
+            if (KnownLocations.Any(l => l.LocationIdentifier == identifier))
+                throw new ArgumentException($"Can't add duplicate location for Identifier='{identifier}'");
+
+            KnownLocations.Add(locationInfo);
+
+            return locationInfo;
         }
 
-        public LocationInfo LocationInfo { get; set; }
+        private static readonly List<LocationInfo> KnownLocations = new List<LocationInfo>();
+
+        public LocationInfo ForcedLocationInfo { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -35,24 +54,27 @@ namespace PluginTester
 
         public LocationInfo GetLocationByIdentifier(string locationIdentifier)
         {
-            if (LocationInfo == null)
-                return CreateLocationInfo(locationIdentifier);
+            if (ForcedLocationInfo != null)
+            {
+                if (ForcedLocationInfo.LocationIdentifier == locationIdentifier)
+                    return ForcedLocationInfo;
 
-            if (locationIdentifier == LocationInfo.LocationIdentifier)
-                return LocationInfo;
+                throw new ArgumentException($"Location {locationIdentifier} does not exist");
+            }
 
-            throw new ArgumentException($"Location {locationIdentifier} does not exist");
+            var locationInfo = KnownLocations.SingleOrDefault(l => l.LocationIdentifier == locationIdentifier);
+
+            return locationInfo ?? CreateDummyLocationInfoByIdentifier(locationIdentifier);
         }
 
-        public LocationInfo GetLocationByUniqueId(string uniqueId)
+        public LocationInfo GetLocationByUniqueId(string uniqueIdText)
         {
-            if (LocationInfo == null)
-                return CreateLocationInfo(uniqueId);
+            if (!Guid.TryParse(uniqueIdText, out var uniqueId))
+                throw new ArgumentException($"Can't parse '{uniqueIdText}' as a unique ID");
 
-            if (uniqueId == LocationInfo.UniqueId)
-                return LocationInfo;
+            var locationInfo = KnownLocations.SingleOrDefault(l => Guid.Parse(l.UniqueId) == uniqueId);
 
-            throw new ArgumentException($"Location {uniqueId} does not exist");
+            return locationInfo ?? CreateDummyLocationInfoByUniqueId(uniqueId);
         }
 
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)
