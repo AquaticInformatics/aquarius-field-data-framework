@@ -23,7 +23,7 @@ OR
 
 * A program calls the **PostFieldDataAttachment** operation from the AQUARIUS Acquisition API (http://\<yourserver\>/AQUARIUS/Acquisition/v2/location/{LocationUniqueId}/visits/uploads/plugins).
 
-![Figure 1: Architecture Overview](/docs/images/Figure1_ArchitectureOverview.png)
+![Figure 1: Architecture Overview](images/Figure1_ArchitectureOverview.png)
 
 <p align="center"><b>Figure 1: Architecture Overview</b></p>
 
@@ -33,7 +33,7 @@ Field data plug-ins are dynamically loaded at runtime and run within its own App
 
 Figure 2 illustrates the control flow after a user uploads a field data file to the Framework.
 
-![Figure 2: Control Flow](/docs/images/Figure2_ControlFlowDiagram.png) 
+![Figure 2: Control Flow](images/Figure2_ControlFlowDiagram.png) 
 
 <p align="center"><b>Figure 2: Control Flow</b></p>
 
@@ -49,7 +49,7 @@ The Framework SDK provides a number of data objects. Your plug-in is responsible
 
 Figure 3 illustrates the data objects and their relationships, as currently supported by the Framework.
 
-![Figure 3: Data Object Diagram](/docs/images/Figure3_DataObjectDiagram.png)
+![Figure 3: Data Object Diagram](images/Figure3_DataObjectDiagram.png)
 
 <p align="center"><b>Figure 3: Data Object Diagram</b></p>
 
@@ -203,7 +203,7 @@ To unregister a plug-in, you need to refer to the plug-in by its unique ID. A pl
 After installing and registering your plug-in on the AQUARIUS Time-Series Server, you can test and debug your plug-in by using the drag-and-drop upload method, (available from Springboard, Location Manager or the Field Data Editor), to upload your test field data files. If there is a problem with your plug-in, the feedback from these drag-and-drop interfaces is not very informative:
 
 <p align="center">
-<img src="/docs/images/Figure4_DragAndDropErrorMessage.png" alt="Figure 4: Drag-and-drop Error Message">
+<img src="images/Figure4_DragAndDropErrorMessage.png" alt="Figure 4: Drag-and-drop Error Message">
 </p>
 
 <p align="center"><b>Figure 4: Drag-and-drop Error Message</b></p>
@@ -213,7 +213,7 @@ To help debug problems with your plug-in, look in *FieldDataPluginFramework.log*
 
 Another approach to testing and debugging your plug-in is to use the AQUARIUS Acquisition API, which provides more details in its response to help you quickly diagnose problems:
 
-![Figure 5: Acquisition API Response](/docs/images/Figure5_AcquisitionApiResponse.png)
+![Figure 5: Acquisition API Response](images/Figure5_AcquisitionApiResponse.png)
 
 <p align="center"><b>Figure 5: AQUARIUS Acquisition API Response</b></p>
 
