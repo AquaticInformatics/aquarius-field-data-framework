@@ -6,6 +6,7 @@ using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.Results;
 
@@ -99,6 +100,11 @@ namespace PluginTester
         public void AddReading(FieldVisitInfo fieldVisit, Reading reading)
         {
             fieldVisit.Readings.Add(reading);
+        }
+
+        public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)
+        {
+            fieldVisit.LevelSurveys.Add(levelSurvey);
         }
     }
 }

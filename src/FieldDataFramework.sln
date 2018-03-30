@@ -18,6 +18,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginTool", "Fiel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginPackager", "PluginPackager\PluginPackager.csproj", "{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E70F15C8-4926-4851-97FD-C8EDC38F8803}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\Readme.md = ..\docs\Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +44,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E70F15C8-4926-4851-97FD-C8EDC38F8803} = {F2704BB2-F23E-45EA-8B12-3611F413F454}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1BFE59B2-DBB4-48D9-A511-4B473C7C9F10}
