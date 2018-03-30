@@ -12,6 +12,18 @@ This guide provides guidance for developing custom field data plug-ins for AQUAR
 
 If you would like to see more examples of field data plug-ins, please visit our [**Examples Repository**](https://github.com/AquaticInformatics/Examples/tree/master/TimeSeries/PublicApis/FieldDataPlugins) on GitHub.
 
+## Change log
+
+### AQTS 2018.1
+
+- Changed the framework guide from PDF to Markdown
+- Added support for Level Surveys
+
+### AQTS 2017.4
+
+- First supported release of the plugin framework
+- The PDF of the 2017.4 framework guide can be found [here.](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/v17.4.3/docs/AQUARIUSDeveloperGuideFieldDataPluginFramework.pdf)
+
 # Overview
 
 Figure 1 illustrates how the Field Data Plug-In Framework fits into the overall architecture of AQUARIUS Time-Series.
@@ -21,7 +33,7 @@ The Framework is called when:
 
 OR
 
-* A program calls the **PostFieldDataAttachment** operation from the AQUARIUS Acquisition API (http://\<yourserver\>/AQUARIUS/Acquisition/v2/location/{LocationUniqueId}/visits/uploads/plugins).
+* A program calls the **PostFieldDataAttachment** operation from the AQUARIUS Acquisition API via a `POST http://<yourserver>/AQUARIUS/Acquisition/v2/location/{LocationUniqueId}/visits/uploads/plugins` operation.
 
 ![Figure 1: Architecture Overview](images/Figure1_ArchitectureOverview.png)
 
@@ -82,13 +94,17 @@ If these properties are left as the default "Unknown" value, the Framework will 
 
 Plug-ins are 64-bit libraries written using .NET Framework 4.7.  If the .NET Framework 4.7 developer pack is not already installed, it can be downloaded [here](https://www.microsoft.com/en-us/download/details.aspx?id=55170).
 
-The Field Data Plug-In Framework SDK is found on the AQUARIUS Time-Series Server at: 
+Install the Field Data Framework in your project via NuGet.
 
-**{AppInstallRoot}\\FieldDataPlugins\\Library**
+```Powershell
+PM> Install-Package Aquarius.FieldDataFramework
+```
 
-where {AppInstallRoot} is the installation root of the AQUARIUS Time-Series Server. The default installation root is %ProgramFiles%\\Aquatic Informatics\\AQUARIUS Server.
-
-The Framework SDK (plug-in interface and data objects) is defined in the following library: *FieldDataPluginFramework.dll*.  This library must be added as a reference in your plug-in project.
+This will install:
+- the `lib\FieldDataPluginFramework.dll` assembly, which your plugin must consume and implement.
+- the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plugin without needing an AQTS server
+- the [`tools\PluginPackager.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) tool, for packaging your plugin into a single `*.plugin` file for easy deployment.
+- the [`tools\FieldDataPluginTool.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) tool for easily deploying your packaged plugin on an AQTS server.
 
 # Writing a Field Data Plug-In
 
@@ -161,9 +177,19 @@ Each plug-in is provided a reference to an **ILog** object when its **ParseFile*
 
 The log messages written to *FieldDataPluginFramework.log* are designed to be easily parsed by log analytic tools, such as LogStash.
 
-# Installing and Registering your Plug-In
+# Packaging your plugin for easy deployment
 
-To install and register your plug-in:
+See the [PluginPacker](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) project for details on adding a build step that will automatically create a `*.plugin` file every time your project builds in Visual Studio. This file can be deployed using the `FieldDataPluginTool`.
+
+# Deploy your plugin using the FieldDataPluginTool
+
+See the [FieldDataPluginTool](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) project for an easy to use GUI tool to correctly install your plugin on your AQTS app server.
+
+# Manually Installing and Registering your Plug-In
+
+You really should use the FieldDataPluginTool mentioned above. It handles all the heavy lifting for you.
+
+But if you want to install and register your plug-in manually:
 
 1. On the AQUARIUS Time-Series Server, navigate to the folder:
 **{AppInstallRoot}\\Aquatic Informatics\\AQUARIUS Server\\FieldDataPlugins**
@@ -219,9 +245,9 @@ Another approach to testing and debugging your plug-in is to use the AQUARIUS Ac
 
 However, we still recommend that you refer to *FieldDataPluginFramework.log* to find more details about your plug-in failure.
 
-Additionally, the Aquatic Informatics Example repo on GitHub provides the PluginTester.exe as a tool to help debug your plug-in outside of the AQUARIUS Time-Series Server environment.  The Plug-in Tester can be found [here](https://github.com/AquaticInformatics/Examples/tree/master/TimeSeries/PublicApis/FieldDataPlugins/PluginTester).
+Additionally, the Aquatic Informatics Field Data Framework repo on GitHub provides the PluginTester.exe as a tool to help debug your plug-in outside of the AQUARIUS Time-Series Server environment.  The Plug-in Tester can be found [here](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester). This tool is also available in `tools` folder of the NuGet package.
 
-In particular, when the **--json=AppendedResults.json** command line option is used, the JSON written to disk will include both the framework data models written by your plug-in and the correct AssemblyQualifiedTypeName to use during plug-in registration.
+In particular, when the **/Json=AppendedResults.json** command line option is used, the JSON written to disk will include both the framework data models written by your plug-in and the correct AssemblyQualifiedTypeName to use during plug-in registration.
 
 If you make changes to your plug-in, it is not necessary to unregister and re-register your plug-in with AQUARIUS Time-Series Server. Simply replace the existing plug-in library on the server with its newer version.
 
