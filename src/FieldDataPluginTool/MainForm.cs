@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -23,6 +24,9 @@ namespace FieldDataPluginTool
         {
             InitializeComponent();
 
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Text = $@"Field Data Plugin Tool v{GetExecutingFileVersion()}";
+
             usernameTextBox.Text = @"admin";
             passwordTextBox.Text = @"admin";
 
@@ -32,6 +36,14 @@ namespace FieldDataPluginTool
             priorityUpButton.Enabled = false;
             priorityDownButton.Enabled = false;
             pluginListBox.Enabled = false;
+        }
+
+        private static string GetExecutingFileVersion()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+            return fileVersionInfo.FileVersion;
         }
 
         private void Info(string message)
@@ -97,7 +109,7 @@ namespace FieldDataPluginTool
                 _client = AquariusClient.CreateConnectedClient(_hostname, usernameTextBox.Text.Trim(),
                     passwordTextBox.Text);
 
-                Info($"Connected to AQTS {_client.ServerVersion} on {_hostname}");
+                Info($"{Text} connected to AQTS {_client.ServerVersion} on {Environment.MachineName}");
 
                 GetAllPlugins();
             
@@ -132,6 +144,23 @@ namespace FieldDataPluginTool
                 throw new Exception($"Can't find the root plugin folder at '{installPath}'");
 
             return installPath;
+        }
+
+        private const string FrameworkAssemblyFilename = "FieldDataPluginFramework.dll";
+
+        private string GetServerFrameworkPath()
+        {
+            var libraryPath = Path.Combine(GetInstallPath(), "Library");
+
+            if (!Directory.Exists(libraryPath))
+                throw new Exception($"Can't find the server's master framework assembly as '{libraryPath}'");
+
+            var frameworkPath = Path.Combine(libraryPath, FrameworkAssemblyFilename);
+
+            if (!File.Exists(frameworkPath))
+                throw new Exception($"Can't file server framework assembly as '{frameworkPath}'");
+
+            return frameworkPath;
         }
 
         private void ThrowIfWrongVersion()
@@ -389,11 +418,18 @@ namespace FieldDataPluginTool
                         }
 
                         Info($"Extracting {entry.FullName} ...");
-                        using (var stream = entry.Open())
-                        using(var x = File.Create(extractedPath))
+                        using (var inStream = entry.Open())
+                        using (var outStream = File.Create(extractedPath))
                         {
-                            stream.CopyTo(x);
+                            inStream.CopyTo(outStream);
                         }
+                    }
+
+                    Info($"Copying server framework assembly ...");
+                    using (var inStream = File.OpenRead(GetServerFrameworkPath()))
+                    using (var outStream = File.Create(Path.Combine(targetPath, FrameworkAssemblyFilename)))
+                    {
+                        inStream.CopyTo(outStream);
                     }
 
                     Info($"Registering new plugin '{plugin.PluginFolderName}' ...");
@@ -402,6 +438,8 @@ namespace FieldDataPluginTool
 
                     pluginListBox.SelectedIndex =
                         _allPlugins.IndexOf(_allPlugins.Single(p => p.PluginFolderName == plugin.PluginFolderName));
+
+                    Info($"Plugin '{plugin.PluginFolderName}' was installed successfully.");
                 }
             }
             catch (Exception exception)
