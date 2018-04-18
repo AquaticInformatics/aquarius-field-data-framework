@@ -32,7 +32,7 @@ Adding the `Aquarius.FieldDataFramework` as a dependency to your .NET project wi
 
 ## Documentation
 
-A developer guide is available [here.](docs/AQUARIUSDeveloperGuideFieldDataPluginFramework.pdf)
+A developer guide is available [here.](docs/)
 
 ## Getting Help
 
