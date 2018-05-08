@@ -45,17 +45,17 @@ artifacts:
     name: FieldDataPluginFramework
     type: zip
   
-  - path: src\FieldDataPluginTool\bin\Release
+  - path: src\FieldDataPluginTool\bin\Release\FieldDataPluginTool.exe
     name: FieldDataPluginTool
-    type: zip
+    type: file
   
-  - path: src\PluginPackager\bin\Release
+  - path: src\PluginPackager\bin\Release\PluginPackager.exe
     name: PluginPackager
-    type: zip
+    type: file
 
-  - path: src\PluginTester\bin\Release
+  - path: src\PluginTester\bin\Release\PluginTester.exe
     name: PluginTester
-    type: zip
+    type: file
 
   - path: 'Aquarius.FieldDataFramework.*.nupkg'
     name: AllPackages
