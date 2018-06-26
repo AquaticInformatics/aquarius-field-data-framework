@@ -99,6 +99,12 @@ Some enumerated types in the Framework SDK default to "Unknown" value.  When cre
 
 If these properties are left as the default "Unknown" value, the Framework will save the field data, but when the data is viewed in the Field Data Editor, it will show an invalid icon (orange exclamation mark) by the discharge value. Unfortunately, this value cannot be corrected in the Field Data Editor.
 
+## PickList Data Type
+
+In AQUARIUS Time-Series, certain field visit activity properties are pick lists, a customizable collection of key-value pairs, known as a PickListItem.  A PickListItem has an identifier and a display name, which is shown in the Field Data Editor.  
+
+In the Framework, pick list properties are defined as data type, PickList.  The PickList data type is similar to an enumeration, but the possible values are only known at run time.  A PickList instance is constructed by specifying either the identifier or the display name of a PickListItem that belongs to the pick list.  When the Framework saves the field data to the AQUARIUS Time-Series Server, it will validate the PickList.  If the PickList specifies an invalid PickLlistItem, the Framework will return an error message that lists all of the PickListItems that belong to the pick list.
+
 # Setting up a Development Environment
 
 Plug-ins are 64-bit libraries written using .NET Framework 4.7.  If the .NET Framework 4.7 developer pack is not already installed, it can be downloaded [here](https://www.microsoft.com/en-us/download/details.aspx?id=55170).
