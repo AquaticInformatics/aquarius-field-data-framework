@@ -12,7 +12,16 @@ This guide provides guidance for developing custom field data plug-ins for AQUAR
 
 If you would like to see more examples of field data plug-ins, please visit our [**Examples Repository**](https://github.com/AquaticInformatics/Examples/tree/master/TimeSeries/PublicApis/FieldDataPlugins) on GitHub.
 
-## Change log
+## Change Log
+
+### AQTS 2018.2
+
+- Added support to set reference points on Readings
+- Added Weather, CollectionAgency and CompletedVisitActivities properties on FieldVisitDetails
+- Added AdjustmentType, AdjustmentAmount, and ReasonForAdjustment properties on DischargeActivity
+- Expanded GageHeightCalculationType to support ManuallyCalculated and SimpleAverage options on DischargeActivity
+- Added support for ControlConditions
+- Enhanced the field data plug-in framework to support uploading attachments with a field data file
 
 ### AQTS 2018.1
 
@@ -21,7 +30,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ### AQTS 2017.4
 
-- First supported release of the plugin framework
+- First supported release of the plug-in framework
 - The PDF of the 2017.4 framework guide can be found [here.](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/v17.4.3/docs/AQUARIUSDeveloperGuideFieldDataPluginFramework.pdf)
 
 # Overview
@@ -75,7 +84,7 @@ All Framework SDK data objects require timestamps specified as **DateTimeOffset*
 
 Similarly, **FieldVisitInfo** is an immutable object. It is created when the plug-in uses the **IFieldDataResultsAppender** to add an instance of a **FieldVisitDetails** object to a location.
 
-There are factory methods to create an instance of **CrossSectionSurvey**, **DischargeActivity**, and **ManualGaugingDischargeSection** object. Plug-ins should also use **IFieldDataResultsAppender** to add **Reading**, **CrossSectionSurvey**, **LevelSurvey** and **DischargeActivity** objects to the **IFieldVisitInfo**.
+There are factory methods to create an instance of **CrossSectionSurvey**, **DischargeActivity**, and **ManualGaugingDischargeSection** object. Plug-ins should also use **IFieldDataResultsAppender** to add field data objects to **IFieldVisitInfo**.
 
 Some enumerated types in the Framework SDK default to "Unknown" value.  When creating data objects that have these enumerated types as properties, the properties should be set to “Unspecified” value if there is no other appropriate value for it so that the data displays correctly in the Field Data Editor. For example, when creating an instance of **ManualGaugingDischargeSection**,
 
@@ -90,6 +99,12 @@ Some enumerated types in the Framework SDK default to "Unknown" value.  When cre
 
 If these properties are left as the default "Unknown" value, the Framework will save the field data, but when the data is viewed in the Field Data Editor, it will show an invalid icon (orange exclamation mark) by the discharge value. Unfortunately, this value cannot be corrected in the Field Data Editor.
 
+## PickList Data Type
+
+In AQUARIUS Time-Series, certain field visit activity properties are pick lists, a customizable collection of key-value pairs, known as a PickListItem.  A PickListItem has an identifier and a display name, which is shown in the Field Data Editor.  
+
+In the Framework, pick list properties are defined as data type, PickList.  The PickList data type is similar to an enumeration, but the possible values are only known at run time.  A PickList instance is constructed by specifying either the identifier or the display name of a PickListItem that belongs to the pick list.  When the Framework saves the field data to the AQUARIUS Time-Series Server, it will validate the PickList.  If the PickList specifies an invalid PickLlistItem, the Framework will return an error message that lists all of the PickListItems that belong to the pick list.
+
 # Setting up a Development Environment
 
 Plug-ins are 64-bit libraries written using .NET Framework 4.7.  If the .NET Framework 4.7 developer pack is not already installed, it can be downloaded [here](https://www.microsoft.com/en-us/download/details.aspx?id=55170).
@@ -101,10 +116,10 @@ PM> Install-Package Aquarius.FieldDataFramework
 ```
 
 This will install:
-- the `lib\FieldDataPluginFramework.dll` assembly, which your plugin must consume and implement.
-- the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plugin without needing an AQTS server
-- the [`tools\PluginPackager.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) tool, for packaging your plugin into a single `*.plugin` file for easy deployment.
-- the [`tools\FieldDataPluginTool.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) tool for easily deploying your packaged plugin on an AQTS server.
+- the `lib\FieldDataPluginFramework.dll` assembly, which your plug-in must consume and implement.
+- the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plug-in without needing an AQTS server
+- the [`tools\PluginPackager.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) tool, for packaging your plug-in into a single `*.plugin` file for easy deployment.
+- the [`tools\FieldDataPluginTool.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) tool for easily deploying your packaged plug-in on an AQTS server.
 
 # Writing a Field Data Plug-In
 
@@ -133,7 +148,7 @@ In **IFieldDataPlugin**, there are two *ParseFile* method signatures:
     1. Called by the Framework when LocationManager, the Field Data Editor or AQUARIUS Acquisition API is used to import a data file;
     2. Field data will be created in the targetLocation.  If the data file references a location, it must match the targetLocation or the field data will not be imported.
 
-Each *ParseFile* method returns a **ParseFileResult** object.  **ParseFileResult** has static constructors to create an instance to represent the plugin status (SuccessullyParsedAndDataValid, SuccessfullyParsedButDataInvalid, CannotParse).
+Each *ParseFile* method returns a **ParseFileResult** object.  **ParseFileResult** has static constructors to create an instance to represent the plug-in status (SuccessullyParsedAndDataValid, SuccessfullyParsedButDataInvalid, CannotParse).  If your plug-in returns a SuccessfullyParsedButDataInvalid or CannotParser status, we recommend that it includes an error message or exception, which will be displayed as an error message to the user by the drag-and-drop interfaces.
 
 ## Tips
 
@@ -177,13 +192,13 @@ Each plug-in is provided a reference to an **ILog** object when its **ParseFile*
 
 The log messages written to *FieldDataPluginFramework.log* are designed to be easily parsed by log analytic tools, such as LogStash.
 
-# Packaging your plugin for easy deployment
+# Packaging your Plug-In for Easy Deployment
 
 See the [PluginPacker](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) project for details on adding a build step that will automatically create a `*.plugin` file every time your project builds in Visual Studio. This file can be deployed using the `FieldDataPluginTool`.
 
-# Deploy your plugin using the FieldDataPluginTool
+# Deploy your plug-in using the FieldDataPluginTool
 
-See the [FieldDataPluginTool](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) project for an easy to use GUI tool to correctly install your plugin on your AQTS app server.
+See the [FieldDataPluginTool](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) project for an easy to use GUI tool to correctly install your plug-in on your AQTS server.
 
 # Manually Installing and Registering your Plug-In
 
@@ -198,7 +213,7 @@ But if you want to install and register your plug-in manually:
 4. Register your plug-in with the AQUARIUS Time-Series Server using the **POST /fielddataplugins** endpoint in the Provisioning API (http://\<yourservername\>/AQUARIUS/Provisioning/v1). The AQUARIUS Time-Series Server is not aware that your plug-in is installed until it is registered. The POST endpoint requires the following parameters:
     1. PluginFolderName – the name of the sub-folder;
     2. AssemblyQualifiedTypeName – the type name and display name of your plug-in assembly, which allows the Framework to load your plug-in using reflection.  The minimum specification of an AssemblyQualifiedTypeName is *{classTypeName}, {assemblyName}*. 
-    3. PluginPriority – the unique number representing the order that the Framework will run your plug-in will be run relative to other registered plug-ins (the framework runs plugins in ascending priority order). The highest priority plug-in has PluginPriority = 1;
+    3. PluginPriority – the unique number representing the order that the Framework will run your plug-in will be run relative to other registered plug-ins (the framework runs plug-ins in ascending priority order). The highest priority plug-in has PluginPriority = 1;
 5. When a plug-in is registered, it is assigned a unique ID. The plug-in’s unique ID will be used to unregister the plug-in from the Framework.
 
 For example, you have installed your plug-in assembly on the AQUARIUS Time-Series Server at %ProgramFiles%\\Aquatic Informatics\\AQUARIUS Server\\FieldDataPlugins\\MyPlugin\\MyFirstPlugin.dll.  The assembly contains a class, Foo.FieldDataPlugin that implements the IFieldDataPluginInterface. To register your plug-in, you would call **POST /fielddataplugins** in Provisioning API with the following input parameters:
@@ -214,7 +229,7 @@ For example, you have installed your plug-in assembly on the AQUARIUS Time-Serie
 
 For example, your AQUARIUS Time-Series Server has two plug-ins registered so that PluginA is assigned priority = 1 and PluginC is assigned priority = 3. 
 
-Now, you would like to install a new plugin, PluginB, so that it is the second plugin that will be run by the framework. To do so, you need to un-register and re-register PluginC with priority = 3 so that you can register PluginB with priority = 2.
+Now, you would like to install a new plug-in, PluginB, so that it is the second plug-in that will be run by the framework. To do so, you need to un-register and re-register PluginC with priority = 3 so that you can register PluginB with priority = 2.
 
 However, if PluginA and PluginB were registered so that PluginA is assigned priority = 100 and PluginC is assigned priority = 300, you do not need to change the priority of PluginC; you only need to assign PluginC a priority between 100 and 300.
 
@@ -226,7 +241,7 @@ To unregister a plug-in, you need to refer to the plug-in by its unique ID. A pl
 
 # Debugging your Plug-In
 
-After installing and registering your plug-in on the AQUARIUS Time-Series Server, you can test and debug your plug-in by using the drag-and-drop upload method, (available from Springboard, Location Manager or the Field Data Editor), to upload your test field data files. If there is a problem with your plug-in, the feedback from these drag-and-drop interfaces is not very informative:
+After installing and registering your plug-in on the AQUARIUS Time-Series Server, you can test and debug your plug-in by using the drag-and-drop upload method, (available from Springboard, Location Manager or the Field Data Editor), to upload your test field data files.  We recommend that your plug-in specifies an error message or exception when it returns a SuccessfullyParsedButDataInvalid or CannotParser status.  The error message or exception is displayed as feedback to the user by the drag-and-drop interfaces.  Otherwise, the feedback from these drag-and-drop interfaces may not be very informative:
 
 <p align="center">
 <img src="images/Figure4_DragAndDropErrorMessage.png" alt="Figure 4: Drag-and-drop Error Message">
@@ -260,5 +275,16 @@ This change will take effect immediately, without needing to re-start the server
 
 This will make reading the log files much more difficult, so you may want to resort to searching for specific terms instead of scanning the logs for errors. 
 
-When you have finished debugging your plugin, we recommend that you restore the log level in RemotingAppender.config to the INFO log level.
+When you have finished debugging your plug-in, we recommend that you restore the log level in RemotingAppender.config to the INFO log level.
 
+# Uploading Field Data with Attachments
+
+The Field Data Plug-In Framework will attach files to field visits when the custom field data file and its attachments are bundled into a single zip file.  The zip file is organized as follows:
+- A single custom field data file that is located at the root of the zip file; 
+- A sub-folder that is located at the root of the zip file containing any field visit attachments (for example, images, videos, files).  The sub-folder can be given any name;
+- If there are multiple files located at the root level of the zip folder, the Field Data Plug-In Framework will fail to parse the zip file for attachments;
+
+When the Field Data Plug-In Framework processes the zip file, it will
+- Pass the field data file to each registered parser.  If the field data file is successfully parsed by a plug-in, it will create the field visits;
+- Attach all of the files contained in the sub-folder to each field visit;
+- The zip file is not attached to the field visits;
