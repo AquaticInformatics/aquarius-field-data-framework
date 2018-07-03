@@ -4,6 +4,7 @@ using System.Linq;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
+using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
@@ -90,6 +91,11 @@ namespace PluginTester
         public void AddDischargeActivity(FieldVisitInfo fieldVisit, DischargeActivity dischargeActivity)
         {
             fieldVisit.DischargeActivities.Add(dischargeActivity);
+        }
+
+        public void AddControlCondition(FieldVisitInfo fieldVisit, ControlCondition controlCondition)
+        {
+            fieldVisit.ControlConditions.Add(controlCondition);
         }
 
         public void AddCrossSectionSurvey(FieldVisitInfo fieldVisit, CrossSectionSurvey crossSectionSurvey)
