@@ -148,7 +148,7 @@ In **IFieldDataPlugin**, there are two *ParseFile* method signatures:
     1. Called by the Framework when LocationManager, the Field Data Editor or AQUARIUS Acquisition API is used to import a data file;
     2. Field data will be created in the targetLocation.  If the data file references a location, it must match the targetLocation or the field data will not be imported.
 
-Each *ParseFile* method returns a **ParseFileResult** object.  **ParseFileResult** has static constructors to create an instance to represent the plug-in status (SuccessullyParsedAndDataValid, SuccessfullyParsedButDataInvalid, CannotParse).  If your plug-in returns a SuccessfullyParsedButDataInvalid or CannotParser status, we recommend that it includes an error message or exception, which will be displayed as an error message to the user by the drag-and-drop interfaces.
+Each *ParseFile* method returns a **ParseFileResult** object.  **ParseFileResult** has static constructors to create an instance to represent the plug-in status (SuccessullyParsedAndDataValid, SuccessfullyParsedButDataInvalid, CannotParse).  If your plug-in returns a SuccessfullyParsedButDataInvalid or CannotParse status, we recommend that it includes an error message or exception, which will be displayed as an error message to the user by the drag-and-drop interfaces.
 
 ## Tips
 
@@ -241,7 +241,7 @@ To unregister a plug-in, you need to refer to the plug-in by its unique ID. A pl
 
 # Debugging your Plug-In
 
-After installing and registering your plug-in on the AQUARIUS Time-Series Server, you can test and debug your plug-in by using the drag-and-drop upload method, (available from Springboard, Location Manager or the Field Data Editor), to upload your test field data files.  We recommend that your plug-in specifies an error message or exception when it returns a SuccessfullyParsedButDataInvalid or CannotParser status.  The error message or exception is displayed as feedback to the user by the drag-and-drop interfaces.  Otherwise, the feedback from these drag-and-drop interfaces may not be very informative:
+After installing and registering your plug-in on the AQUARIUS Time-Series Server, you can test and debug your plug-in by using the drag-and-drop upload method, (available from Springboard, Location Manager or the Field Data Editor), to upload your test field data files.  We recommend that your plug-in specifies an error message or exception when it returns a SuccessfullyParsedButDataInvalid or CannotParse status.  The error message or exception is displayed as feedback to the user by the drag-and-drop interfaces.  Otherwise, the feedback from these drag-and-drop interfaces may not be very informative:
 
 <p align="center">
 <img src="images/Figure4_DragAndDropErrorMessage.png" alt="Figure 4: Drag-and-drop Error Message">
@@ -273,7 +273,7 @@ If you make changes to your plug-in, it is not necessary to unregister and re-re
 
 This change will take effect immediately, without needing to re-start the server. While changing the log level to DEBUG can help with debugging, it will also fill up the log file with a large number of logging messages.
 
-This will make reading the log files much more difficult, so you may want to resort to searching for specific terms instead of scanning the logs for errors. 
+This will make reading the log files much more difficult, so you may want to search for specific terms instead of scanning the logs for errors. 
 
 When you have finished debugging your plug-in, we recommend that you restore the log level in RemotingAppender.config to the INFO log level.
 
@@ -281,10 +281,10 @@ When you have finished debugging your plug-in, we recommend that you restore the
 
 The Field Data Plug-In Framework will attach files to field visits when the custom field data file and its attachments are bundled into a single zip file.  The zip file is organized as follows:
 - A single custom field data file that is located at the root of the zip file; 
-- A sub-folder that is located at the root of the zip file containing any field visit attachments (for example, images, videos, files).  The sub-folder can be given any name;
-- If there are multiple files located at the root level of the zip folder, the Field Data Plug-In Framework will fail to parse the zip file for attachments;
+- A sub-folder that is located at the root of the zip file containing any field visit attachments (for example, images, videos, files).  The sub-folder can be given any name; and 
+- If there are multiple files located at the root level of the zip folder, the Field Data Plug-In Framework will fail to parse the zip file for attachments.
 
-When the Field Data Plug-In Framework processes the zip file, it will
+When the Field Data Plug-In Framework processes the zip file, it will:
 - Pass the field data file to each registered parser.  If the field data file is successfully parsed by a plug-in, it will create the field visits;
-- Attach all of the files contained in the sub-folder to each field visit;
-- The zip file is not attached to the field visits;
+- Attach all of the files contained in the sub-folder to each field visit; and 
+- The zip file is not attached to the field visits.
