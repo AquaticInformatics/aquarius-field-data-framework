@@ -13,7 +13,7 @@ The Field Data Plugin tool is a utility that can be used to install and configur
 ## Requirements
 
 - The tool must be run directly on an AQTS app server, running 2017.4-or-newer software.
-- Administrative access is required.
+- Administrative access on the AQTS app server is required. Right-click `FieldDataPluginTool.exe` and select "Run as administrator"
 - The Time-Series server software must be running.
 
 ## The `*.plugin` file format
