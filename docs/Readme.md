@@ -14,6 +14,11 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2018.3
+
+- Added AdcpDischargeSection channel measurement activity
+- Added ValidationChecks.CannotBeNegative() helper method
+
 ### AQTS 2018.2
 
 - Added support to set reference points on Readings
