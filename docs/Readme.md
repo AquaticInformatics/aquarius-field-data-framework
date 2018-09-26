@@ -65,7 +65,7 @@ Figure 2 illustrates the control flow after a user uploads a field data file to 
 
 Plug-ins are registered with the Framework and given a priority. The priority determines the order that the Framework runs the plug-ins to parse the field data file. When a field data file is submitted to the Framework, the file is passed to each parser, in ascending priority order. Each parser returns one of the following statuses:
 
-* **CannotParse.** The plug-in could not parse the file. The Framework will pass the file to the next highest priority plug-in.  If the file is submitted through the drag-and-drop interface in Springboard, Location Manager, or the Field Data Editor, and there are no more registered plug-ins, then the Framework passes the built-in plug-ins (e.g., SWAMI, FlowTracker *.DIS, AquaCalc) to parse.  If the file is submitted through the AQUARIUS Acquisition API, an HTTP error is returned.
+* **CannotParse.** The plug-in could not parse the file. The Framework will pass the file to the next highest priority plug-in.  If the file is submitted through the drag-and-drop interface in Springboard, Location Manager, or the Field Data Editor, and there are no more registered plug-ins, then the Framework passes the file to the built-in plug-ins (e.g., SWAMI, FlowTracker *.DIS, AquaCalc) to parse.  If the file is submitted through the AQUARIUS Acquisition API, an HTTP error is returned.
 * **SuccessfullyParsedButDataInvalid.** The plug-in parsed the file but failed to process the data.  The framework will exit with an error. The error will be logged to a log file (*FieldDataPluginFramework.log*) and a "Failed" status will be reported in Springboard or an HTTP error is returned in the AQUARIUS Acquisition API.
 * **SuccessfullyParsedAndDataValid.** The plug-in parsed the file and processed the data without error. The framework will try to save the field data to the database and the save status will be reported below the drag-and-drop area in Springboard, Location Manager or the Field Data Editor (FDE).
 
@@ -106,9 +106,9 @@ If these properties are left as the default "Unknown" value, the Framework will 
 
 ## PickList Data Type
 
-In AQUARIUS Time-Series, certain field visit activity properties are pick lists, a customizable collection of key-value pairs, known as a PickListItem.  A PickListItem has an identifier and a display name, which is shown in the Field Data Editor.  
+In AQUARIUS Time-Series, certain field visit activity properties are pick lists, a customizable collection of key-value pairs, known as a **PickListItem**.  A **PickListItem** has an identifier and a display name, which is shown in the Field Data Editor.  
 
-In the Framework, pick list properties are defined as data type, PickList.  The PickList data type is similar to an enumeration, but the possible values are only known at run time.  A PickList instance is constructed by specifying either the identifier or the display name of a PickListItem that belongs to the pick list.  When the Framework saves the field data to the AQUARIUS Time-Series Server, it will validate the PickList.  If the PickList specifies an invalid PickLlistItem, the Framework will return an error message that lists all of the PickListItems that belong to the pick list.
+In the Framework, pick list properties are defined as data type, **PickList**.  The **PickList** data type is similar to an enumeration, but the possible values are only known at run time.  A **PickList** instance is constructed by specifying either the identifier or the display name of a **PickListItem** that belongs to the pick list.  When the Framework saves the field data to the AQUARIUS Time-Series Server, it will validate the **PickList**.  If the **PickList** specifies an invalid **PickListItem**, the Framework will return an error message that lists all of the **PickListItems** that belong to the pick list.
 
 # Setting up a Development Environment
 
@@ -122,7 +122,7 @@ PM> Install-Package Aquarius.FieldDataFramework
 
 This will install:
 - the `lib\FieldDataPluginFramework.dll` assembly, which your plug-in must consume and implement.
-- the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plug-in without needing an AQTS server
+- the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plug-in without needing an AQTS server.
 - the [`tools\PluginPackager.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) tool, for packaging your plug-in into a single `*.plugin` file for easy deployment.
 - the [`tools\FieldDataPluginTool.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) tool for easily deploying your packaged plug-in on an AQTS server.
 
@@ -157,7 +157,7 @@ Each *ParseFile* method returns a **ParseFileResult** object.  **ParseFileResult
 
 ## Tips
 
-1. Plug-ins should not access the network. The framework runs plug-ins locally in a sand-boxed environment.
+1. Plug-ins should not access the network. The Framework runs plug-ins locally in a sand-boxed environment.
 2. Plug-ins should be thread safe. In the future, the Framework will call plug-ins concurrently from multiple threads or processes.
 3. Plug-ins should only contain managed code. Aquatic Informatics will not provide developer support for plug-ins containing unmanaged code.
 4. Plug-ins should be able to process field data files in less than **one second**. In the future, the Framework will terminate long-running plug-ins.
@@ -218,7 +218,7 @@ But if you want to install and register your plug-in manually:
 4. Register your plug-in with the AQUARIUS Time-Series Server using the **POST /fielddataplugins** endpoint in the Provisioning API (http://\<yourservername\>/AQUARIUS/Provisioning/v1). The AQUARIUS Time-Series Server is not aware that your plug-in is installed until it is registered. The POST endpoint requires the following parameters:
     1. PluginFolderName – the name of the sub-folder;
     2. AssemblyQualifiedTypeName – the type name and display name of your plug-in assembly, which allows the Framework to load your plug-in using reflection.  The minimum specification of an AssemblyQualifiedTypeName is *{classTypeName}, {assemblyName}*. 
-    3. PluginPriority – the unique number representing the order that the Framework will run your plug-in will be run relative to other registered plug-ins (the framework runs plug-ins in ascending priority order). The highest priority plug-in has PluginPriority = 1;
+    3. PluginPriority – the unique number representing the order that the Framework will run your plug-in relative to other registered plug-ins (the Framework runs plug-ins in ascending priority order). The highest priority plug-in has PluginPriority = 1;
 5. When a plug-in is registered, it is assigned a unique ID. The plug-in’s unique ID will be used to unregister the plug-in from the Framework.
 
 For example, you have installed your plug-in assembly on the AQUARIUS Time-Series Server at %ProgramFiles%\\Aquatic Informatics\\AQUARIUS Server\\FieldDataPlugins\\MyPlugin\\MyFirstPlugin.dll.  The assembly contains a class, Foo.FieldDataPlugin that implements the IFieldDataPluginInterface. To register your plug-in, you would call **POST /fielddataplugins** in Provisioning API with the following input parameters:
@@ -234,13 +234,13 @@ For example, you have installed your plug-in assembly on the AQUARIUS Time-Serie
 
 For example, your AQUARIUS Time-Series Server has two plug-ins registered so that PluginA is assigned priority = 1 and PluginC is assigned priority = 3. 
 
-Now, you would like to install a new plug-in, PluginB, so that it is the second plug-in that will be run by the framework. To do so, you need to un-register and re-register PluginC with priority = 3 so that you can register PluginB with priority = 2.
+Now, you would like to install a new plug-in, PluginB, so that it is the second plug-in that will be run by the Framework. To do so, you need to un-register and re-register PluginC with priority = 3 so that you can register PluginB with priority = 2.
 
 However, if PluginA and PluginB were registered so that PluginA is assigned priority = 100 and PluginC is assigned priority = 300, you do not need to change the priority of PluginC; you only need to assign PluginC a priority between 100 and 300.
 
 # Unregistering your Plug-In
 
-A plug-in can be unregistered from the Framework using the **DELETE /fielddataplugins** endpoint in Provisioning API.  The delete endpoint only removes the Framework’s awareness of the plug-in (i.e. when a field data file is submitted, the framework will not run the plug-in), it does not delete the plug-in’s libraries from the AQUARIUS Time-Series Server.
+A plug-in can be unregistered from the Framework using the **DELETE /fielddataplugins** endpoint in Provisioning API.  The delete endpoint only removes the Framework’s awareness of the plug-in (i.e. when a field data file is submitted, the Framework will not run the plug-in), it does not delete the plug-in’s libraries from the AQUARIUS Time-Series Server.
 
 To unregister a plug-in, you need to refer to the plug-in by its unique ID. A plug-in’s unique id can be found by using the **GET /fielddataplugins** endpoint in Provisioning API to retrieve a list of all plug-ins registered with the Framework.
 
@@ -267,7 +267,7 @@ However, we still recommend that you refer to *FieldDataPluginFramework.log* to 
 
 Additionally, the Aquatic Informatics Field Data Framework repo on GitHub provides the PluginTester.exe as a tool to help debug your plug-in outside of the AQUARIUS Time-Series Server environment.  The Plug-in Tester can be found [here](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester). This tool is also available in `tools` folder of the NuGet package.
 
-In particular, when the **/Json=AppendedResults.json** command line option is used, the JSON written to disk will include both the framework data models written by your plug-in and the correct AssemblyQualifiedTypeName to use during plug-in registration.
+In particular, when the **/Json=AppendedResults.json** command line option is used, the JSON written to disk will include both the Framework data models written by your plug-in and the correct AssemblyQualifiedTypeName to use during plug-in registration.
 
 If you make changes to your plug-in, it is not necessary to unregister and re-register your plug-in with AQUARIUS Time-Series Server. Simply replace the existing plug-in library on the server with its newer version.
 
@@ -292,4 +292,4 @@ The Field Data Plug-In Framework will attach files to field visits when the cust
 When the Field Data Plug-In Framework processes the zip file, it will:
 - Pass the field data file to each registered parser.  If the field data file is successfully parsed by a plug-in, it will create the field visits;
 - Attach all of the files contained in the sub-folder to each field visit; and 
-- The zip file is not attached to the field visits.
+- Not attach the zip file to the field visits.
