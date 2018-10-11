@@ -2,6 +2,8 @@
 
 The Field Data Plugin tool is a utility that can be used to install and configure Field Data Plugins on your AQTS app server.
 
+Download the latest version of the Field Data Plugin Tool [from the releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest).
+
 ![Field Data Plugin Tool](./Screenshot.png "Field Data Plugin Tool")
 
 ## Features
