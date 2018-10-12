@@ -10,6 +10,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
+using Humanizer;
 using log4net;
 using Microsoft.Win32;
 using ServiceStack;
@@ -50,6 +51,12 @@ namespace FieldDataPluginTool
         {
             Log.Info(message);
             WriteLine($"INFO: {message}");
+        }
+
+        private void Warn(string message)
+        {
+            Log.Warn(message);
+            WriteLine($"WARN: {message}");
         }
 
         private void Error(Exception exception)
@@ -112,7 +119,9 @@ namespace FieldDataPluginTool
                 Info($"{Text} connected to AQTS {_client.ServerVersion} on {Environment.MachineName}");
 
                 GetAllPlugins();
-            
+
+                CheckForMissingPlugins();
+
                 connectButton.Enabled = false;
                 disconnectButton.Enabled = true;
                 addButton.Enabled = true;
@@ -188,14 +197,11 @@ namespace FieldDataPluginTool
 
         private void GetAllPlugins()
         {
-            _allPlugins = _client.Provisioning.Get(new GetFieldDataPlugins())
-                .Results;
+            _allPlugins = GetSortedPlugins();
 
             var pluginsDictionary = _allPlugins.ToDictionary(p => p, FormatPluginListItem);
-            pluginListBox.DataSource = new BindingSource(pluginsDictionary, null);
-            pluginListBox.DisplayMember = "Value";
-            pluginListBox.ValueMember = "Key";
-            pluginListBox.Enabled = true;
+
+            SetPluginList(pluginsDictionary);
 
             if (_allPlugins.Any())
             {
@@ -210,6 +216,107 @@ namespace FieldDataPluginTool
                 : $", {plugin.Description}";
 
             return $"{plugin.PluginFolderName}{description}, PluginPriority={plugin.PluginPriority}";
+        }
+
+        private List<FieldDataPlugin> GetSortedPlugins()
+        {
+            return _client.Provisioning.Get(new GetFieldDataPlugins())
+                .Results
+                .OrderBy(p => p.PluginPriority)
+                .ToList();
+        }
+
+        private void SetPluginList(Dictionary<FieldDataPlugin, string> items)
+        {
+            pluginListBox.DataSource = new BindingSource(items, null);
+            pluginListBox.DisplayMember = "Value";
+            pluginListBox.ValueMember = "Key";
+            pluginListBox.Enabled = true;
+        }
+
+        private void CheckForMissingPlugins()
+        {
+            var plugins = GetSortedPlugins();
+
+            var missingPlugins = plugins.Where(IsPluginMissing).ToList();
+
+            if (!missingPlugins.Any())
+                return;
+
+            var summary = "missing field data plugin".ToQuantity(missingPlugins.Count);
+
+            if (ConfirmAction($"Remove the {summary} from the database?"))
+            {
+                RemoveMissingPlugins(missingPlugins);
+
+                Info($"Successfully removed {summary}.");
+
+                GetAllPlugins();
+                return;
+            }
+
+            Warn("Missing field data plugins will cause field data import failures. You should remove these plugins from your system.");
+
+            var allPlugins = GetSortedPlugins();
+            var pluginsMarkedAsMissing = allPlugins
+                .ToDictionary(
+                    p => p,
+                    p =>
+                    {
+                        var displayName = FormatPluginListItem(p);
+                        return missingPlugins.Any(m => m.UniqueId == p.UniqueId) ? $"** MISSING ** {displayName}" : displayName;
+                    });
+
+            SetPluginList(pluginsMarkedAsMissing);
+        }
+
+        private bool IsPluginMissing(FieldDataPlugin plugin)
+        {
+            var expectedPath = Path.Combine(GetInstallPath(), plugin.PluginFolderName);
+
+            if (!Directory.Exists(expectedPath))
+            {
+                Warn($"Expected plugin folder '{expectedPath}' is missing.");
+                return true;
+            }
+
+            var assemblyPath = GetAssemblyPath(expectedPath, plugin.AssemblyQualifiedTypeName);
+
+            if (!File.Exists(assemblyPath))
+            {
+                Warn($"Expected plugin assembly '{assemblyPath}' is missing.");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string GetAssemblyPath(string path, string assemblyName)
+        {
+            var names = assemblyName.Split(new[] { ',' }, 3);
+
+            var name = names.Length > 2
+                ? names[1].Trim()   // Works for AQFN names
+                : names[0];         // Works for simple assembly names
+
+            return Path.Combine(path, $"{name}.dll");
+        }
+
+        private void RemoveMissingPlugins(List<FieldDataPlugin> missingPlugins)
+        {
+            var installPath = GetInstallPath();
+
+            foreach (var plugin in missingPlugins)
+            {
+                _client.Provisioning.Delete(new DeleteFieldDataPlugin { UniqueId = plugin.UniqueId });
+
+                var pluginPath = Path.Combine(installPath, plugin.PluginFolderName);
+
+                if (Directory.Exists(pluginPath))
+                {
+                    Directory.Delete(pluginPath, true);
+                }
+            }
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
