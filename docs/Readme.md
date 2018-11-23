@@ -14,28 +14,33 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2018.4
+
+- **Breaking change**: Added a required PointOrder property to CrossSectionPoint. This property controls the order in which the points are drawn. Previously, points would always be drawn in order of Distance.
+- Added support for vertical segments and overhangs in cross-section profiles.
+
 ### AQTS 2018.3
 
-- Added AdcpDischargeSection channel measurement activity
-- Added ValidationChecks.CannotBeNegative() helper method
+- Added AdcpDischargeSection channel measurement activity.
+- Added ValidationChecks.CannotBeNegative() helper method.
 
 ### AQTS 2018.2
 
-- Added support to set reference points on Readings
-- Added Weather, CollectionAgency and CompletedVisitActivities properties on FieldVisitDetails
-- Added AdjustmentType, AdjustmentAmount, and ReasonForAdjustment properties on DischargeActivity
-- Expanded GageHeightCalculationType to support ManuallyCalculated and SimpleAverage options on DischargeActivity
-- Added support for ControlConditions
-- Enhanced the field data plug-in framework to support uploading attachments with a field data file
+- Added support to set reference points on Readings.
+- Added Weather, CollectionAgency and CompletedVisitActivities properties on FieldVisitDetails.
+- Added AdjustmentType, AdjustmentAmount, and ReasonForAdjustment properties on DischargeActivity.
+- Expanded GageHeightCalculationType to support ManuallyCalculated and SimpleAverage options on DischargeActivity.
+- Added support for ControlConditions.
+- Enhanced the field data plug-in framework to support uploading attachments with a field data file.
 
 ### AQTS 2018.1
 
-- Changed the framework guide from PDF to Markdown
-- Added support for Level Surveys
+- Changed the framework guide from PDF to Markdown.
+- Added support for Level Surveys.
 
 ### AQTS 2017.4
 
-- First supported release of the plug-in framework
+- First supported release of the plug-in framework.
 - The PDF of the 2017.4 framework guide can be found [here.](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/v17.4.3/docs/AQUARIUSDeveloperGuideFieldDataPluginFramework.pdf)
 
 # Overview
