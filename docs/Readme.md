@@ -16,7 +16,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ### AQTS 2018.4
 
-- **Breaking change**: Added a required PointOrder property to CrossSectionPoint. This property controls the order in which the points are drawn. Previously, points would always be drawn in order of Distance. Valid values for the property are `1, 2, ..., N` where `N` is the total number of points in the cross-section. Values cannot be repeated. See the examples page for Cross-Section Surveys from the link above for more detail.
+- **Breaking change**: Added a required PointOrder property to CrossSectionPoint. This property controls the order in which the points are drawn. Previously, points would always be drawn in order of Distance. Valid values for the property are `1, 2, ..., N` where `N` is the total number of points in the cross-section. Values cannot be repeated. See the [examples page for Cross-Section Surveys](https://github.com/AquaticInformatics/examples/tree/master/TimeSeries/SampleFiles/FieldData/Plugin/CrossSectionSurvey) for more detail.
 - Added support for vertical segments and overhangs in cross-section profiles.
 
 ### AQTS 2018.3
