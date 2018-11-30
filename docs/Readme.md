@@ -15,7 +15,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 ## Change Log
 
 ### AQTS 2018.4
-- Changed format of ControlConditionActivity.ControlCondition from Enum to string. New string value contains identifier for control condition picklist item. 
+- **Breaking change**: Changed the parameter type of ControlCondition.ControlCondition from the ConditionType Enum to ControlConditionPickList. See [PickList Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#picklist-data-type) for more details about working with PickLists.
 
 ### AQTS 2018.3
 
