@@ -53,7 +53,8 @@ namespace PluginPackager
 
         private static byte[] LoadEmbeddedResource(string path)
         {
-            var resourceName = $"{GetProgramName()}.{path}";
+            // ReSharper disable once PossibleNullReferenceException
+            var resourceName = $"{MethodBase.GetCurrentMethod().DeclaringType.Namespace}.{path}";
 
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
