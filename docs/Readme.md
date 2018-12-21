@@ -14,6 +14,12 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2018.4
+
+- Field data plug-ins do not need to be re-installed following an upgrade to AQUARIUS Time-Series
+- Changed location where field data plug-ins are installed to %ProgramData%\Aquatic Informatics\AQUARIUS Server\FieldDataPlugins
+- Modified Provisioning API `POST /fielddataplugins` to upload and install field data plug-ins packaged in a *.plugin file
+
 ### AQTS 2018.3
 
 - Added AdcpDischargeSection channel measurement activity
@@ -112,7 +118,7 @@ In the Framework, pick list properties are defined as data type, **PickList**.  
 
 # Setting up a Development Environment
 
-Plug-ins are 64-bit libraries written using .NET Framework 4.7.  If the .NET Framework 4.7 developer pack is not already installed, it can be downloaded [here](https://www.microsoft.com/en-us/download/details.aspx?id=55170).
+Plug-ins are 64-bit libraries written using .NET Framework 4.7.2.  If the .NET Framework 4.7.2 developer pack is not already installed, it can be downloaded [here](https://support.microsoft.com/en-ca/help/4054531/microsoft-net-framework-4-7-2-web-installer-for-windows).
 
 Install the Field Data Framework in your project via NuGet.
 
@@ -205,27 +211,11 @@ See the [PluginPacker](https://github.com/AquaticInformatics/aquarius-field-data
 
 See the [FieldDataPluginTool](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) project for an easy to use GUI tool to correctly install your plug-in on your AQTS server.
 
-# Manually Installing and Registering your Plug-In
+# Register and deploy your plug-in using the Provisioning API
 
-You really should use the FieldDataPluginTool mentioned above. It handles all the heavy lifting for you.
+Register and deploy your plug-in with the AQUARIUS Time-Series Server using the **POST /fielddataplugins** endpoint in the Provisioning API (http://\<yourservername\>/AQUARIUS/Provisioning/v1).
 
-But if you want to install and register your plug-in manually:
-
-1. On the AQUARIUS Time-Series Server, navigate to the folder:
-**{AppInstallRoot}\\Aquatic Informatics\\AQUARIUS Server\\FieldDataPlugins**
-2. In the FieldDataPlugins folder, create a sub-folder with a name that matches your plug-in’s name.
-3. Copy your plug-in and its dependencies into the sub-folder.
-4. Register your plug-in with the AQUARIUS Time-Series Server using the **POST /fielddataplugins** endpoint in the Provisioning API (http://\<yourservername\>/AQUARIUS/Provisioning/v1). The AQUARIUS Time-Series Server is not aware that your plug-in is installed until it is registered. The POST endpoint requires the following parameters:
-    1. PluginFolderName – the name of the sub-folder;
-    2. AssemblyQualifiedTypeName – the type name and display name of your plug-in assembly, which allows the Framework to load your plug-in using reflection.  The minimum specification of an AssemblyQualifiedTypeName is *{classTypeName}, {assemblyName}*. 
-    3. PluginPriority – the unique number representing the order that the Framework will run your plug-in relative to other registered plug-ins (the Framework runs plug-ins in ascending priority order). The highest priority plug-in has PluginPriority = 1;
-5. When a plug-in is registered, it is assigned a unique ID. The plug-in’s unique ID will be used to unregister the plug-in from the Framework.
-
-For example, you have installed your plug-in assembly on the AQUARIUS Time-Series Server at %ProgramFiles%\\Aquatic Informatics\\AQUARIUS Server\\FieldDataPlugins\\MyPlugin\\MyFirstPlugin.dll.  The assembly contains a class, Foo.FieldDataPlugin that implements the IFieldDataPluginInterface. To register your plug-in, you would call **POST /fielddataplugins** in Provisioning API with the following input parameters:
-
-* PluginFolderName = MyPlugin
-* AssemblyQualifiedTypeName = Foo.FieldDataPlugin, MyFirstPlugin
-* PluginPriority = 2500
+In a multi-server configuration, the `POST /fielddataplugin` endpoint **must** be run on each server to install the field data plugin.  This is required so that any server in the multi-server configuration can parse a field data file.
 
 ## Tips
 
