@@ -37,3 +37,12 @@ If you set the `/AssemblyPath=path` option or just specify a path to an assembly
 - The `/DeployedFolder=value` will default to the simplified plugin name unless explicitly set.
 - The `/Description=value` will default to simplified plugin name unless explicitly set.
 
+## The `*.plugin` file format
+
+A `*.plugin` file is a ZIP archive containing:
+- A `manifest.json` file, which includes the **PluginFolderName**, **Description**, and **AssemblyQualifiedTypeName** string properties. These values are set by the plugin developer and should not need to be changed when a plugin is installed on an AQTS system.
+- All other files in the ZIP archive, including any nested folders and files, will be copied to the named folder when the plugin is installed.
+
+A bare-minimum `*.plugin` file contains 2 files:
+- The plugin assembly implementing the `IFieldDataPlugin` interface
+- The `manifest.json` file

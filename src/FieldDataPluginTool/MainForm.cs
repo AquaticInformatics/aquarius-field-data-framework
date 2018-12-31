@@ -10,6 +10,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
+using FieldDataPluginTool.LegacyApi;
 using Humanizer;
 using log4net;
 using Microsoft.Win32;
@@ -28,14 +29,15 @@ namespace FieldDataPluginTool
             // ReSharper disable once VirtualMemberCallInConstructor
             Text = $@"Field Data Plugin Tool v{GetExecutingFileVersion()}";
 
+            serverTextBox.Text = @"localhost";
             usernameTextBox.Text = @"admin";
             passwordTextBox.Text = @"admin";
 
             disconnectButton.Enabled = false;
             addButton.Enabled = false;
             removeButton.Enabled = false;
-            priorityUpButton.Enabled = false;
-            priorityDownButton.Enabled = false;
+            priorityUpButton.Enabled = priorityDownButton.Enabled = false;
+            priorityUpButton.Visible = priorityDownButton.Visible = false;
             pluginListBox.Enabled = false;
         }
 
@@ -100,23 +102,24 @@ namespace FieldDataPluginTool
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-            Connect();
+            using (new CursorWait())
+            {
+                Connect();
+            }
         }
-
-        private readonly string _hostname = "localhost";
 
         private void Connect()
         {
             try
             {
-                ThrowIfServerNotInstalled();
-                ThrowIfWrongVersion();
-                ThrowIfNotAdministrativeUser();
+                _client = AquariusClient.CreateConnectedClient(
+                    serverTextBox.Text.Trim(),
+                    usernameTextBox.Text.Trim(),
+                    passwordTextBox.Text.Trim());
 
-                _client = AquariusClient.CreateConnectedClient(_hostname, usernameTextBox.Text.Trim(),
-                    passwordTextBox.Text);
+                Info($"{Text} connected to AQTS {_client.ServerVersion} on {GetServerName()}");
 
-                Info($"{Text} connected to AQTS {_client.ServerVersion} on {Environment.MachineName}");
+                ValidateConnection();
 
                 GetAllPlugins();
 
@@ -125,11 +128,52 @@ namespace FieldDataPluginTool
                 connectButton.Enabled = false;
                 disconnectButton.Enabled = true;
                 addButton.Enabled = true;
+                priorityUpButton.Enabled = priorityDownButton.Enabled = !IsPureApiVersion();
+                serverTextBox.Enabled = false;
+                usernameTextBox.Enabled = false;
+                passwordTextBox.Enabled = false;
             }
             catch (Exception exception)
             {
+                Disconnect();
                 Error(exception);
             }
+        }
+
+        private string GetServerName()
+        {
+            var serverName = serverTextBox.Text.Trim();
+
+            if (serverName.Equals("localhost", StringComparison.InvariantCultureIgnoreCase)
+                || serverName.Equals("127.0.0.1"))
+            {
+                return Environment.MachineName;
+            }
+
+            return serverName;
+        }
+
+        private bool IsLocalHost()
+        {
+            return GetServerName().Equals(Environment.MachineName, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private void ValidateConnection()
+        {
+            ThrowIfWrongVersion();
+
+            if (IsPureApiVersion()) return;
+
+            priorityUpButton.Visible = priorityDownButton.Visible = true;
+
+            ThrowIfNotLocalhost();
+            ThrowIfServerNotInstalled();
+            ThrowIfNotAdministrativeUser();
+        }
+
+        private bool IsPureApiVersion()
+        {
+            return !_client?.ServerVersion.IsLessThan(_pureApiVersion) ?? false;
         }
 
         private void ThrowIfServerNotInstalled()
@@ -174,14 +218,7 @@ namespace FieldDataPluginTool
 
         private void ThrowIfWrongVersion()
         {
-            var serverType = AquariusSystemDetector.Instance.GetAquariusServerType(_hostname);
-
-            if (serverType != AquariusServerType.NextGeneration)
-                throw new Exception($"This tool only works on AQTS 201x (Detected server={serverType}).");
-
-            var version = AquariusSystemDetector.Instance.GetAquariusServerVersion(_hostname);
-
-            if (version.IsLessThan(_minimumVersion))
+            if (_client.ServerVersion.IsLessThan(_minimumVersion))
                 throw new Exception($"The AQTS server must be running {_minimumVersion} or higher.");
         }
 
@@ -191,7 +228,14 @@ namespace FieldDataPluginTool
                 throw new Exception("Please relaunch this utility with administrative rights.");
         }
 
+        private void ThrowIfNotLocalhost()
+        {
+            if (!IsLocalHost())
+                throw new Exception($"You must run this tool directly from the app server to install plugins on AQTS versions before {_pureApiVersion}");
+        }
+
         private readonly AquariusServerVersion _minimumVersion = AquariusServerVersion.Create("17.4");
+        private readonly AquariusServerVersion _pureApiVersion = AquariusServerVersion.Create("18.4.62");
 
         private List<FieldDataPlugin> _allPlugins;
 
@@ -226,6 +270,13 @@ namespace FieldDataPluginTool
                 .ToList();
         }
 
+        private void ClearPluginList()
+        {
+            pluginListBox.DataSource = null;
+            pluginListBox.Enabled = false;
+            pluginListBox.SelectedIndex = -1;
+        }
+
         private void SetPluginList(Dictionary<FieldDataPlugin, string> items)
         {
             pluginListBox.DataSource = new BindingSource(items, null);
@@ -236,6 +287,9 @@ namespace FieldDataPluginTool
 
         private void CheckForMissingPlugins()
         {
+            if (IsPureApiVersion())
+                return;
+
             var plugins = GetSortedPlugins();
 
             var missingPlugins = plugins.Where(IsPluginMissing).ToList();
@@ -321,23 +375,32 @@ namespace FieldDataPluginTool
 
         private void disconnectButton_Click(object sender, EventArgs e)
         {
-            Disconnect();
+            using (new CursorWait())
+            {
+                Disconnect();
+            }
         }
 
         private void Disconnect()
         {
             if (_client != null)
             {
-                Info($"Disconnected from AQTS {_client.ServerVersion} on {_hostname}");
+                Info($"Disconnected from AQTS {_client.ServerVersion} on {GetServerName()}");
 
                 _client.Dispose();
                 _client = null;
             }
 
-            pluginListBox.DataSource = new BindingSource(new Dictionary<FieldDataPlugin,string>(), null);
+            ClearPluginList();
             disconnectButton.Enabled = false;
-            connectButton.Enabled = true;
             addButton.Enabled = false;
+            removeButton.Enabled = false;
+            priorityUpButton.Enabled = priorityDownButton.Enabled = false;
+            priorityUpButton.Visible = priorityDownButton.Visible = false;
+            connectButton.Enabled = true;
+            serverTextBox.Enabled = true;
+            usernameTextBox.Enabled = true;
+            passwordTextBox.Enabled = true;
         }
 
         private void addButton_Click(object sender, EventArgs e)
@@ -351,7 +414,10 @@ namespace FieldDataPluginTool
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                AddFile(fileDialog.FileName);
+                using (new CursorWait())
+                {
+                    AddFile(fileDialog.FileName);
+                }
             }
         }
 
@@ -365,19 +431,25 @@ namespace FieldDataPluginTool
             if (!ConfirmAction($"Remove the '{plugin.PluginFolderName}' plugin from the AQTS server?"))
                 return;
 
-            DeletePlugin(plugin);
-            GetAllPlugins();
+            using (new CursorWait())
+            {
+                DeletePlugin(plugin);
+                GetAllPlugins();
 
-            Info($"Removed the '{plugin.PluginFolderName}' plugin.");
+                Info($"Removed the '{plugin.PluginFolderName}' plugin.");
 
-            var folderPath = Path.Combine(GetInstallPath(), plugin.PluginFolderName);
+                if (IsPureApiVersion())
+                    return;
 
-            if (!ConfirmAction($"Also delete the '{folderPath}' folder from the server?"))
-                return;
+                var folderPath = Path.Combine(GetInstallPath(), plugin.PluginFolderName);
 
-            Directory.Delete(folderPath, true);
+                if (!ConfirmAction($"Also delete the '{folderPath}' folder from the server?"))
+                    return;
 
-            Info($"Deleted the '{folderPath}' folder.");
+                Directory.Delete(folderPath, true);
+
+                Info($"Deleted the '{folderPath}' folder.");
+            }
         }
 
         private bool ConfirmAction(string message)
@@ -399,9 +471,9 @@ namespace FieldDataPluginTool
             _client.Provisioning.Delete(new DeleteFieldDataPlugin { UniqueId = plugin.UniqueId });
         }
 
-        private void RegisterPlugin(FieldDataPlugin plugin)
+        private void RegisterPlugin183(FieldDataPlugin plugin)
         {
-            _client.Provisioning.Post(new PostFieldDataPlugin
+            _client.Provisioning.Post(new PostFieldDataPlugin183
             {
                 AssemblyQualifiedTypeName = plugin.AssemblyQualifiedTypeName,
                 PluginFolderName = plugin.PluginFolderName,
@@ -426,21 +498,24 @@ namespace FieldDataPluginTool
             if (!ConfirmAction($"Swap the priority of the '{plugin1.PluginFolderName}' and '{plugin2.PluginFolderName}' plugins?"))
                 return;
 
-            var temp = plugin1.PluginPriority;
-            plugin1.PluginPriority = plugin2.PluginPriority;
-            plugin2.PluginPriority = temp;
+            using (new CursorWait())
+            {
+                var temp = plugin1.PluginPriority;
+                plugin1.PluginPriority = plugin2.PluginPriority;
+                plugin2.PluginPriority = temp;
 
-            DeletePlugin(plugin1);
-            DeletePlugin(plugin2);
+                DeletePlugin(plugin1);
+                DeletePlugin(plugin2);
 
-            RegisterPlugin(plugin1);
-            RegisterPlugin(plugin2);
+                RegisterPlugin183(plugin1);
+                RegisterPlugin183(plugin2);
 
-            Info($"Swapped plugin priority of {plugin1.PluginFolderName} and {plugin2.PluginFolderName}.");
+                Info($"Swapped plugin priority of {plugin1.PluginFolderName} and {plugin2.PluginFolderName}.");
 
-            GetAllPlugins();
+                GetAllPlugins();
 
-            pluginListBox.SelectedIndex = targetIndex;
+                pluginListBox.SelectedIndex = targetIndex;
+            }
         }
 
         private void priorityDownButton_Click(object sender, EventArgs e)
@@ -456,6 +531,9 @@ namespace FieldDataPluginTool
             var index = pluginListBox.SelectedIndex;
 
             removeButton.Enabled = index >= 0;
+
+            if (IsPureApiVersion()) return;
+
             priorityUpButton.Enabled = index > 0;
             priorityDownButton.Enabled = index < pluginListBox.Items.Count - 1;
         }
@@ -463,7 +541,12 @@ namespace FieldDataPluginTool
         private void pluginListBox_DragDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Any())
-                AddFile(files.First());
+            {
+                using (new CursorWait())
+                {
+                    AddFile(files.First());
+                }
+            }
         }
 
         private void pluginListBox_DragOver(object sender, DragEventArgs e)
@@ -497,50 +580,22 @@ namespace FieldDataPluginTool
                     if (!otherEntries.Any())
                         throw new Exception($"Invalid plugin bundle. No file entries found.");
 
-                    var installPath = GetInstallPath();
-
-                    var targetPath = Path.Combine(installPath, plugin.PluginFolderName);
-
-                    if (Directory.Exists(targetPath))
+                    if (!IsPureApiVersion())
                     {
-                        Info($"Deleting existing folder '{targetPath}' ...");
-                        Directory.Delete(targetPath, true);
-                    }
-                    else
-                    {
-                        Info($"Creating new plugin folder '{targetPath}' ...");
-                    }
-
-                    Directory.CreateDirectory(targetPath);
-
-                    foreach (var entry in otherEntries)
-                    {
-                        var extractedPath = Path.Combine(targetPath, entry.FullName);
-                        var extractedDir = Path.GetDirectoryName(extractedPath);
-
-                        if (!Directory.Exists(extractedDir))
-                        {
-                            // ReSharper disable once AssignNullToNotNullAttribute
-                            Directory.CreateDirectory(extractedDir);
-                        }
-
-                        Info($"Extracting {entry.FullName} ...");
-                        using (var inStream = entry.Open())
-                        using (var outStream = File.Create(extractedPath))
-                        {
-                            inStream.CopyTo(outStream);
-                        }
-                    }
-
-                    Info($"Copying server framework assembly ...");
-                    using (var inStream = File.OpenRead(GetServerFrameworkPath()))
-                    using (var outStream = File.Create(Path.Combine(targetPath, FrameworkAssemblyFilename)))
-                    {
-                        inStream.CopyTo(outStream);
+                        CopyFilesToPluginFolder(plugin, otherEntries);
                     }
 
                     Info($"Registering new plugin '{plugin.PluginFolderName}' ...");
-                    RegisterPlugin(plugin);
+
+                    if (!IsPureApiVersion())
+                    {
+                        RegisterPlugin183(plugin);
+                    }
+                    else
+                    {
+                        UploadPlugin(path);
+                    }
+
                     GetAllPlugins();
 
                     pluginListBox.SelectedIndex =
@@ -582,6 +637,56 @@ namespace FieldDataPluginTool
 
                 return plugin;
             }
+        }
+
+        private void CopyFilesToPluginFolder(FieldDataPlugin plugin, List<ZipArchiveEntry> otherEntries)
+        {
+            var installPath = GetInstallPath();
+
+            var targetPath = Path.Combine(installPath, plugin.PluginFolderName);
+
+            if (Directory.Exists(targetPath))
+            {
+                Info($"Deleting existing folder '{targetPath}' ...");
+                Directory.Delete(targetPath, true);
+            }
+            else
+            {
+                Info($"Creating new plugin folder '{targetPath}' ...");
+            }
+
+            Directory.CreateDirectory(targetPath);
+
+            foreach (var entry in otherEntries)
+            {
+                var extractedPath = Path.Combine(targetPath, entry.FullName);
+                var extractedDir = Path.GetDirectoryName(extractedPath);
+
+                if (!Directory.Exists(extractedDir))
+                {
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    Directory.CreateDirectory(extractedDir);
+                }
+
+                Info($"Extracting {entry.FullName} ...");
+                using (var inStream = entry.Open())
+                using (var outStream = File.Create(extractedPath))
+                {
+                    inStream.CopyTo(outStream);
+                }
+            }
+
+            Info($"Copying server framework assembly ...");
+            using (var inStream = File.OpenRead(GetServerFrameworkPath()))
+            using (var outStream = File.Create(Path.Combine(targetPath, FrameworkAssemblyFilename)))
+            {
+                inStream.CopyTo(outStream);
+            }
+        }
+
+        private void UploadPlugin(string path)
+        {
+            _client.Provisioning.PostFileWithRequest(path, new PostFieldDataPluginFile());
         }
 
         private static bool UserHasAdminPrivileges()
