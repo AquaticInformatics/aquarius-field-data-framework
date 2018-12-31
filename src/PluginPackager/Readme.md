@@ -10,7 +10,7 @@ PluginPackager.exe is tool that can be used during a build process to create a `
 This post-build event will create a plugin bundle with the name of the current target. This is usually all you need.
 
 ```
-$(SolutionDir)packages\Aquarius.FieldDataFramework.17.4.1\tools\PluginPackager.exe $(TargetPath) /OutputPath=$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin
+$(SolutionDir)packages\Aquarius.FieldDataFramework.18.4.0\tools\PluginPackager.exe $(TargetPath) /OutputPath=$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin
 ```
 
 ## How does my build know if the packaging step has failed?

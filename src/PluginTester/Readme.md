@@ -37,7 +37,7 @@ Log statements from the tester itself are easily distinguished from log statemen
 This post-build event will test that your plugin can successfully parse the `data\somefile.ext` file. If a parsing error is detected, the build will be marked as failed.
 
 ```
-$(SolutionDir)packages\Aquarius.FieldDataFramework.17.4.1\tools\PluginTester.exe /Plugin=$(TargetPath) /Data=$(SolutionDir)..\data\somefile.ext
+$(SolutionDir)packages\Aquarius.FieldDataFramework.18.4.0\tools\PluginTester.exe /Plugin=$(TargetPath) /Data=$(SolutionDir)..\data\somefile.ext
 ```
 
 ### How does my build know if the tester has failed?
@@ -90,7 +90,7 @@ Use the `PluginTest.exe` to debug your plugin from within Visual Studio.
 
 1. Open your plugin's **Properties** page
 2. Select the **Debug** tab
-3. Select **Start external program:** as the start action and browse to `packages\Aquarius.FieldDataFramework.17.4.1\tools\PluginTester.exe`
+3. Select **Start external program:** as the start action and browse to `packages\Aquarius.FieldDataFramework.18.4.0\tools\PluginTester.exe`
 4. Enter the **Command line arguments:** to launch your plugin
 
 ```

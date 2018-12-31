@@ -6,6 +6,7 @@ Not all changes will be listed, but you can always [compare by version tags](htt
 
 ### 18.4.0
 - Added support for 2018.4 plugins
+- Updated the target .NET framework to .NET 4.7.2 to match the AQTS 2018.4 requirements
 - See [2018.4 release notes](docs#aqts-20184) for details of new features.
 
 ### 18.3.1
