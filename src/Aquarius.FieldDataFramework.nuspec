@@ -41,7 +41,7 @@
     </metadata>
 
     <files>
-        <file src="Library\FieldDataPluginFramework.dll" target="lib\net47" />
+        <file src="Library\FieldDataPluginFramework.dll" target="lib\net472" />
         <file src="FieldDataPluginTool\bin\Release\FieldDataPluginTool.exe" target="tools" />
         <file src="PluginPackager\bin\Release\PluginPackager.exe" target="tools" />
         <file src="PluginTester\bin\Release\PluginTester.exe" target="tools" />
