@@ -14,18 +14,21 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
-### AQTS 2018.4
+### AQTS 2018.4 - Framework version 2.0
 
 - Field data plug-ins do not need to be re-installed following an upgrade to AQUARIUS Time-Series
 - Changed location where field data plug-ins are installed to %ProgramData%\Aquatic Informatics\AQUARIUS Server\FieldDataPlugins
 - Modified Provisioning API `POST /fielddataplugins` to upload and install field data plug-ins packaged in a *.plugin file
+- **Breaking change**: Changed the parameter type of ControlCondition.ControlCondition from the ConditionType Enum to ControlConditionPickList. See [PickList Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#picklist-data-type) for more details about working with PickLists.
+- **Breaking change**: Added a required PointOrder property to CrossSectionPoint. This property controls the order in which the points are drawn. Previously, points would always be drawn in order of Distance. Valid values for the property are `1, 2, ..., N` where `N` is the total number of points in the cross-section. Values cannot be repeated. See the [examples page for Cross-Section Surveys](https://github.com/AquaticInformatics/examples/tree/master/TimeSeries/SampleFiles/FieldData/Plugin/CrossSectionSurvey) for more detail.
+- Added support for vertical segments and overhangs in cross-section profiles.
 
-### AQTS 2018.3
+### AQTS 2018.3 - Framework version 1.3
 
 - Added AdcpDischargeSection channel measurement activity
 - Added ValidationChecks.CannotBeNegative() helper method
 
-### AQTS 2018.2
+### AQTS 2018.2 - Framework version 1.2
 
 - Added support to set reference points on Readings
 - Added Weather, CollectionAgency and CompletedVisitActivities properties on FieldVisitDetails
@@ -34,12 +37,12 @@ If you would like to see more examples of field data plug-ins, please visit our 
 - Added support for ControlConditions
 - Enhanced the field data plug-in framework to support uploading attachments with a field data file
 
-### AQTS 2018.1
+### AQTS 2018.1 - Framework version 1.1
 
 - Changed the framework guide from PDF to Markdown
 - Added support for Level Surveys
 
-### AQTS 2017.4
+### AQTS 2017.4 - Framework version 1.0
 
 - First supported release of the plug-in framework
 - The PDF of the 2017.4 framework guide can be found [here.](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/v17.4.3/docs/AQUARIUSDeveloperGuideFieldDataPluginFramework.pdf)
