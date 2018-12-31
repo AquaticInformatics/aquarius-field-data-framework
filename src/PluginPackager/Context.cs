@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using FieldDataPluginFramework;
 
 namespace PluginPackager
 {
@@ -12,6 +14,6 @@ namespace PluginPackager
         public string AssemblyQualifiedTypeName { get; set; }
         public bool Subfolders { get; set; } = true;
         public List<string> Include { get; } = new List<string> {"*.*"};
-        public List<string> Exclude { get; } = new List<string> {"*.xml", "*.pdb"};
+        public List<string> Exclude { get; } = new List<string> {$"{Path.GetFileName(typeof(IFieldDataPlugin).Assembly.GetName().Name)}.dll", "*.xml", "*.pdb"};
     }
 }
