@@ -19,8 +19,9 @@ usage: PluginTester [-option=value] ...
 Supported -option=value settings (/option=value works too):
 
   -Plugin               Path to the plugin assembly to debug
-  -Data                 Path to the data file to be parsed
+  -Data                 Path to the data file to be parsed. Can be set more than once.
   -Location             Optional location identifier context
+  -UtcOffset            UTC offset in .NET TimeSpan format. [default: -08:00:00]
   -Json                 Optional path to write the appended results as JSON
   -ExpectedError        Expected error message
   -ExpectedStatus       Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
