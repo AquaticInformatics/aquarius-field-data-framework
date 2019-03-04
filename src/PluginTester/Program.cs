@@ -5,18 +5,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
-using FieldDataPluginFramework;
 using FieldDataPluginFramework.Results;
 using log4net;
 using ServiceStack;
 using ServiceStack.Text;
-using ILog = FieldDataPluginFramework.ILog;
 
 namespace PluginTester
 {
     public class Program
     {
-        private static log4net.ILog _log;
+        private static ILog _log;
 
         public static void Main(string[] args)
         {
@@ -99,8 +97,9 @@ namespace PluginTester
             var options = new[]
             {
                 new Option {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
-                new Option {Key = "Data", Setter = value => Context.DataPath = value, Getter = () => Context.DataPath, Description = "Path to the data file to be parsed"},
+                new Option {Key = "Data", Setter = value => AddDataPath(Context, value), Getter = () => string.Empty, Description = "Path to the data file to be parsed. Can be set more than once."},
                 new Option {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
+                new Option {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
                 new Option {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
                 new Option {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
                 new Option {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
@@ -145,7 +144,7 @@ namespace PluginTester
             if (string.IsNullOrEmpty(Context.PluginPath))
                 throw new ExpectedException("No plugin assembly specified.");
 
-            if (string.IsNullOrEmpty(Context.DataPath))
+            if (!Context.DataPaths.Any())
                 throw new ExpectedException("No data file specified.");
         }
 
@@ -167,163 +166,36 @@ namespace PluginTester
 
         private static readonly Regex ArgRegex = new Regex(@"^([/-])(?<key>[^=]+)=(?<value>.*)$", RegexOptions.Compiled);
 
+        private static void AddDataPath(Context context, string dataPath)
+        {
+            foreach (var path in ExpandDataPath(dataPath))
+            {
+                context.DataPaths.Add(path);
+            }
+        }
+
+        private static IEnumerable<string> ExpandDataPath(string path)
+        {
+            var dir = Path.GetDirectoryName(path);
+            var filename = Path.GetFileName(path);
+
+            if (string.IsNullOrEmpty(dir) || string.IsNullOrEmpty(filename))
+            {
+                yield return path;
+            }
+            else
+            {
+                foreach (var expandedPath in Directory.GetFiles(dir, filename))
+                {
+                    yield return expandedPath;
+                }
+            }
+        }
+
         private void Run()
         {
-            using (var stream = LoadDataStream())
-            {
-                var locationInfo = !string.IsNullOrEmpty(Context.LocationIdentifier)
-                    ? FieldDataResultsAppender.CreateDummyLocationInfoByIdentifier(Context.LocationIdentifier)
-                    : null;
-
-                var plugin = LoadPlugin();
-                var logger = CreateLogger();
-                var appender = new FieldDataResultsAppender {ForcedLocationInfo = locationInfo};
-
-                try
-                {
-                    appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
-
-                    var result = string.IsNullOrEmpty(Context.LocationIdentifier)
-                        ? plugin.ParseFile(stream, appender, logger)
-                        : plugin.ParseFile(stream, locationInfo, appender, logger);
-
-
-                    SaveAppendedResults(appender.AppendedResults);
-
-                    SummarizeResults(result, appender.AppendedResults);
-                }
-                catch (ExpectedException)
-                {
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    _log.Error("Plugin has thrown an error", exception);
-
-                    throw new ExpectedException($"Unhandled plugin exception: {exception.Message}");
-                }
-            }
-        }
-
-        private void SaveAppendedResults(AppendedResults appendedResults)
-        {
-            if (string.IsNullOrEmpty(Context.JsonPath))
-                return;
-
-            _log.Info($"Saving {appendedResults.AppendedVisits.Count} visits data to '{Context.JsonPath}'");
-
-            File.WriteAllText(Context.JsonPath, appendedResults.ToJson().IndentJson());
-        }
-
-        private void SummarizeResults(ParseFileResult result, AppendedResults appendedResults)
-        {
-            if (result.Status == Context.ExpectedStatus)
-            {
-                SummarizeExpectedResults(result, appendedResults);
-            }
-            else
-            {
-                SummarizeFailedResults(result, appendedResults);
-            }
-        }
-
-        private void SummarizeExpectedResults(ParseFileResult result, AppendedResults appendedResults)
-        {
-            if (result.Parsed)
-            {
-                if (!appendedResults.AppendedVisits.Any())
-                {
-                    throw new ExpectedException("File was parsed but no visits were appended.");
-                }
-
-                _log.Info($"Successfully parsed {appendedResults.AppendedVisits.Count} visits.");
-            }
-            else
-            {
-                var actualError = result.ErrorMessage ?? string.Empty;
-                var expectedError = Context.ExpectedError ?? string.Empty;
-
-                if (!actualError.Equals(expectedError))
-                    throw new ExpectedException(
-                        $"Expected an error message of '{expectedError}' but received '{actualError}' instead.");
-
-                _log.Info($"ParsedResult.Status == {Context.ExpectedStatus} with Error='{Context.ExpectedError}' as expected.");
-            }
-        }
-
-        private void SummarizeFailedResults(ParseFileResult result, AppendedResults appendedResults)
-        {
-            if (result.Parsed)
-                throw new ExpectedException(
-                    $"File was parsed successfully with {appendedResults.AppendedVisits.Count} visits appended.");
-
-            if (result.Status != ParseFileStatus.CannotParse)
-                throw new ExpectedException(
-                    $"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
-
-            if (!string.IsNullOrEmpty(result.ErrorMessage))
-            {
-                throw new ExpectedException($"Can't parse '{Context.DataPath}'. {result.ErrorMessage}");
-            }
-
-            throw new ExpectedException($"File '{Context.DataPath}' is not parsed by the plugin.");
-        }
-
-        private Stream LoadDataStream()
-        {
-            if (!File.Exists(Context.DataPath))
-                throw new ExpectedException($"Data file '{Context.DataPath}' does not exist.");
-
-            _log.Info($"Loading data file '{Context.DataPath}'");
-
-            using (var stream = new FileStream(Context.DataPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var reader = new BinaryReader(stream))
-            {
-                return new MemoryStream(reader.ReadBytes((int)stream.Length));
-            }
-        }
-
-        private IFieldDataPlugin LoadPlugin()
-        {
-            var pluginPath = Path.GetFullPath(Context.PluginPath);
-
-            if (!File.Exists(pluginPath))
-                throw new ExpectedException($"Plugin file '{pluginPath}' does not exist.");
-
-            // ReSharper disable once PossibleNullReferenceException
-            var assembliesInPluginFolder = new FileInfo(pluginPath).Directory.GetFiles("*.dll");
-
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                var dll = assembliesInPluginFolder.FirstOrDefault(fi =>
-                    args.Name.StartsWith(Path.GetFileNameWithoutExtension(fi.Name) + ", ",
-                        StringComparison.InvariantCultureIgnoreCase));
-
-                return dll == null ? null : Assembly.LoadFrom(dll.FullName);
-            };
-
-            var assembly = Assembly.LoadFile(pluginPath);
-
-            var pluginTypes = (
-                    from type in assembly.GetTypes()
-                    where typeof(IFieldDataPlugin).IsAssignableFrom(type)
-                    select type
-                ).ToList();
-
-            if (pluginTypes.Count == 0)
-                throw new ExpectedException($"No IFieldDataPlugin plugin implementations found in '{pluginPath}'.");
-
-            if (pluginTypes.Count > 1)
-                throw new ExpectedException($"{pluginTypes.Count} IFieldDataPlugin plugin implementations found in '{pluginPath}'.");
-
-            var pluginType = pluginTypes.Single();
-
-            return Activator.CreateInstance(pluginType) as IFieldDataPlugin;
-        }
-
-        private ILog CreateLogger()
-        {
-            return Log4NetLogger.Create(LogManager.GetLogger(Path.GetFileNameWithoutExtension(Context.PluginPath)));
+            new Tester {Context = Context}
+                .Run();
         }
     }
 }

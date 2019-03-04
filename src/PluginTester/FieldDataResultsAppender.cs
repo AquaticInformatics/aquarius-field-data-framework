@@ -15,27 +15,26 @@ namespace PluginTester
 {
     public class FieldDataResultsAppender : IFieldDataResultsAppender
     {
-        public static LocationInfo CreateDummyLocationInfoByIdentifier(string locationIdentifier)
+        public LocationInfo CreateDummyLocationInfoByIdentifier(string locationIdentifier)
         {
             return CreateDummyLocationInfo(locationIdentifier, $"DummyNameFor-{locationIdentifier}", Guid.Empty);
         }
 
-        public static LocationInfo CreateDummyLocationInfoByUniqueId(Guid uniqueId)
+        private LocationInfo CreateDummyLocationInfoByUniqueId(Guid uniqueId)
         {
             return CreateDummyLocationInfo($"DummyIdentifierFor-{uniqueId:N}", $"DummyNameFor-{uniqueId:N}", uniqueId);
         }
 
-        private static LocationInfo CreateDummyLocationInfo(string identifier, string name, Guid uniqueId)
+        private LocationInfo CreateDummyLocationInfo(string identifier, string name, Guid uniqueId)
         {
             const long dummyLocationId = 0;
-            const double dummyUtcOffset = 0;
 
             var locationInfo = InternalConstructor<LocationInfo>.Invoke(
                 name,
                 identifier,
                 dummyLocationId,
                 uniqueId,
-                dummyUtcOffset);
+                UtcOffset.TotalHours);
 
             if (KnownLocations.Any(l => l.LocationIdentifier == identifier))
                 throw new ArgumentException($"Can't add duplicate location for Identifier='{identifier}'");
@@ -48,6 +47,7 @@ namespace PluginTester
         private static readonly List<LocationInfo> KnownLocations = new List<LocationInfo>();
 
         public LocationInfo ForcedLocationInfo { get; set; }
+        public TimeSpan UtcOffset { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
