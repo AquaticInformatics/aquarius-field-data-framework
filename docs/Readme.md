@@ -56,7 +56,7 @@ The Framework is called when:
 
 OR
 
-* A program calls the **PostFieldDataAttachment** operation from the AQUARIUS Acquisition API via a `POST http://<yourserver>/AQUARIUS/Acquisition/v2/location/{LocationUniqueId}/visits/uploads/plugins` operation.
+* A program calls the **PostFieldDataAttachment** operation from the AQUARIUS Acquisition API via a `POST http://<yourserver>/AQUARIUS/Acquisition/v2/locations/{LocationUniqueId}/visits/uploads/plugins` operation.
 
 ![Figure 1: Architecture Overview](images/Figure1_ArchitectureOverview.png)
 
@@ -76,7 +76,7 @@ Plug-ins are registered with the Framework and given a priority. The priority de
 
 * **CannotParse.** The plug-in could not parse the file. The Framework will pass the file to the next highest priority plug-in.  If the file is submitted through the drag-and-drop interface in Springboard, Location Manager, or the Field Data Editor, and there are no more registered plug-ins, then the Framework passes the file to the built-in plug-ins (e.g., SWAMI, FlowTracker *.DIS, AquaCalc) to parse.  If the file is submitted through the AQUARIUS Acquisition API, an HTTP error is returned.
 * **SuccessfullyParsedButDataInvalid.** The plug-in parsed the file but failed to process the data.  The framework will exit with an error. The error will be logged to a log file (*FieldDataPluginFramework.log*) and a "Failed" status will be reported in Springboard or an HTTP error is returned in the AQUARIUS Acquisition API.
-* **SuccessfullyParsedAndDataValid.** The plug-in parsed the file and processed the data without error. The framework will try to save the field data to the database and the save status will be reported below the drag-and-drop area in Springboard, Location Manager or the Field Data Editor (FDE).
+* **SuccessfullyParsedAndDataValid.** The plug-in parsed the file and processed the data without error. The framework will try to save the field data to the database and the save status will be reported below the drag-and-drop area in Springboard, Location Manager or the Field Data Editor (FDE) or an HTTP created status (201) is returned in the AQUARIUS Acquisition API.
 
 # Data Model
 
@@ -99,6 +99,8 @@ All Framework SDK data objects require timestamps specified as **DateTimeOffset*
 Similarly, **FieldVisitInfo** is an immutable object. It is created when the plug-in uses the **IFieldDataResultsAppender** to add an instance of a **FieldVisitDetails** object to a location.
 
 There are factory methods to create an instance of **CrossSectionSurvey**, **DischargeActivity**, and **ManualGaugingDischargeSection** object. Plug-ins should also use **IFieldDataResultsAppender** to add field data objects to **IFieldVisitInfo**.
+
+**LevelSurveyMeasurement** elevation values (**MeasuredElevation**) use the same units as the location elevation.
 
 Some enumerated types in the Framework SDK default to "Unknown" value.  When creating data objects that have these enumerated types as properties, the properties should be set to “Unspecified” value if there is no other appropriate value for it so that the data displays correctly in the Field Data Editor. For example, when creating an instance of **ManualGaugingDischargeSection**,
 
