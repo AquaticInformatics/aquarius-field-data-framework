@@ -68,7 +68,7 @@ namespace PluginTester
 
                     SaveAppendedResults(path, appender.AppendedResults);
 
-                    SummarizeResults(result, appender.AppendedResults);
+                    SummarizeResults(path, result, appender.AppendedResults);
                 }
                 catch (ExpectedException)
                 {
@@ -97,17 +97,17 @@ namespace PluginTester
             File.WriteAllText(savePath, appendedResults.ToJson().IndentJson());
         }
 
-        private void SummarizeResults(ParseFileResult result, AppendedResults appendedResults)
+        private void SummarizeResults(string path, ParseFileResult result, AppendedResults appendedResults)
         {
             try
             {
                 if (result.Status == Context.ExpectedStatus)
                 {
-                    SummarizeExpectedResults(result, appendedResults);
+                    SummarizeExpectedResults(path, result, appendedResults);
                 }
                 else
                 {
-                    SummarizeFailedResults(result, appendedResults);
+                    SummarizeFailedResults(path, result, appendedResults);
                 }
 
             }
@@ -125,16 +125,16 @@ namespace PluginTester
             }
         }
 
-        private void SummarizeExpectedResults(ParseFileResult result, AppendedResults appendedResults)
+        private void SummarizeExpectedResults(string path, ParseFileResult result, AppendedResults appendedResults)
         {
             if (result.Parsed)
             {
                 if (!appendedResults.AppendedVisits.Any())
                 {
-                    throw new ExpectedException("File was parsed but no visits were appended.");
+                    throw new ExpectedException($"'{path}' was parsed but no visits were appended.");
                 }
 
-                Log.Info($"Successfully parsed {appendedResults.AppendedVisits.Count} visits.");
+                Log.Info($"Successfully parsed {appendedResults.AppendedVisits.Count} visits from '{path}'.");
             }
             else
             {
@@ -143,28 +143,28 @@ namespace PluginTester
 
                 if (!actualError.Equals(expectedError))
                     throw new ExpectedException(
-                        $"Expected an error message of '{expectedError}' but received '{actualError}' instead.");
+                        $"Expected an error message of '{expectedError}' but received '{actualError}' instead while parsing '{path}'.");
 
-                Log.Info($"ParsedResult.Status == {Context.ExpectedStatus} with Error='{Context.ExpectedError}' as expected.");
+                Log.Info($"ParsedResult.Status == {Context.ExpectedStatus} with Error='{Context.ExpectedError}' as expected when parsing '{path}'.");
             }
         }
 
-        private void SummarizeFailedResults(ParseFileResult result, AppendedResults appendedResults)
+        private void SummarizeFailedResults(string path, ParseFileResult result, AppendedResults appendedResults)
         {
             if (result.Parsed)
                 throw new ExpectedException(
-                    $"File was parsed successfully with {appendedResults.AppendedVisits.Count} visits appended.");
+                    $"'{path}' was parsed successfully with {appendedResults.AppendedVisits.Count} visits appended when {Context.ExpectedStatus} was expected.");
 
             if (result.Status != ParseFileStatus.CannotParse)
                 throw new ExpectedException(
-                    $"Result: Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
+                    $"Result: '{path}' Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}");
 
             if (!string.IsNullOrEmpty(result.ErrorMessage))
             {
-                throw new ExpectedException($"Can't parse '{Context.DataPaths}'. {result.ErrorMessage}");
+                throw new ExpectedException($"Can't parse '{path}'. {result.ErrorMessage}");
             }
 
-            throw new ExpectedException($"File '{Context.DataPaths}' is not parsed by the plugin.");
+            throw new ExpectedException($"File '{path}' is not parsed by the plugin.");
         }
 
         private Stream LoadDataStream(string path)

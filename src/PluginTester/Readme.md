@@ -27,6 +27,17 @@ Supported -option=value settings (/option=value works too):
   -ExpectedStatus       Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
 ```
 
+## Saving JSON results
+
+The `/Json=outputPath` option can be specified to save the resulting framework DTOs to a JSON document.
+
+This JSON document can be very useful to debug complex logic within a plugin, since it will represent the exact data being sent to the framework when your plugin runs on your AQUARIUS Time Series app server.
+
+This JSON document will contain the [AppendedResults](./AppendedResults.cs) content:
+- The version information of the framework used to launch the plugin.
+- The version information of the plugin used to parse the data file.
+- A list of `FieldVisitInfo` objects parsed by the plugin.
+
 ### Logging
 
 The tester uses `log4net` to log to both the console and to the `PluginTester.log` file.
