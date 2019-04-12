@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Results;
+using FieldDataPluginFramework.Serialization;
 using log4net;
 using ServiceStack;
 using ServiceStack.Text;

@@ -33,10 +33,12 @@ The `/Json=outputPath` option can be specified to save the resulting framework D
 
 This JSON document can be very useful to debug complex logic within a plugin, since it will represent the exact data being sent to the framework when your plugin runs on your AQUARIUS Time Series app server.
 
-This JSON document will contain the [AppendedResults](./AppendedResults.cs) content:
+This JSON document will contain the [AppendedResults](../FieldDataPluginFramework.Serialization/AppendedResults.cs) content:
 - The version information of the framework used to launch the plugin.
 - The version information of the plugin used to parse the data file.
 - A list of `FieldVisitInfo` objects parsed by the plugin.
+
+This JSON document can also be parsed by the [JSON field data plugin](../JsonFieldData/Readme.md) and it can be sent to the AQUARIUS Support team for troubleshooting.
 
 ### Logging
 

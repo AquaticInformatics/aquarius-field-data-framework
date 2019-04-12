@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-namespace PluginTester
+namespace FieldDataPluginFramework.Serialization
 {
-    public class InternalConstructor<T> where T: class
+    public class InternalConstructor<T> where T : class
     {
         public static T Invoke(params object[] args)
         {
