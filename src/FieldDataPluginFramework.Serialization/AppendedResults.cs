@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using FieldDataPluginFramework.Context;
 
-namespace PluginTester
+namespace FieldDataPluginFramework.Serialization
 {
     public class AppendedResults
     {

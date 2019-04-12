@@ -23,6 +23,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E70F15C8-4
 		..\docs\Readme.md = ..\docs\Readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonFieldData", "JsonFieldData\JsonFieldData.csproj", "{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C429E4A0-DD6D-4701-93FF-ECDB2B59C2CD} = {C429E4A0-DD6D-4701-93FF-ECDB2B59C2CD}
+		{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E} = {7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginFramework.Serialization", "FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj", "{B7F9D2AC-0AD5-4435-B3A6-E5E6B4C4877D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginFramework.Serialization.UnitTests", "FieldDataPluginFramework.Serialization.UnitTests\FieldDataPluginFramework.Serialization.UnitTests.csproj", "{432C6A68-EC05-41F2-B34A-57B537D5C868}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +51,18 @@ Global
 		{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0F13B0D-0120-4A6C-BD39-147C4AFCC436}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7F9D2AC-0AD5-4435-B3A6-E5E6B4C4877D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F9D2AC-0AD5-4435-B3A6-E5E6B4C4877D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F9D2AC-0AD5-4435-B3A6-E5E6B4C4877D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F9D2AC-0AD5-4435-B3A6-E5E6B4C4877D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

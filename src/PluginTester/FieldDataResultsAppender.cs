@@ -10,6 +10,7 @@ using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.Results;
+using FieldDataPluginFramework.Serialization;
 
 namespace PluginTester
 {

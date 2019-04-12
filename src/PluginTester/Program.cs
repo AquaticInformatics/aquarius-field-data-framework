@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using FieldDataPluginFramework.Results;
+using FieldDataPluginFramework.Serialization;
 using log4net;
 using ServiceStack;
-using ServiceStack.Text;
 
 namespace PluginTester
 {
@@ -72,13 +72,7 @@ namespace PluginTester
 
         private static void ConfigureJson()
         {
-            JsConfig.ExcludeTypeInfo = true;
-            JsConfig.DateHandler = DateHandler.ISO8601DateTime;
-            JsConfig.IncludeNullValues = true;
-            JsConfig.IncludeNullValuesInDictionaries = true;
-
-            JsConfig<DateTimeOffset>.SerializeFn = offset => offset.ToString("O");
-            JsConfig<DateTimeOffset?>.SerializeFn = offset => offset?.ToString("O") ?? string.Empty;
+            JsonConfig.Configure();
         }
 
         private static string GetProgramName()
