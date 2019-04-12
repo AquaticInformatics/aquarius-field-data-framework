@@ -7,7 +7,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
+using Common;
+using FieldDataPluginFramework;
 using log4net;
+using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
 {
@@ -27,7 +30,7 @@ namespace FieldVisitHotFolderService
             if (CancellationToken.IsCancellationRequested)
                 return;
 
-            ThrowIfJsonPluginMissing();
+            ThrowIfJsonPluginNotInstalled();
 
             while (!CancellationToken.IsCancellationRequested)
             {
@@ -41,6 +44,7 @@ namespace FieldVisitHotFolderService
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<Regex> FileMasks { get; set; }
+        private List<IFieldDataPlugin> Plugins { get; set; }
 
         private void Validate()
         {
@@ -53,11 +57,8 @@ namespace FieldVisitHotFolderService
 
             ThrowIfFolderIsMissing(SourceFolder);
 
-            if (string.IsNullOrWhiteSpace(Context.PluginFolder))
-                throw new ExpectedException($"You must specify a /{nameof(Context.PluginFolder)} option.");
-
-            Context.PluginFolder = ResolvePath(FileHelper.ExeDirectory, Context.PluginFolder);
-            ThrowIfFolderIsMissing(Context.PluginFolder);
+            if (!Context.Plugins.Any())
+                throw new ExpectedException($"You must specify a /Plugin option.");
 
             ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
             UploadedFolder = CreateFolderPath(Context.UploadedFolder);
@@ -68,6 +69,8 @@ namespace FieldVisitHotFolderService
                 .Where(mask => !string.IsNullOrWhiteSpace(mask))
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
+
+            LoadLocalPlugins();
         }
 
         private static readonly char[] FileMaskDelimiters = {','};
@@ -108,6 +111,12 @@ namespace FieldVisitHotFolderService
         {
             if (!Directory.Exists(path))
                 throw new ExpectedException($"'{path}' is not an existing folder.");
+        }
+
+        private void LoadLocalPlugins()
+        {
+            Plugins = new PluginLoader()
+                .LoadPlugins(Context.Plugins);
         }
 
         private IAquariusClient CreateConnectedClient()
@@ -156,19 +165,28 @@ namespace FieldVisitHotFolderService
 
         private IAquariusClient Client { get; set; }
 
-        private void ThrowIfJsonPluginMissing()
+        private void ThrowIfJsonPluginNotInstalled()
         {
-            using (var client = CreateConnectedClient())
+            using (Client = CreateConnectedClient())
             {
-                var plugins = client.Provisioning.Get(new GetFieldDataPlugins())
-                    .Results;
-
-                var jsonPlugin = plugins
-                    .FirstOrDefault(p => p.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin"));
-
-                if (jsonPlugin == null)
-                    throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/json-field-data-plugin/releases");
+                GetInstalledJsonPlugin();
             }
+
+            Client = null;
+        }
+
+        private FieldDataPlugin GetInstalledJsonPlugin()
+        {
+            var plugins = Client.Provisioning.Get(new GetFieldDataPlugins())
+                .Results;
+
+            var jsonPlugin = plugins
+                .FirstOrDefault(p => p.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin"));
+
+            if (jsonPlugin == null)
+                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/json-field-data-plugin/releases");
+
+            return jsonPlugin;
         }
 
         private void ProcessNewFiles()
@@ -202,11 +220,6 @@ namespace FieldVisitHotFolderService
             return Directory.GetFiles(SourceFolder)
                 .Where(f => FileMasks.Any(m => m.IsMatch(f)))
                 .ToList();
-        }
-
-        private void LoadLocalPlugins()
-        {
-            // TODO: Load *.plugin from the folder, extract them into relative subfolders, find the entry assembly
         }
 
         private void ProcessFile(string filename)

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace FieldVisitHotFolderService
+namespace Common
 {
     public class CommandLineOptionResolver
     {
@@ -21,7 +21,7 @@ namespace FieldVisitHotFolderService
             {
                 if (IsHelpArg(args.Length, arg))
                 {
-                    DisplayHelpTextAndExit0(usage);
+                    throw new ExpectedException(usage);
                 }
 
                 var match = ArgRegex.Match(arg);
@@ -58,12 +58,6 @@ namespace FieldVisitHotFolderService
 
             return argsLength == 1 &&
                    HelpArgs.Any(a => string.Equals(lowerArg, a) || lowerArg.EndsWith(a));
-        }
-
-        private void DisplayHelpTextAndExit0(string usage)
-        {
-            Console.WriteLine(usage);
-            Environment.Exit(0);
         }
 
         private static IEnumerable<string> ResolveOptionsFromFile(string arg)

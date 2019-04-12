@@ -4,6 +4,7 @@ using System.Reflection;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 using log4net;
 
 namespace FieldVisitHotFolderService

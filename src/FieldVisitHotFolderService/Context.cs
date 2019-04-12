@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FieldVisitHotFolderService
 {
@@ -15,6 +16,6 @@ namespace FieldVisitHotFolderService
         public TimeSpan FileQuietDelay { get; set; } = TimeSpan.FromSeconds(5);
         public int MaximumConnectionAttempts { get; set; } = 3;
         public TimeSpan ConnectionRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
-        public string PluginFolder { get; set; } = "Plugins";
+        public List<string> Plugins { get; set; } = new List<string>();
     }
 }

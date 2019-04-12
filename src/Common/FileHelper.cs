@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace FieldVisitHotFolderService
+namespace Common
 {
     public class FileHelper
     {

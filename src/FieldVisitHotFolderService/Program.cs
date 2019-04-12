@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Xml;
+using Common;
 using log4net;
 
 namespace FieldVisitHotFolderService
@@ -112,10 +113,10 @@ namespace FieldVisitHotFolderService
                 new CommandLineOption(), new CommandLineOption{Description = "Local plugin settings"},
                 new CommandLineOption
                 {
-                    Key = nameof(context.PluginFolder),
-                    Setter = value => context.PluginFolder = value,
-                    Getter = () => context.PluginFolder,
-                    Description = "A folder containing *.plugin files, to process field visit files locally."
+                    Key = "Plugin",
+                    Setter = value => context.Plugins.Add(value),
+                    Getter = () => string.Empty,
+                    Description = "A plugin assembly to use for parsing field visits locally. Can be set multiple times."
                 },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 

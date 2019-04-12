@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FieldVisitHotFolderService
+namespace Common
 {
     public class CommandLineOption
     {

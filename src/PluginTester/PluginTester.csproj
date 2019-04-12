@@ -57,10 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
-    <Compile Include="ExpectedException.cs" />
     <Compile Include="FieldDataResultsAppender.cs" />
     <Compile Include="Log4NetLogger.cs" />
-    <Compile Include="Option.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tester.cs" />
@@ -75,6 +73,10 @@
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{3c14aff1-f815-4be1-8072-e510917d04e4}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FieldDataPluginFramework.Serialization\FieldDataPluginFramework.Serialization.csproj">
       <Project>{b7f9d2ac-0ad5-4435-b3a6-e5e6b4c4877d}</Project>
       <Name>FieldDataPluginFramework.Serialization</Name>

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace FieldVisitHotFolderService
+namespace Common
 {
     public class CommandLineUsage
     {
