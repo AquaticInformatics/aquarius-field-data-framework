@@ -100,7 +100,6 @@ namespace FieldVisitHotFolderService
                 WaitForFileDetectorTask();
 
                 CancellationTokenSource.Dispose();
-                FileDetectorTask?.Dispose();
             }
             catch (Exception e)
             {

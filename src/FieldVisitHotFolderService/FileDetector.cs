@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
@@ -255,11 +256,48 @@ namespace FieldVisitHotFolderService
             if (CancellationToken.IsCancellationRequested)
                 return;
 
-            // TODO: Replace with an actual FileWatcher
+            Log.Info($"Waiting for file changes in '{SourceFolder}' ...");
+            var task = WhenFileCreated();
+            task.Wait(CancellationToken);
 
             var timeSpan = Context.FileQuietDelay;
             Log.Info($"Waiting {timeSpan} for file activity to settle at '{SourceFolder}'");
             CancellationToken.WaitHandle.WaitOne(timeSpan);
+        }
+
+        private Task WhenFileCreated()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            var watcher = new FileSystemWatcher(SourceFolder);
+
+            void CreatedHandler(object s, FileSystemEventArgs e)
+            {
+                tcs.TrySetResult(true);
+                watcher.Created -= CreatedHandler;
+                watcher.Dispose();
+            }
+
+            void ChangedHandler(object s, FileSystemEventArgs e)
+            {
+                tcs.TrySetResult(true);
+                watcher.Changed -= ChangedHandler;
+                watcher.Dispose();
+            }
+
+            void RenamedHandler(object s, RenamedEventArgs e)
+            {
+                tcs.TrySetResult(true);
+                watcher.Renamed -= RenamedHandler;
+                watcher.Dispose();
+            }
+
+            watcher.Created += CreatedHandler;
+            watcher.Changed += ChangedHandler;
+            watcher.Renamed += RenamedHandler;
+
+            watcher.EnableRaisingEvents = true;
+
+            return tcs.Task;
         }
     }
 }
