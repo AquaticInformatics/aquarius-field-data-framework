@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Xml;
@@ -169,11 +170,28 @@ namespace FieldVisitHotFolderService
 
             var optionResolver = new CommandLineOptionResolver();
 
-            optionResolver.Resolve(args, options, usageMessage, arg => ResolvePositionalArgument(context, arg));
+            optionResolver.Resolve(InjectOptionsFileByDefault(args), options, usageMessage, arg => ResolvePositionalArgument(context, arg));
 
             ValidateContext(context);
 
             return context;
+        }
+
+        private static string[] InjectOptionsFileByDefault(string[] args)
+        {
+            if (args.Any())
+                return args;
+
+            var defaultOptionsFile = Path.Combine(FileHelper.ExeDirectory, "Options.txt");
+
+            if (File.Exists(defaultOptionsFile))
+            {
+                Log.Info($"Using '@{defaultOptionsFile}' configuration by default.");
+
+                return new[] {"@" + defaultOptionsFile};
+            }
+
+            return args;
         }
 
         private static bool ResolvePositionalArgument(Context context, string arg)

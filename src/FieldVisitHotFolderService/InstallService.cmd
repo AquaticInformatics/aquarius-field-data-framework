@@ -20,22 +20,16 @@ rem Install the service
 set ServiceFilename=FieldVisitHotFolderService.exe
 set ServiceName=FieldVisitHotFolderService
 set ServiceDisplayName=AQUARIUS Field Visit Hot Folder
-set OptionsFilename=Options.txt
 
-if exist %ServiceFilename% goto :checkOptions
+if exist %ServiceFilename% goto :installService
 echo ERROR: %ServiceFilename% is not found in this directory.
-goto :error
-
-:checkOptions
-if exist %OptionsFilename% goto :installService
-echo ERROR: %OptionsFilename% is not found in this directory.
 goto :error
 
 :installService
 for %%f in (%ServiceFilename%) do (
 rem Create the service with reasonable dependencies
-SC CREATE "%ServiceName%" DisplayName= "%ServiceDisplayName%" binPath= "%%~ff @%%~pf%OptionsFilename%" depend= LanmanServer/Tcpip/Winmgmt start= delayed-auto
-rem configure the failure modes for reliable uptimes. Reset failure counters after 5 minutes
+SC CREATE "%ServiceName%" DisplayName= "%ServiceDisplayName%" binPath= "%%~sf" depend= LanmanServer/Tcpip/Winmgmt start= delayed-auto
+rem configure the failure modes for reliable uptimes. Reset failure counters after 5 minutes with no failures
 SC FAILURE "%ServiceName%" actions= restart/15000/restart/15000// reset= 300
 )
 

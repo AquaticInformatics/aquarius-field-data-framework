@@ -420,7 +420,9 @@ namespace FieldVisitHotFolderService
 
         private static DateTimeOffset EndOfDay(DateTimeOffset dateTimeOffset)
         {
-            return StartOfDay(dateTimeOffset).AddDays(1);
+            var start = StartOfDay(dateTimeOffset);
+
+            return new DateTimeOffset(start.Year, start.Month, start.Day, 23,59, 59, start.Offset);
         }
 
         private void WaitForNewFiles()
