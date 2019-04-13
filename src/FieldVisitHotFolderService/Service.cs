@@ -16,12 +16,12 @@ namespace FieldVisitHotFolderService
 
         public Context Context { get; set; }
         private CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
-        private Task FileProcessingTask { get; set; }
+        private Task FileDetectorTask { get; set; }
 
         public void RunUntilStopped()
         {
-            FileProcessingTask = StartAsynchronously();
-            WaitForFileProcessingTask(true);
+            FileDetectorTask = StartAsynchronously();
+            WaitForFileDetectorTask(true);
         }
 
         protected override void OnStart(string[] args)
@@ -35,7 +35,7 @@ namespace FieldVisitHotFolderService
 
             base.OnStart(args);
 
-            FileProcessingTask = StartAsynchronously();
+            FileDetectorTask = StartAsynchronously();
         }
 
         private Task StartAsynchronously()
@@ -47,7 +47,7 @@ namespace FieldVisitHotFolderService
         {
             Log.Info($"Starting {FileHelper.ExeNameAndVersion}.");
 
-            var fileProcessor = new FileProcessor
+            var fileProcessor = new FileDetector
             {
                 Context = Context,
                 CancellationToken = CancellationTokenSource.Token
@@ -56,11 +56,11 @@ namespace FieldVisitHotFolderService
             await Task.Run(() => fileProcessor.Run(), CancellationTokenSource.Token);
         }
 
-        private void WaitForFileProcessingTask(bool shouldRethrowExpectedExceptions = false)
+        private void WaitForFileDetectorTask(bool shouldRethrowExpectedExceptions = false)
         {
             try
             {
-                FileProcessingTask.Wait(CancellationTokenSource.Token);
+                FileDetectorTask.Wait(CancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -97,10 +97,10 @@ namespace FieldVisitHotFolderService
             {
                 CancellationTokenSource.Cancel();
 
-                WaitForFileProcessingTask();
+                WaitForFileDetectorTask();
 
                 CancellationTokenSource.Dispose();
-                FileProcessingTask?.Dispose();
+                FileDetectorTask?.Dispose();
             }
             catch (Exception e)
             {

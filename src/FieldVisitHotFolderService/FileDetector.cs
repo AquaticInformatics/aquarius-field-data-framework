@@ -22,7 +22,7 @@ using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
 {
-    public class FileProcessor
+    public class FileDetector
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

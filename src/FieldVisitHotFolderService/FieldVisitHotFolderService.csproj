@@ -79,7 +79,7 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="FieldDataResultsAppender.cs" />
-    <Compile Include="FileProcessor.cs" />
+    <Compile Include="FileDetector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service.cs" />
