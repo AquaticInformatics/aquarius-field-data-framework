@@ -34,6 +34,9 @@
     <Reference Include="FieldDataPluginFramework">
       <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -43,8 +46,12 @@
     <Compile Include="CommandLineUsage.cs" />
     <Compile Include="ExpectedException.cs" />
     <Compile Include="FileHelper.cs" />
+    <Compile Include="Log4NetLogger.cs" />
     <Compile Include="PluginLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

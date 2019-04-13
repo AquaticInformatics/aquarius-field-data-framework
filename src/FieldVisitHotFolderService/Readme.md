@@ -30,7 +30,7 @@ Supported -option=value settings (/option=value works too):
   -ConnectionRetryDelay       The TimeSpan to wait in between AQTS connection attempts. [default: 00:01:00]
 
   =========================== Local plugin settings
-  -PluginFolder               A folder containing *.plugin files, to process field visit files locally. [default: Plugins]
+  -Plugin                     A plugin assembly to use for parsing field visits locally. Can be set multiple times.
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.

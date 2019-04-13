@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="FieldDataResultsAppender.cs" />
-    <Compile Include="Log4NetLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tester.cs" />

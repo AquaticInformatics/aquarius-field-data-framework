@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Aquarius.TimeSeries.Client;
+using Aquarius.TimeSeries.Client.ServiceModels.Acquisition;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
+using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using Common;
 using FieldDataPluginFramework;
+using FieldDataPluginFramework.Context;
+using FieldDataPluginFramework.Results;
+using FieldDataPluginFramework.Serialization;
 using log4net;
+using ServiceStack;
+using FieldDataPlugin = Aquarius.TimeSeries.Client.ServiceModels.Provisioning.FieldDataPlugin;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -70,7 +78,15 @@ namespace FieldVisitHotFolderService
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
 
-            LoadLocalPlugins();
+            Plugins = new PluginLoader()
+                .LoadPlugins(Context.Plugins);
+
+            Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
+
+            foreach (var plugin in Plugins)
+            {
+                Log.Info($"{plugin.GetType().AssemblyQualifiedName}");
+            }
         }
 
         private static readonly char[] FileMaskDelimiters = {','};
@@ -111,12 +127,6 @@ namespace FieldVisitHotFolderService
         {
             if (!Directory.Exists(path))
                 throw new ExpectedException($"'{path}' is not an existing folder.");
-        }
-
-        private void LoadLocalPlugins()
-        {
-            Plugins = new PluginLoader()
-                .LoadPlugins(Context.Plugins);
         }
 
         private IAquariusClient CreateConnectedClient()
@@ -189,6 +199,8 @@ namespace FieldVisitHotFolderService
             return jsonPlugin;
         }
 
+        private List<LocationInfo> LocationCache { get; set; }
+
         private void ProcessNewFiles()
         {
             for (var files = GetNewFiles(); files.Any(); files = GetNewFiles())
@@ -200,7 +212,7 @@ namespace FieldVisitHotFolderService
                 if (CancellationToken.IsCancellationRequested)
                     return;
 
-                LoadLocalPlugins();
+                LocationCache = new List<LocationInfo>();
 
                 using (Client = CreateConnectedClient())
                 {
@@ -212,6 +224,8 @@ namespace FieldVisitHotFolderService
                         ProcessFile(file);
                     }
                 }
+
+                Client = null;
             }
         }
 
@@ -243,12 +257,14 @@ namespace FieldVisitHotFolderService
 
             try
             {
-                ParseAndUploadFile(processingPath);
+                var appendedResults = ParseLocalFile(processingPath);
+                UploadResults(processingPath, appendedResults);
+
                 MoveFile(processingPath, UploadedFolder);
             }
             catch (Exception exception)
             {
-                Log.Error($"Can't upload '{processingPath}'", exception);
+                Log.Error(exception.Message);
 
                 try
                 {
@@ -285,11 +301,126 @@ namespace FieldVisitHotFolderService
             return targetPath;
         }
 
-        private void ParseAndUploadFile(string path)
+        private AppendedResults ParseLocalFile(string path)
         {
-            // TODO: Parse the file using the local plugins
-            // TODO: Upload all the visits to AQTS
-            Log.Info($"Uploaded '{path}'");
+            using (var stream = LoadDataStream(path))
+            {
+                var appender = new FieldDataResultsAppender
+                {
+                    Client = Client,
+                    LocationCache = LocationCache
+                };
+
+                foreach (var plugin in Plugins)
+                {
+                    var pluginName = plugin.GetType().FullName;
+
+                    try
+                    {
+                        var logger = Log4NetLogger.Create(LogManager.GetLogger(plugin.GetType()));
+
+                        var result = plugin.ParseFile(CloneMemoryStream(stream), appender, logger);
+
+                        // TODO: Support Zip-with-attachments
+
+                        if (result.Status == ParseFileStatus.CannotParse)
+                            continue;
+
+                        if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
+                            throw new ArgumentException($"Error parsing '{path}' with {pluginName}: {result.ErrorMessage}");
+
+                        if (!appender.AppendedResults.AppendedVisits.Any())
+                            throw new ArgumentException($"{pluginName} did not parse any field visits.");
+
+                        Log.Info($"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Select(v => v.FieldVisitIdentifier))}");
+
+                        appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
+                        return appender.AppendedResults;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn($"{pluginName} skipping '{path}': {e.Message}");
+                    }
+                }
+            }
+
+            throw new ArgumentException($"'{path}' was not parsed by any plugin.");
+        }
+
+        private MemoryStream LoadDataStream(string path)
+        {
+            if (!File.Exists(path))
+                throw new ExpectedException($"Data file '{path}' does not exist.");
+
+            Log.Info($"Loading data file '{path}'");
+
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new BinaryReader(stream, Encoding.Default, true))
+            {
+                return new MemoryStream(reader.ReadBytes((int)stream.Length));
+            }
+        }
+
+        private MemoryStream CloneMemoryStream(MemoryStream source)
+        {
+            return new MemoryStream(source.ToArray());
+        }
+
+        private void UploadResults(string path, AppendedResults appendedResults)
+        {
+            foreach (var visit in appendedResults.AppendedVisits)
+            {
+                var singleResult = new AppendedResults
+                {
+                    FrameworkAssemblyQualifiedName = appendedResults.FrameworkAssemblyQualifiedName,
+                    PluginAssemblyQualifiedTypeName = appendedResults.PluginAssemblyQualifiedTypeName,
+                    AppendedVisits = new List<FieldVisitInfo> {visit}
+                };
+
+                if (DoConflictingVisitsExist(visit))
+                    continue;
+
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
+                {
+                    var uploadedFilename = Path.GetFileName(path) + ".json";
+
+                    var response = Client.Acquisition.PostFileWithRequest(stream, uploadedFilename, new PostVisitFile
+                    {
+                        LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
+                    });
+
+                    Log.Info($"Uploaded '{uploadedFilename}' to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
+                }
+            }
+        }
+
+        private bool DoConflictingVisitsExist(FieldVisitInfo visit)
+        {
+            var existingVisits = Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
+                {
+                    LocationIdentifier = visit.LocationInfo.LocationIdentifier,
+                    QueryFrom = StartOfDay(visit.StartDate),
+                    QueryTo = EndOfDay(visit.EndDate)
+                })
+                .FieldVisitDescriptions;
+
+            if (existingVisits.Any())
+            {
+                Log.Warn($"Skipping conflicting visit {visit.FieldVisitIdentifier} with {string.Join(", ", existingVisits.Select(v => $"{v.StartTime}/{v.EndTime}"))}");
+                return true;
+            }
+
+            return false;
+        }
+
+        private static DateTimeOffset StartOfDay(DateTimeOffset dateTimeOffset)
+        {
+            return new DateTimeOffset(dateTimeOffset.Date, dateTimeOffset.Offset);
+        }
+
+        private static DateTimeOffset EndOfDay(DateTimeOffset dateTimeOffset)
+        {
+            return StartOfDay(dateTimeOffset).AddDays(1);
         }
 
         private void WaitForNewFiles()
