@@ -1,7 +1,7 @@
 ﻿using Log4NetILog = log4net.ILog;
 using PluginILog = FieldDataPluginFramework.ILog;
 
-namespace PluginTester
+namespace Common
 {
     public class Log4NetLogger : PluginILog
     {

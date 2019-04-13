@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PluginPackager
+namespace Common
 {
     public class ExpectedException : Exception
     {

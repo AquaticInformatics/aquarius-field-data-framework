@@ -1,4 +1,8 @@
-﻿# JSON format
+﻿# JSON Field Data Plugin
+
+The JSON Field Data Plugin is a plugin for AQTS 2018.4-or-newer which reads JSON files and created field visit activities from its contents.
+
+Download the latest version of the JSON Field Data plugin [from the releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest).
 
 The JSON content supported by this plugin is the [AppendedResults](../FieldDataPluginFramework.Serialization/AppendedResults.cs) document DTO.
 

@@ -33,6 +33,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginFramework.Se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginFramework.Serialization.UnitTests", "FieldDataPluginFramework.Serialization.UnitTests\FieldDataPluginFramework.Serialization.UnitTests.csproj", "{432C6A68-EC05-41F2-B34A-57B537D5C868}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldVisitHotFolderService", "FieldVisitHotFolderService\FieldVisitHotFolderService.csproj", "{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{3C14AFF1-F815-4BE1-8072-E510917D04E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{432C6A68-EC05-41F2-B34A-57B537D5C868}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C14AFF1-F815-4BE1-8072-E510917D04E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C14AFF1-F815-4BE1-8072-E510917D04E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C14AFF1-F815-4BE1-8072-E510917D04E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C14AFF1-F815-4BE1-8072-E510917D04E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Xml;
+using Common;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using log4net;
@@ -75,65 +75,27 @@ namespace PluginTester
             JsonConfig.Configure();
         }
 
-        private static string GetProgramName()
-        {
-            return Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
-        }
-
-        private Context Context { get; set; } = new Context();
+        private Context Context { get; } = new Context();
 
         private void ParseArgs(string[] args)
         {
-            var resolvedArgs = args
-                .SelectMany(ResolveOptionsFromFile)
-                .ToArray();
-
             var options = new[]
             {
-                new Option {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
-                new Option {Key = "Data", Setter = value => AddDataPath(Context, value), Getter = () => string.Empty, Description = "Path to the data file to be parsed. Can be set more than once."},
-                new Option {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
-                new Option {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
-                new Option {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
-                new Option {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
-                new Option {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
+                new CommandLineOption {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
+                new CommandLineOption {Key = "Data", Setter = value => AddDataPath(Context, value), Getter = () => string.Empty, Description = "Path to the data file to be parsed. Can be set more than once."},
+                new CommandLineOption {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
+                new CommandLineOption {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
+                new CommandLineOption {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
+                new CommandLineOption {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
+                new CommandLineOption {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
             };
 
-            var usageMessage = $"Parse a file using a field data plugin, logging the results."
-                               + $"\n"
-                               + $"\nusage: {GetProgramName()} [-option=value] ..."
-                               + $"\n"
-                               + $"\nSupported -option=value settings (/option=value works too):\n\n  -{string.Join("\n  -", options.Select(o => o.UsageText()))}"
-                               + $"\n"
-                               + $"\nUse the @optionsFile syntax to read more options from a file."
-                               + $"\n"
-                               + $"\n  Each line in the file is treated as a command line option."
-                               + $"\n  Blank lines and leading/trailing whitespace is ignored."
-                               + $"\n  Comment lines begin with a # or // marker."
-                               ;
+            var usageMessage = CommandLineUsage.ComposeUsageText(
+                "Parse a file using a field data plugin, logging the results.", options);
 
-            foreach (var arg in resolvedArgs)
-            {
-                var match = ArgRegex.Match(arg);
+            var optionResolver = new CommandLineOptionResolver();
 
-                if (!match.Success)
-                {
-                    throw new ExpectedException($"Unknown argument: {arg}\n\n{usageMessage}");
-                }
-
-                var key = match.Groups["key"].Value.ToLower();
-                var value = match.Groups["value"].Value;
-
-                var option =
-                    options.FirstOrDefault(o => o.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase));
-
-                if (option == null)
-                {
-                    throw new ExpectedException($"Unknown -option=value: {arg}\n\n{usageMessage}");
-                }
-
-                option.Setter(value);
-            }
+            optionResolver.Resolve(args, options, usageMessage);
 
             if (string.IsNullOrEmpty(Context.PluginPath))
                 throw new ExpectedException("No plugin assembly specified.");
@@ -141,24 +103,6 @@ namespace PluginTester
             if (!Context.DataPaths.Any())
                 throw new ExpectedException("No data file specified.");
         }
-
-        private static IEnumerable<string> ResolveOptionsFromFile(string arg)
-        {
-            if (!arg.StartsWith("@"))
-                return new[] { arg };
-
-            var path = arg.Substring(1);
-
-            if (!File.Exists(path))
-                throw new ExpectedException($"Options file '{path}' does not exist.");
-
-            return File.ReadAllLines(path)
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s.Trim())
-                .Where(s => !s.StartsWith("#") && !s.StartsWith("//"));
-        }
-
-        private static readonly Regex ArgRegex = new Regex(@"^([/-])(?<key>[^=]+)=(?<value>.*)$", RegexOptions.Compiled);
 
         private static void AddDataPath(Context context, string dataPath)
         {
