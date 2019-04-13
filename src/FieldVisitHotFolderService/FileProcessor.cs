@@ -49,6 +49,7 @@ namespace FieldVisitHotFolderService
 
         private string SourceFolder { get; set; }
         private string ProcessingFolder { get; set; }
+        private string PartialFolder { get; set; }
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<Regex> FileMasks { get; set; }
@@ -69,6 +70,7 @@ namespace FieldVisitHotFolderService
                 throw new ExpectedException($"You must specify a /Plugin option.");
 
             ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
+            PartialFolder = CreateFolderPath(Context.PartialFolder);
             UploadedFolder = CreateFolderPath(Context.UploadedFolder);
             FailedFolder = CreateFolderPath(Context.FailedFolder);
 
@@ -258,9 +260,12 @@ namespace FieldVisitHotFolderService
             try
             {
                 var appendedResults = ParseLocalFile(processingPath);
-                UploadResults(processingPath, appendedResults);
+                var isPartial = UploadResults(processingPath, appendedResults);
 
-                MoveFile(processingPath, UploadedFolder);
+                if (isPartial)
+                    MoveFile(processingPath, PartialFolder);
+                else
+                    MoveFile(processingPath, UploadedFolder);
             }
             catch (Exception exception)
             {
@@ -366,8 +371,10 @@ namespace FieldVisitHotFolderService
             return new MemoryStream(source.ToArray());
         }
 
-        private void UploadResults(string path, AppendedResults appendedResults)
+        private bool UploadResults(string path, AppendedResults appendedResults)
         {
+            var isPartial = false;
+
             foreach (var visit in appendedResults.AppendedVisits)
             {
                 var singleResult = new AppendedResults
@@ -378,7 +385,10 @@ namespace FieldVisitHotFolderService
                 };
 
                 if (DoConflictingVisitsExist(visit))
+                {
+                    isPartial = true;
                     continue;
+                }
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
                 {
@@ -392,6 +402,8 @@ namespace FieldVisitHotFolderService
                     Log.Info($"Uploaded '{uploadedFilename}' to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
                 }
             }
+
+            return isPartial;
         }
 
         private bool DoConflictingVisitsExist(FieldVisitInfo visit)

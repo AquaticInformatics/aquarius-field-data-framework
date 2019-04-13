@@ -158,6 +158,13 @@ namespace FieldVisitHotFolderService
                 },
                 new CommandLineOption
                 {
+                    Key = nameof(context.PartialFolder),
+                    Setter = value => context.PartialFolder = value,
+                    Getter = () => context.PartialFolder,
+                    Description = "Move files to this folder if when partial uploads are performed to avoid duplicates."
+                },
+                new CommandLineOption
+                {
                     Key = nameof(context.FailedFolder),
                     Setter = value => context.FailedFolder = value,
                     Getter = () => context.FailedFolder,

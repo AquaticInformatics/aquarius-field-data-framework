@@ -44,14 +44,15 @@ When not run as Windows Service, the program will run until you type Ctrl-C or C
 
 ## Folder configuration
 
-There are four configurable folders which are used to process field visit files.
+There are five configurable folders which are used to process field visit files.
 
 - The `/HotFolderPath` option is the folder that will be watched for new files.
 - When a new file is detected, it is moved to the `/ProcessingFolder` while it is being processed.
-- After processing, the file will be moved to the `/UploadedFolder` if it can successful upload its results to AQTS.
+- After processing, the file will be moved to the `/UploadedFolder` if it can successful upload all of its results to AQTS.
+- The file will be moved to the `/PartialFolder` which at least one visit was skipped with a `WARN` to avoid duplicates.
 - Otherwise processed file will be moved to the `/FailedFolder` if it fails to upload anything to AQTS.
 
-The `/ProcessingFolder`, `/UploadedFolder`, and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
+The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
 
 - These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path.
 - The program will need file system rights to read, write, delete, and move files in all of these folder locations.
@@ -71,11 +72,16 @@ Any of these conditions will cause the file to be considered failed, and will be
 - The location identifiers referenced in the file do not exist on the AQTS system.
 - A validation error occurred when the visit was uploaded to AQTS.
 
-## Existing visits on the same day cannot be overwritten
+## "Partial uploads" - Existing visits on the same day cannot be overwritten
 
 AQTS does not allow 2 visits on the same day in a location, and does not allow visit data from a plugin to be merged with a visit already existing in AQTS.
 
-So before the service uploads a locally-parsed visit, it checks if the location already has a visit on the same day. If an existing visit is detected, the service will not attempt to upload the conflicting visit. It will be skipped and logged with a `WARN` line, but will not cause the file processing to fail.
+So before the service uploads a locally-parsed visit, it checks if the location already has a visit on the same day.
+If an existing visit is detected, the service will not attempt to upload the conflicting visit.
+The upload will be skipped and logged with a `WARN` line, but will not cause the file processing to fail.
+The file will be moved to the `/PartialFolder`.
+
+This feature allows the hot folder to consume files which are repeatedly generated via an append operation, containing only new data appended to the end of the file.
 
 ## Detecting a valid AQTS app server connection
 
@@ -114,10 +120,12 @@ Supported -option=value settings (/option=value works too):
   -FileQuietDelay             Timespan of no file activity before processing begins. [default: 00:00:05]
   -ProcessingFolder           Move files to this folder during processing. [default: Processing]
   -UploadedFolder             Move files to this folder after successful uploads. [default: Uploaded]
+  -PartialFolder              Move files to this folder if when partial uploads are performed to avoid duplicates. [default: PartialUploads]
   -FailedFolder               Move files to this folder if an upload error occurs. [default: Failed]
 
 Use the @optionsFile syntax to read more options from a file.
 
   Each line in the file is treated as a command line option.
   Blank lines and leading/trailing whitespace is ignored.
+  Comment lines begin with a # or // marker.
 ```
