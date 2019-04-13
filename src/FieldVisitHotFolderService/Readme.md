@@ -95,6 +95,12 @@ When the service is started, and immediately before processing any detected file
 - If the AQTS server is not running AQTS 2018.4-or-newer, the service will exit.
 - If the AQTS server does not have the [JSON field data plugin](../JsonFieldData/Readme.md) installed, the service will exit.
 
+# Log files
+
+The service creates a `FieldVisitHotFolderService.log` file in the same directory as the EXE.
+
+In addition, each processed file will have a `{filename}.log` file in the appropriate `/UploadedFolder`, `/PartialFolder`, or `/FailedFolder`, for debugging purposes.
+
 # /Help screen
 
 ```
