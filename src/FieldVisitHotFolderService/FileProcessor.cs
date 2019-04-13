@@ -99,23 +99,25 @@ namespace FieldVisitHotFolderService
 
         private AppendedResults ParseLocalFile(string path)
         {
-            using (var stream = LoadDataStream(path))
+            var fileBytes = LoadFileBytes(path);
+
+            var appender = new FieldDataResultsAppender
             {
-                var appender = new FieldDataResultsAppender
-                {
-                    Client = Client,
-                    LocationCache = LocationCache
-                };
+                Client = Client,
+                LocationCache = LocationCache
+            };
 
-                foreach (var plugin in Plugins)
-                {
-                    var pluginName = plugin.GetType().FullName;
+            foreach (var plugin in Plugins)
+            {
+                var pluginName = plugin.GetType().FullName;
 
-                    try
+                try
+                {
+                    var logger = Log4NetLogger.Create(LogManager.GetLogger(plugin.GetType()));
+
+                    using (var stream = new MemoryStream(fileBytes))
                     {
-                        var logger = Log4NetLogger.Create(LogManager.GetLogger(plugin.GetType()));
-
-                        var result = plugin.ParseFile(CloneMemoryStream(stream), appender, logger);
+                        var result = plugin.ParseFile(stream, appender, logger);
 
                         // TODO: Support Zip-with-attachments
 
@@ -123,43 +125,36 @@ namespace FieldVisitHotFolderService
                             continue;
 
                         if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
-                            throw new ArgumentException($"Error parsing '{path}' with {pluginName}: {result.ErrorMessage}");
+                            throw new ArgumentException(
+                                $"Error parsing '{path}' with {pluginName}: {result.ErrorMessage}");
 
                         if (!appender.AppendedResults.AppendedVisits.Any())
                             throw new ArgumentException($"{pluginName} did not parse any field visits.");
 
-                        Log.Info($"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Select(v => v.FieldVisitIdentifier))}");
+                        Log.Info(
+                            $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Select(v => v.FieldVisitIdentifier))}");
+                    }
 
-                        appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
-                        return appender.AppendedResults;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warn($"{pluginName} skipping '{path}': {e.Message}");
-                    }
+                    appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
+                    return appender.AppendedResults;
+                }
+                catch (Exception e)
+                {
+                    Log.Warn($"{pluginName} skipping '{path}': {e.Message}");
                 }
             }
 
             throw new ArgumentException($"'{path}' was not parsed by any plugin.");
         }
 
-        private MemoryStream LoadDataStream(string path)
+        private byte[] LoadFileBytes(string path)
         {
             if (!File.Exists(path))
                 throw new ExpectedException($"Data file '{path}' does not exist.");
 
             Log.Info($"Loading data file '{path}'");
 
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var reader = new BinaryReader(stream, Encoding.Default, true))
-            {
-                return new MemoryStream(reader.ReadBytes((int)stream.Length));
-            }
-        }
-
-        private MemoryStream CloneMemoryStream(MemoryStream source)
-        {
-            return new MemoryStream(source.ToArray());
+            return File.ReadAllBytes(path);
         }
 
         private bool UploadResults(string path, AppendedResults appendedResults)

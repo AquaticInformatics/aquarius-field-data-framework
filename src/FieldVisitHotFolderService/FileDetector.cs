@@ -255,8 +255,10 @@ namespace FieldVisitHotFolderService
             if (CancellationToken.IsCancellationRequested)
                 return;
 
+            // TODO: Replace with an actual FileWatcher
+
             var timeSpan = Context.FileQuietDelay;
-            Log.Info($"Waiting {timeSpan} for new files at '{SourceFolder}'");
+            Log.Info($"Waiting {timeSpan} for file activity to settle at '{SourceFolder}'");
             CancellationToken.WaitHandle.WaitOne(timeSpan);
         }
     }
