@@ -38,6 +38,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{3C14AFF1-F815-4BE1-8072-E510917D04E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiFile", "MultiFile\MultiFile.csproj", "{42F7C57D-988D-420F-9497-B7AE3D922CA4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C429E4A0-DD6D-4701-93FF-ECDB2B59C2CD} = {C429E4A0-DD6D-4701-93FF-ECDB2B59C2CD}
+		{7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E} = {7D0E92B1-FF3C-4A29-A4B5-89ACD0A5532E}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

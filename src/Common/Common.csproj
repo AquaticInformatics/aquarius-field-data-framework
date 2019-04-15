@@ -46,6 +46,7 @@
     <Compile Include="CommandLineUsage.cs" />
     <Compile Include="ExpectedException.cs" />
     <Compile Include="FileHelper.cs" />
+    <Compile Include="LogExtensions.cs" />
     <Compile Include="Log4NetLogger.cs" />
     <Compile Include="PluginLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

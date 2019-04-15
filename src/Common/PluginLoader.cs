@@ -5,14 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using FieldDataPluginFramework;
-using log4net;
-using ILog = log4net.ILog;
 
 namespace Common
 {
     public class PluginLoader
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        public ILog Log { get; set; }
 
         private List<string> PluginFolders { get; } = new List<string>();
 
@@ -28,19 +26,37 @@ namespace Common
         private Assembly ResolvePluginAssembliesFromSameFolder(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
+            var requestingAssemblyName = args.RequestingAssembly.Location;
 
             var pluginFolder = PluginFolders
-                .FirstOrDefault(p => args.RequestingAssembly.Location.StartsWith(p, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(p => requestingAssemblyName.StartsWith(p, StringComparison.InvariantCultureIgnoreCase));
 
             if (string.IsNullOrEmpty(pluginFolder))
+            {
+                Log.Warn($"No plugin folder matches '{assemblyName}' from requesting assembly '{requestingAssemblyName}'");
                 return null;
+            }
 
             var assemblyPath = Path.Combine(pluginFolder, assemblyName);
 
             if (!File.Exists(assemblyPath))
+            {
+                Log.Warn($"'{assemblyPath}' does not exist for '{requestingAssemblyName}'");
                 return null;
+            }
 
-            return Assembly.LoadFrom(assemblyPath);
+            var loadedAssembly = LoadAssembly(assemblyPath, message => Log.Error($"Can't load plugin dependency from '{assemblyPath}' for '{requestingAssemblyName}': {message}"));
+
+            if (loadedAssembly == null)
+            {
+                Log.Warn($"Plugin dependency '{assemblyPath}' exists but could not be loaded for '{requestingAssemblyName}'.");
+            }
+            else
+            {
+                Log.Debug($"Loaded '{assemblyPath}' for '{requestingAssemblyName}'");
+            }
+
+            return loadedAssembly;
         }
 
         private IFieldDataPlugin LoadPlugin(string path)
@@ -53,7 +69,7 @@ namespace Common
 
         private IFieldDataPlugin LoadPluginFromFile(string path)
         {
-            PluginFolders.Add(Path.GetDirectoryName(path));
+            AddPluginFolderPath(Path.GetDirectoryName(path));
 
             var assembly = LoadAssembly(path, message => Log.Error($"Can't load '{path}': {message}"));
 
@@ -63,6 +79,13 @@ namespace Common
             var plugins = FindAllPluginImplementations(assembly).ToList();
 
             return GetSinglePluginOrThrow(path, plugins);
+        }
+
+        private void AddPluginFolderPath(string path)
+        {
+            if (PluginFolders.Contains(path)) return;
+
+            PluginFolders.Add(path);
         }
 
         private IFieldDataPlugin GetSinglePluginOrThrow(string path, List<IFieldDataPlugin> plugins)
@@ -81,7 +104,7 @@ namespace Common
             if (!Directory.Exists(path))
                 throw new ExpectedException($"'{path}' is not a valid directory.");
 
-            PluginFolders.Add(path);
+            AddPluginFolderPath(path);
 
             var directory = new DirectoryInfo(path);
 
@@ -89,7 +112,7 @@ namespace Common
 
             foreach (var file in directory.GetFiles("*.dll"))
             {
-                var assembly = LoadAssembly(file.FullName, message => Log.Warn($"Skipping '{file.FullName}': {message}"));
+                var assembly = LoadAssembly(file.FullName, message => Log.Info($"Skipping '{file.FullName}': {message}"));
 
                 if (assembly == null)
                     continue;
@@ -104,13 +127,17 @@ namespace Common
         {
             try
             {
-                return Assembly.LoadFile(path);
+                var assembly = Assembly.LoadFile(path);
+
+                Log.Debug($"Loaded '{path}'");
+
+                return assembly;
             }
             catch (Exception exception)
             {
                 if (exception is ReflectionTypeLoadException loadException)
                 {
-                    exceptionAction(string.Join("\n", loadException.LoaderExceptions.Select(e => e.Message)));
+                    exceptionAction(SummarizeLoaderExceptions(loadException));
                 }
                 else if (exception is BadImageFormatException || exception is FileLoadException || exception is SecurityException)
                 {
@@ -118,6 +145,7 @@ namespace Common
                 }
                 else
                 {
+                    exceptionAction($"Unexpected Assembly.LoadFile() exception: {exception.GetType().Name}: {exception.Message}");
                     throw;
                 }
 
@@ -125,11 +153,27 @@ namespace Common
             }
         }
 
-        private static IEnumerable<IFieldDataPlugin> FindAllPluginImplementations(Assembly assembly)
+        private static string SummarizeLoaderExceptions(ReflectionTypeLoadException exception)
         {
-            return assembly.GetTypes()
-                .Where(type => typeof(IFieldDataPlugin).IsAssignableFrom(type))
-                .Select(type => (IFieldDataPlugin)Activator.CreateInstance(type));
+            if (exception.LoaderExceptions == null)
+                return string.Empty;
+
+            return string.Join("\n", exception.LoaderExceptions.Select(e => e.Message));
+        }
+
+        private IEnumerable<IFieldDataPlugin> FindAllPluginImplementations(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes()
+                    .Where(type => typeof(IFieldDataPlugin).IsAssignableFrom(type))
+                    .Select(type => (IFieldDataPlugin)Activator.CreateInstance(type));
+            }
+            catch (ReflectionTypeLoadException exception)
+            {
+                Log.Error($"Can't load plugin from '{assembly.FullName}': {exception.Message}:\n{SummarizeLoaderExceptions(exception)}\n{exception.StackTrace}");
+                throw;
+            }
         }
     }
 }
