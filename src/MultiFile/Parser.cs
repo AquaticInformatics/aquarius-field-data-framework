@@ -16,6 +16,7 @@ namespace MultiFile
     {
         public Parser(ILog logger, IFieldDataResultsAppender resultsAppender)
         {
+            // LogExtensions.DebugEnabled = true;
             Log = logger;
             ResultsAppender = new DelayedAppender(resultsAppender);
         }
@@ -89,23 +90,69 @@ namespace MultiFile
 
                 if (!pluginPaths.Any())
                 {
-                    var pluginFolder = new DirectoryInfo(GetPluginDirectory());
-                    var parentFolder = pluginFolder.Parent;
-
-                    // ReSharper disable once PossibleNullReferenceException
-                    pluginPaths = parentFolder
-                        .GetDirectories()
-                        .Where(di => !ExcludedFolderNames.Contains(di.Name) && di.FullName != parentFolder.FullName)
-                        .Select(di => di.FullName)
-                        .ToList();
+                    pluginPaths = GetAllOtherPluginFolders();
                 }
 
                 CachedPlugins.Clear();
-                CachedPlugins.AddRange(new PluginLoader()
+                CachedPlugins.AddRange(new PluginLoader
+                    {
+                        Log = Log
+                    }
                     .LoadPlugins(pluginPaths));
 
                 return CachedPlugins;
             }
+        }
+
+        private List<string> GetAllOtherPluginFolders()
+        {
+            var pluginFolder = new DirectoryInfo(GetPluginDirectory());
+            var parentFolder = pluginFolder.Parent;
+
+            // ReSharper disable once PossibleNullReferenceException
+            var sourceFolders = parentFolder
+                .GetDirectories()
+                .Where(di => !ExcludedFolderNames.Contains(di.Name)
+                             && di.FullName != pluginFolder.FullName
+                             && di.GetFiles("*.dll").Any())
+                .ToList();
+
+            var pluginCopyRoot = new DirectoryInfo(Path.Combine(pluginFolder.FullName, "PluginCopies"));
+
+            pluginCopyRoot.Create();
+
+            var copiesToDelete = pluginCopyRoot
+                .GetDirectories()
+                .Where(copy =>
+                {
+                    if (sourceFolders.All(source => source.Name != copy.Name))
+                        return true;
+
+                    return sourceFolders
+                        .First(source => source.Name == copy.Name)
+                        .CreationTimeUtc > copy.CreationTimeUtc;
+                })
+                .ToList();
+
+            foreach (var copy in copiesToDelete)
+            {
+                Log.Info($"Deleting stale plugin copy '{copy.FullName}'");
+                copy.Delete(true);
+            }
+
+            return sourceFolders
+                .Select(source =>
+                {
+                    var copyPath = Path.Combine(pluginCopyRoot.FullName, source.Name);
+
+                    if (!Directory.Exists(copyPath))
+                    {
+                        CopyFolder(source, copyPath);
+                    }
+
+                    return copyPath;
+                })
+                .ToList();
         }
 
         private static readonly HashSet<string> ExcludedFolderNames = new HashSet<string>
@@ -114,6 +161,30 @@ namespace MultiFile
             "Release",  // Ignore the common bin folders when run from the Visual Studio build folder
             "Debug"
         };
+
+        private void CopyFolder(DirectoryInfo source, string copyPath)
+        {
+            Log.Info($"Copying plugin from '{source.FullName}' to '{copyPath}'");
+
+            Directory.CreateDirectory(copyPath);
+
+            // Copy all the directories first
+            foreach (var dir in source.GetDirectories("*", SearchOption.AllDirectories))
+            {
+                var copySubfolder = Path.Combine(copyPath, dir.FullName.Substring(source.FullName.Length + 1));
+                Log.Debug($"Creating dir '{copySubfolder}'");
+                Directory.CreateDirectory(copySubfolder);
+            }
+
+            // Now copy the files
+            foreach (var file in source.GetFiles("*", SearchOption.AllDirectories))
+            {
+                var copyFile = Path.Combine(copyPath, file.FullName.Substring(source.FullName.Length + 1));
+
+                Log.Debug($"Copying file '{file.FullName}' to '{copyFile}'");
+                File.Copy(file.FullName, copyFile);
+            }
+        }
 
         private static readonly object SyncObject = new object();
 

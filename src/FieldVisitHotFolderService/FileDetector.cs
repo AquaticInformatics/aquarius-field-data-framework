@@ -77,7 +77,10 @@ namespace FieldVisitHotFolderService
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
 
-            Plugins = new PluginLoader()
+            Plugins = new PluginLoader
+                {
+                    Log = Log4NetLogger.Create(Log)
+                }
                 .LoadPlugins(Context.Plugins);
 
             Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
