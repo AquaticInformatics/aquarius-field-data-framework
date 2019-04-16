@@ -1,12 +1,8 @@
 ﻿# Enter your AQTS credentials here.
 # The account should have "CanAddData" permission in all locations in order to create field visits.
--Server=myAppServer
--Username-hotfolderuser
--Password=pass123
+/Server=myAppServer
+/Username=hotfolderuser
+/Password=pass123
 
 # Configure the hot folder path to monitor
--HotFolderPath=D:\Some Folder\Drop Field Visit Files Here
-
-# Configure the local plugins to permit (you need at least one)
--Plugin=C:\MyPlugins\FlowTracker2
--Plugin=C:\MyPlugins\StageDischargeReadings
+/HotFolderPath=D:\Some Folder\Drop Field Visit Files Here

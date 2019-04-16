@@ -1,0 +1,5 @@
+﻿The Field Visit Hot Folder Service runs plugins locally, not on the AQTS app server.
+
+The local plugins are used to parse the dropped files and figure out how to interpret their visit data.
+
+To add a plugin to the set of local plugins, just download the *.plugin file and place a copy in this folder.

@@ -111,13 +111,13 @@ namespace FieldVisitHotFolderService
                     Description = "The TimeSpan to wait in between AQTS connection attempts."
                 },
 
-                new CommandLineOption(), new CommandLineOption{Description = "Local plugin settings"},
+                new CommandLineOption(), new CommandLineOption{Description = "Visit merge settings"},
                 new CommandLineOption
                 {
-                    Key = "Plugin",
-                    Setter = value => context.Plugins.Add(value),
-                    Getter = () => string.Empty,
-                    Description = "A plugin assembly to use for parsing field visits locally. Can be set multiple times."
+                    Key = nameof(context.MergeMode),
+                    Setter = value => context.MergeMode = ParseEnum<MergeMode>(value),
+                    Getter = () => context.MergeMode.ToString(),
+                    Description = $"One of {DescribeEnumValues<MergeMode>()}."
                 },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
@@ -182,6 +182,19 @@ namespace FieldVisitHotFolderService
             ValidateContext(context);
 
             return context;
+        }
+
+        private static TEnum ParseEnum<TEnum>(string value) where TEnum: struct
+        {
+            if (Enum.TryParse<TEnum>(value, true, out var enumValue))
+                return enumValue;
+
+            throw new ExpectedException($"'{value}' is not valid {typeof(TEnum).Name} value. Must one of {DescribeEnumValues<TEnum>()}.");
+        }
+
+        private static string DescribeEnumValues<TEnum>() where TEnum : struct
+        {
+            return string.Join(", ", Enum.GetNames(typeof(TEnum)));
         }
 
         private static string[] InjectOptionsFileByDefault(string[] args)

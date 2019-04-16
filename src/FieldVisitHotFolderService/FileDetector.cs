@@ -63,9 +63,6 @@ namespace FieldVisitHotFolderService
 
             ThrowIfFolderIsMissing(SourceFolder);
 
-            if (!Context.Plugins.Any())
-                throw new ExpectedException($"You must specify a /Plugin option.");
-
             ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
             PartialFolder = CreateFolderPath(Context.PartialFolder);
             UploadedFolder = CreateFolderPath(Context.UploadedFolder);
@@ -77,11 +74,8 @@ namespace FieldVisitHotFolderService
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
 
-            Plugins = new PluginLoader
-                {
-                    Log = Log4NetLogger.Create(Log)
-                }
-                .LoadPlugins(Context.Plugins);
+            Plugins = new LocalPluginLoader()
+                .LoadPlugins();
 
             Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
 
