@@ -238,6 +238,11 @@ namespace FieldVisitHotFolderService
         {
             if (Context.MergeMode == MergeMode.ArchiveAndReplace)
                 ArchiveExistingVisit(visit);
+
+            Log.Info($"Deleting existing visit on {visit.StartTime:yyyy-MM-dd} at location '{visit.LocationIdentifier}'");
+
+            new VisitDeleter(Client)
+                .DeleteVisit(visit);
         }
 
         private void ArchiveExistingVisit(FieldVisitDescription visit)
