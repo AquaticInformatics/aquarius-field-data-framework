@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 18.4.7
+- Added [JSON plugin](./src/JsonFieldData/Readme.md), [Multi-file plugin](./src/MultiFile/Readme.md), and the [Field visit hot folder service](./src/FieldVisitHotFolderService/Readme.md)
+
 ### 18.4.0
 - Added support for 2018.4 plugins
 - Updated the target .NET framework to .NET 4.7.2 to match the AQTS 2018.4 requirements

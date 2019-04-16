@@ -22,25 +22,36 @@ The service can be run on any Windows system with the .NET 4.7.2 runtime. This i
 
 Create an `Options.txt` file in the same folder as the EXE, to contain all the configuration options.
 
-The following 12 lines are a good start for the `Options.txt` file:
+The following 9 lines are a good start for the `Options.txt` file:
 ```
 # Enter your AQTS credentials here.
-# The account should have "CanAddData" permission.
+# The account should have "CanAddData" permission in all locations in order to create field visits.
 /Server=myAppServer
-/Username-hotfolderuser
+/Username=hotfolderuser
 /Password=pass123
 
 # Configure the hot folder path to monitor
 /HotFolderPath=D:\Some Folder\Drop Field Visit Files Here
-
-# Configure the local plugins to permit (you need at least one)
-/Plugin=C:\MyPlugins\FlowTracker2
-/Plugin=C:\MyPlugins\StageDischargeReadings
 ```
 
 You can test your configuration without installing the service just by running the EXE directly from the command line or by double-cliking it from Windows Explorer.
 
 When not run as Windows Service, the program will run until you type Ctrl-C or Ctrl-Break to exit.
+
+## Adding the local plugins
+
+The service requires local plugins, so that it can inspect the field data locally, and determine if a conflicting visit already exists at the location in AQTS.
+
+It expects to file `*.plugin` files in the `LocalPlugins` folder where the service runs.
+
+Just download the plugins you need from http://source.aquaticinformatics.com and copy the `*.plugin` files to this folder before starting the service.
+
+## Be sure to install the JSON plugin on the AQTS server
+
+In addition to using the plugins from the `LocalPlugins` folder to parse incoming files,
+the service also requires the [JSON plugin](../JsonFieldData/Readme.md) to be installed on the AQTS app server.
+The service will upload all of its locally parsed field visit activities to AQTS in JSON format,
+according to the configured `/MergeMode` setting.
 
 ## Folder configuration
 
@@ -56,6 +67,20 @@ The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, and `/FailedFolder
 
 - These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path.
 - The program will need file system rights to read, write, delete, and move files in all of these folder locations.
+
+## Controlling the `/MergeMode` behaviour
+
+AQTS does not currently allow a plugin to add any new field visit activities to a location when field visit activities already exist on the same day.
+Attempts to upload such files will result in the dreaded `Saving parsed data would result in duplicates` error message.
+
+The `/MergeMode` option controls how the service behaves when a file contains activities which occur on the same day as a visit already in the AQTS system.
+
+| `/MergeMode=<option>` | Description |
+| --- | --- |
+| `/MergeMode=Skip` | `Skip` mode is the default behaviour.<br/><br/>Any new activities which conflict with an existing AQTS visit will be skipped, and the remaining non-conflicting activities will be be uploaded as new visits to AQTS.<br/><br/>Once processed, the input file will be moved to the `/PartialFolder`, along with its activity log. |
+| `/MergeMode=Fail` | If any of the new activities conflict with any existing visits, then **none of the new activities** will be uploaded to AQTS. The file will be considered as a failure to upload.<br/><br/>Once processed, the input file will be moved to the `/FailedFolder`, along with its activity log. |
+| `/MergeMode=Replace` | If a new activity conflicts with an existing AQTS visit, **the existing AQTS visit will be deleted without confirmation**, and a new activities will be uploaded to AQTS.<br/><br/>Please use caution with this option, as the delete is a destructive operation which cannot be undone.<br/><br/>Once processed, the input file will be moved to the `/UploadedFolder`, along with its activity log. |
+| `/MergeMode=ArchiveAndReplace` | Same as `/MergeMode=Replace`, but existing visits are archived to the `/ArchiveFolder` before being deleted. |
 
 # Operation
 
@@ -117,8 +142,8 @@ Supported -option=value settings (/option=value works too):
   -MaximumConnectionAttempts  The maximum number of connection attempts before exiting. [default: 3]
   -ConnectionRetryDelay       The TimeSpan to wait in between AQTS connection attempts. [default: 00:01:00]
 
-  =========================== Local plugin settings
-  -Plugin                     A plugin assembly to use for parsing field visits locally. Can be set multiple times.
+  =========================== Visit merge settings
+  -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.
@@ -127,6 +152,7 @@ Supported -option=value settings (/option=value works too):
   -ProcessingFolder           Move files to this folder during processing. [default: Processing]
   -UploadedFolder             Move files to this folder after successful uploads. [default: Uploaded]
   -PartialFolder              Move files to this folder if when partial uploads are performed to avoid duplicates. [default: PartialUploads]
+  -ArchivedFolder             Any visits replaced via /MergeMode=ArchiveAndReplace will be archived here before being replace with new visits. [default: Archived]
   -FailedFolder               Move files to this folder if an upload error occurs. [default: Failed]
 
 Use the @optionsFile syntax to read more options from a file.

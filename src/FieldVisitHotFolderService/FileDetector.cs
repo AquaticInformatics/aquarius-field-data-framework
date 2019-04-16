@@ -28,6 +28,7 @@ namespace FieldVisitHotFolderService
         private List<Regex> FileMasks { get; set; }
         private string ProcessingFolder { get; set; }
         private string PartialFolder { get; set; }
+        private string ArchivedFolder { get; set; }
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<IFieldDataPlugin> Plugins { get; set; }
@@ -63,11 +64,9 @@ namespace FieldVisitHotFolderService
 
             ThrowIfFolderIsMissing(SourceFolder);
 
-            if (!Context.Plugins.Any())
-                throw new ExpectedException($"You must specify a /Plugin option.");
-
             ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
             PartialFolder = CreateFolderPath(Context.PartialFolder);
+            ArchivedFolder = CreateFolderPath(Context.ArchivedFolder);
             UploadedFolder = CreateFolderPath(Context.UploadedFolder);
             FailedFolder = CreateFolderPath(Context.FailedFolder);
 
@@ -77,11 +76,8 @@ namespace FieldVisitHotFolderService
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
 
-            Plugins = new PluginLoader
-                {
-                    Log = Log4NetLogger.Create(Log)
-                }
-                .LoadPlugins(Context.Plugins);
+            Plugins = new LocalPluginLoader()
+                .LoadPlugins();
 
             Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
 
@@ -243,11 +239,13 @@ namespace FieldVisitHotFolderService
 
             new FileProcessor
                 {
+                    Context = Context,
                     Client = Client,
                     LocationCache = LocationCache,
                     Plugins = Plugins,
                     ProcessingFolder = ProcessingFolder,
                     PartialFolder = PartialFolder,
+                    ArchivedFolder = ArchivedFolder,
                     UploadedFolder = UploadedFolder,
                     FailedFolder = FailedFolder
                 }

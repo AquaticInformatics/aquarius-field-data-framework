@@ -12,9 +12,18 @@ If you find yourself here because you need to install a plugin on your server, t
 - Run the `FieldDataPluginTool.exe` as Administrator
 - Click the "Add..." button and select your plugin file to install
 
-See the [FieldDataPluginTool](src/FieldDataPluginTool) page for full details.
+See the [FieldDataPluginTool](./src/FieldDataPluginTool/Readme.md) page for full details.
 
 You can skip reading the remaining sections below, since they are intended for software developers using the framework to developer their own custom field data plugins.
+
+## Useful tools ready for download
+
+Each [release](../../releases/latest) of the framework also includes some tools useful to AQTS customers, without requiring any programming knowledge.
+
+- The [FieldDataPluginTool](./src/FieldDataPluginTool/Readme.md) is a GUI tool which can be used to install plugins on your AQTS app server.
+- The [FieldVisitHotFolderService](./src/FieldVisitHotFolderService/Readme.md) is a Windows service which can import field visit files dropped into a monitored hot folder.
+- The [JSON field data](./src/JsonFieldData/Readme.md) plugin can import field data stored in a JSON format. It is often used with the hot folder service.
+- The [Multi-file](./src/MultiFile/Readme.md) plugin can import a ZIP archive of files supported by other installed plugins.
 
 ## Installing the framework SDK
 

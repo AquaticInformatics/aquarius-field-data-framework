@@ -13,10 +13,12 @@ namespace FieldVisitHotFolderService
         public string ProcessingFolder { get; set; } = "Processing";
         public string UploadedFolder { get; set; } = "Uploaded";
         public string PartialFolder { get; set; } = "PartialUploads";
+        public string ArchivedFolder { get; set; } = "Archived";
         public string FailedFolder { get; set; } = "Failed";
         public TimeSpan FileQuietDelay { get; set; } = TimeSpan.FromSeconds(5);
         public int MaximumConnectionAttempts { get; set; } = 3;
         public TimeSpan ConnectionRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
         public List<string> Plugins { get; set; } = new List<string>();
+        public MergeMode MergeMode { get; set; } = MergeMode.Skip;
     }
 }

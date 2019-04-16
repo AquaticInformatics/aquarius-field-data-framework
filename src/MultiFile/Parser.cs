@@ -130,7 +130,7 @@ namespace MultiFile
 
                     return sourceFolders
                         .First(source => source.Name == copy.Name)
-                        .CreationTimeUtc > copy.CreationTimeUtc;
+                        .LastWriteTimeUtc > copy.LastWriteTimeUtc;
                 })
                 .ToList();
 
