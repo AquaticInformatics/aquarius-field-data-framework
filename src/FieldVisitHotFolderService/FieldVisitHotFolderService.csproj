@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchivedVisit.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="FieldDataResultsAppender.cs" />
     <Compile Include="FileDetector.cs" />

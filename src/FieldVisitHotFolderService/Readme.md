@@ -80,6 +80,7 @@ The `/MergeMode` option controls how the service behaves when a file contains ac
 | `/MergeMode=Skip` | `Skip` mode is the default behaviour.<br/><br/>Any new activities which conflict with an existing AQTS visit will be skipped, and the remaining non-conflicting activities will be be uploaded as new visits to AQTS.<br/><br/>Once processed, the input file will be moved to the `/PartialFolder`, along with its activity log. |
 | `/MergeMode=Fail` | If any of the new activities conflict with any existing visits, then **none of the new activities** will be uploaded to AQTS. The file will be considered as a failure to upload.<br/><br/>Once processed, the input file will be moved to the `/FailedFolder`, along with its activity log. |
 | `/MergeMode=Replace` | If a new activity conflicts with an existing AQTS visit, **the existing AQTS visit will be deleted without confirmation**, and a new activities will be uploaded to AQTS.<br/><br/>Please use caution with this option, as the delete is a destructive operation which cannot be undone.<br/><br/>Once processed, the input file will be moved to the `/UploadedFolder`, along with its activity log. |
+| `/MergeMode=ArchiveAndReplace` | Same as `/MergeMode=Replace`, but existing visits are archived to the `/ArchiveFolder` before being deleted. |
 
 # Operation
 
@@ -142,7 +143,7 @@ Supported -option=value settings (/option=value works too):
   -ConnectionRetryDelay       The TimeSpan to wait in between AQTS connection attempts. [default: 00:01:00]
 
   =========================== Visit merge settings
-  -MergeMode                  One of Skip, Fail, Replace. [default: Skip]
+  -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.
@@ -151,6 +152,7 @@ Supported -option=value settings (/option=value works too):
   -ProcessingFolder           Move files to this folder during processing. [default: Processing]
   -UploadedFolder             Move files to this folder after successful uploads. [default: Uploaded]
   -PartialFolder              Move files to this folder if when partial uploads are performed to avoid duplicates. [default: PartialUploads]
+  -ArchivedFolder             Any visits replaced via /MergeMode=ArchiveAndReplace will be archived here before being replace with new visits. [default: Archived]
   -FailedFolder               Move files to this folder if an upload error occurs. [default: Failed]
 
 Use the @optionsFile syntax to read more options from a file.

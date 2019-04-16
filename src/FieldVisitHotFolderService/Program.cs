@@ -165,6 +165,13 @@ namespace FieldVisitHotFolderService
                 },
                 new CommandLineOption
                 {
+                    Key = nameof(context.ArchivedFolder),
+                    Setter = value => context.ArchivedFolder = value,
+                    Getter = () => context.ArchivedFolder,
+                    Description = $"Any visits replaced via /{nameof(context.MergeMode)}={MergeMode.ArchiveAndReplace} will be archived here before being replace with new visits."
+                },
+                new CommandLineOption
+                {
                     Key = nameof(context.FailedFolder),
                     Setter = value => context.FailedFolder = value,
                     Getter = () => context.FailedFolder,

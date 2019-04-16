@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using Aquarius.TimeSeries.Client;
+using Aquarius.TimeSeries.Client.Helpers;
 using Aquarius.TimeSeries.Client.ServiceModels.Acquisition;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using Common;
@@ -14,6 +16,7 @@ using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using log4net;
 using ServiceStack;
+using ServiceStack.Text;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -22,9 +25,11 @@ namespace FieldVisitHotFolderService
     {
         private static readonly ILog Log4NetLog = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        public Context Context { get; set; }
         public string ProcessingFolder { get; set; }
         public string PartialFolder { get; set; }
         public string UploadedFolder { get; set; }
+        public string ArchivedFolder { get; set; }
         public string FailedFolder { get; set; }
         public List<IFieldDataPlugin> Plugins { get; set; }
         public IAquariusClient Client { get; set; }
@@ -170,7 +175,7 @@ namespace FieldVisitHotFolderService
                     AppendedVisits = new List<FieldVisitInfo> { visit }
                 };
 
-                if (DoConflictingVisitsExist(visit))
+                if (ShouldSkipConflictingVisits(visit))
                 {
                     isPartial = true;
                     continue;
@@ -192,7 +197,7 @@ namespace FieldVisitHotFolderService
             return isPartial;
         }
 
-        private bool DoConflictingVisitsExist(FieldVisitInfo visit)
+        private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
         {
             var existingVisits = Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
             {
@@ -202,13 +207,86 @@ namespace FieldVisitHotFolderService
             })
                 .FieldVisitDescriptions;
 
-            if (existingVisits.Any())
-            {
-                Log.Warn($"Skipping conflicting visit {visit.FieldVisitIdentifier} with {string.Join(", ", existingVisits.Select(v => $"{v.StartTime}/{v.EndTime}"))}");
-                return true;
-            }
+            if (!existingVisits.Any())
+                return false;
 
-            return false;
+            switch (Context.MergeMode)
+            {
+                case MergeMode.Fail:
+                    throw new ExpectedException($"A conflicting visit already exists on {visit.StartDate.Date:yyyy-MM-dd} at location '{visit.LocationInfo.LocationIdentifier}'");
+                case MergeMode.Skip:
+                    Log.Warn($"Skipping conflicting visit {visit.FieldVisitIdentifier} with {string.Join(", ", existingVisits.Select(v => $"{v.StartTime}/{v.EndTime}"))}");
+                    return true;
+                case MergeMode.Replace:
+                case MergeMode.ArchiveAndReplace:
+                    DeleteExistingVisits(existingVisits);
+                    return false;
+                default:
+                    throw new ExpectedException($"{Context.MergeMode} is an unsupported {nameof(MergeMode)} value.");
+            }
+        }
+
+        private void DeleteExistingVisits(List<FieldVisitDescription> existingVisits)
+        {
+            foreach (var visit in existingVisits)
+            {
+                DeleteExistingVisit(visit);
+            }
+        }
+
+        private void DeleteExistingVisit(FieldVisitDescription visit)
+        {
+            if (Context.MergeMode == MergeMode.ArchiveAndReplace)
+                ArchiveExistingVisit(visit);
+        }
+
+        private void ArchiveExistingVisit(FieldVisitDescription visit)
+        {
+            var archivedVisit = new ArchivedVisit
+            {
+                Summary = visit,
+                Activities = Client.Publish.Get(new FieldVisitDataServiceRequest
+                {
+                    FieldVisitIdentifier = visit.Identifier,
+                    IncludeNodeDetails = true,
+                    IncludeInvalidActivities = true,
+                    IncludeCrossSectionSurveyProfile = true,
+                    IncludeVerticals = true
+                })
+            };
+
+            var archiveFilenameBase = Path.Combine(ArchivedFolder, $"{visit.Identifier}_{visit.StartTime?.Date:yyyy-MM-dd}_{visit.LocationIdentifier}");
+            
+            Log.Info($"Archiving existing visit '{archiveFilenameBase}'.json");
+            File.WriteAllText(archiveFilenameBase+".json", archivedVisit.ToJson().IndentJson());
+
+            var publishClient = Client.Publish as ServiceClientBase;
+
+            if (publishClient == null) return;
+
+            foreach (var attachment in archivedVisit.Activities.Attachments)
+            {
+                var attachmentUrl = $"{publishClient.BaseUri}/{attachment.Url}";
+                var attachmentFilename = $"{archiveFilenameBase}_{attachment.FileName}";
+
+                Log.Info($"Archiving attachment '{attachmentFilename}' from {attachmentUrl}");
+                File.WriteAllBytes(
+                    attachmentFilename,
+                    attachmentUrl.GetBytesFromUrl(requestFilter: SetAuthenticationHeaders));
+            }
+        }
+
+        private void SetAuthenticationHeaders(HttpWebRequest request)
+        {
+            request.Headers[AuthenticationHeaders.AuthenticationHeaderNameKey] = GetSessionToken();
+        }
+
+        private string GetSessionToken()
+        {
+            var connection =
+                ConnectionPool.Instance.GetConnection(Context.Server, Context.Username, Context.Password, null);
+
+            return connection.SessionToken;
         }
 
         private static DateTimeOffset StartOfDay(DateTimeOffset dateTimeOffset)

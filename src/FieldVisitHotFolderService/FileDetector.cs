@@ -28,6 +28,7 @@ namespace FieldVisitHotFolderService
         private List<Regex> FileMasks { get; set; }
         private string ProcessingFolder { get; set; }
         private string PartialFolder { get; set; }
+        private string ArchivedFolder { get; set; }
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<IFieldDataPlugin> Plugins { get; set; }
@@ -65,6 +66,7 @@ namespace FieldVisitHotFolderService
 
             ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
             PartialFolder = CreateFolderPath(Context.PartialFolder);
+            ArchivedFolder = CreateFolderPath(Context.ArchivedFolder);
             UploadedFolder = CreateFolderPath(Context.UploadedFolder);
             FailedFolder = CreateFolderPath(Context.FailedFolder);
 
@@ -237,11 +239,13 @@ namespace FieldVisitHotFolderService
 
             new FileProcessor
                 {
+                    Context = Context,
                     Client = Client,
                     LocationCache = LocationCache,
                     Plugins = Plugins,
                     ProcessingFolder = ProcessingFolder,
                     PartialFolder = PartialFolder,
+                    ArchivedFolder = ArchivedFolder,
                     UploadedFolder = UploadedFolder,
                     FailedFolder = FailedFolder
                 }
