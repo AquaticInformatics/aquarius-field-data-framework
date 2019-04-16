@@ -55,15 +55,16 @@ according to the configured `/MergeMode` setting.
 
 ## Folder configuration
 
-There are five configurable folders which are used to process field visit files.
+There are six configurable folders which are used to process field visit files.
 
 - The `/HotFolderPath` option is the folder that will be watched for new files.
 - When a new file is detected, it is moved to the `/ProcessingFolder` while it is being processed.
 - After processing, the file will be moved to the `/UploadedFolder` if it can successful upload all of its results to AQTS.
-- The file will be moved to the `/PartialFolder` which at least one visit was skipped with a `WARN` to avoid duplicates.
+- The file will be moved to the `/PartialFolder` when at least one visit was skipped with a `WARN` to avoid duplicates in `/MergeMode=Skip`.
+- The `/ArchiveFolder` will receive copies of visits being replaced when `/MergeMode=ArchiveAndReplace` is enabled.
 - Otherwise processed file will be moved to the `/FailedFolder` if it fails to upload anything to AQTS.
 
-The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
+The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, `/ArchivedFolder` and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
 
 - These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path.
 - The program will need file system rights to read, write, delete, and move files in all of these folder locations.
