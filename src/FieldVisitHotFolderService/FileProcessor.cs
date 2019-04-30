@@ -200,11 +200,11 @@ namespace FieldVisitHotFolderService
         private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
         {
             var existingVisits = Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
-            {
-                LocationIdentifier = visit.LocationInfo.LocationIdentifier,
-                QueryFrom = StartOfDay(visit.StartDate),
-                QueryTo = EndOfDay(visit.EndDate)
-            })
+                {
+                    LocationIdentifier = visit.LocationInfo.LocationIdentifier,
+                    QueryFrom = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate,
+                    QueryTo = Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate
+                })
                 .FieldVisitDescriptions;
 
             if (!existingVisits.Any())

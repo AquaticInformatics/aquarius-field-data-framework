@@ -18,7 +18,7 @@ namespace FieldVisitHotFolderService
         public TimeSpan FileQuietDelay { get; set; } = TimeSpan.FromSeconds(5);
         public int MaximumConnectionAttempts { get; set; } = 3;
         public TimeSpan ConnectionRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
-        public List<string> Plugins { get; set; } = new List<string>();
         public MergeMode MergeMode { get; set; } = MergeMode.Skip;
+        public bool OverlapIncludesWholeDay { get; set; }
     }
 }

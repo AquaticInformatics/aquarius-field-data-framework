@@ -119,6 +119,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => context.MergeMode.ToString(),
                     Description = $"One of {DescribeEnumValues<MergeMode>()}."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.OverlapIncludesWholeDay),
+                    Setter = value => context.OverlapIncludesWholeDay = bool.Parse(value),
+                    Getter = () => context.OverlapIncludesWholeDay.ToString(),
+                    Description = $"True if a conflict includes any visit on same day. False can generate multiple visits on the same day."
+                },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
                 new CommandLineOption
