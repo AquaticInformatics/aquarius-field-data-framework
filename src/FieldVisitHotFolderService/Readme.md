@@ -98,15 +98,21 @@ Any of these conditions will cause the file to be considered failed, and will be
 - The location identifiers referenced in the file do not exist on the AQTS system.
 - A validation error occurred when the visit was uploaded to AQTS.
 
-## "Partial uploads" - Existing visits on the same day cannot be overwritten
+## "Partial uploads" - Conflicting visits on the same day cannot be overwritten
 
-AQTS does not allow 2 visits on the same day in a location, and does not allow visit data from a plugin to be merged with a visit already existing in AQTS.
+AQTS does not allow 2 visits on the same day in a location to have any overlap between the start and end times, and does not allow visit data from a plugin to be merged with a visit already existing in AQTS.
 
 So before the service uploads a locally-parsed visit, it checks if the location already has a visit on the same day.
 If an existing visit is detected, the service will not attempt to upload the conflicting visit.
 The upload will be skipped and logged with a `WARN` line, but will not cause the file processing to fail.
 The file will be moved to the `/PartialFolder`.
 
+The `/OverlapIncludesWholeDay` option controls how strictly the overlap is enforced by the  hot folder service.
+- `/OverlapIncludesWholeDay=false` is the default option, and only considers strict overlaps based on the visit start and end times. This setting can result in multiple, non-overlapping visits on the same day.
+    - Eg. When a visit already exists on Tuesday from 2 PM to 5 PM, a new Tuesday visit from 8AM to 9AM will be uploaded successfully, without triggering any partial upload logic.
+- `/OverlapIncludesWholeDay=true` will consider the entire day of visit when checking for merge conflicts. This mode will ensure at most one visit per day per location.
+    - Eg. When a visit already exists on Tuesday from 2 PM to 5 PM, a new Tuesday visit from 8AM to 9AM will be considered a conflict, and the `/MergeMode` logic will be triggered.
+    
 This feature allows the hot folder to consume files which are repeatedly generated via an append operation, containing only new data appended to the end of the file.
 
 ## Detecting a valid AQTS app server connection
@@ -145,6 +151,7 @@ Supported -option=value settings (/option=value works too):
 
   =========================== Visit merge settings
   -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
+  -OverlapIncludesWholeDay    True if a conflict includes any visit on same day. False can generate multiple visits on the same day. [default: False]
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.
