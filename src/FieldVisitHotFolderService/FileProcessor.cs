@@ -137,7 +137,7 @@ namespace FieldVisitHotFolderService
                             throw new ArgumentException($"{pluginName} did not parse any field visits.");
 
                         Log.Info(
-                            $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Select(v => v.FieldVisitIdentifier))}");
+                            $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Take(10).Select(v => v.FieldVisitIdentifier))}");
                     }
 
                     appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
