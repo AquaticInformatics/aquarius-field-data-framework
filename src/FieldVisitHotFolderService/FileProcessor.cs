@@ -203,7 +203,7 @@ namespace FieldVisitHotFolderService
                 {
                     LocationIdentifier = visit.LocationInfo.LocationIdentifier,
                     QueryFrom = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate,
-                    QueryTo = Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate
+                    QueryTo = (Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate).AddTicks(1) // TODO: Remove the extra tick once AQ-24998 is fixed
                 })
                 .FieldVisitDescriptions;
 
