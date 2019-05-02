@@ -20,5 +20,6 @@ namespace FieldVisitHotFolderService
         public TimeSpan ConnectionRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
         public MergeMode MergeMode { get; set; } = MergeMode.Skip;
         public bool OverlapIncludesWholeDay { get; set; }
+        public int MaximumConcurrentRequests { get; set; } = Environment.ProcessorCount;
     }
 }

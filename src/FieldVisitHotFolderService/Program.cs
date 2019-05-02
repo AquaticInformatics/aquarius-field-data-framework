@@ -110,6 +110,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => context.ConnectionRetryDelay.ToString(),
                     Description = "The TimeSpan to wait in between AQTS connection attempts."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumConcurrentRequests),
+                    Setter = value => context.MaximumConcurrentRequests = int.Parse(value),
+                    Getter = () => context.MaximumConcurrentRequests.ToString(),
+                    Description = "Maximum concurrent requests during field visit import."
+                },
 
                 new CommandLineOption(), new CommandLineOption{Description = "Visit merge settings"},
                 new CommandLineOption
@@ -245,6 +252,14 @@ namespace FieldVisitHotFolderService
 
             if (string.IsNullOrWhiteSpace(context.Server))
                 throw new ExpectedException($"You must specify a /{nameof(context.Server)} option.");
+
+            if (context.MaximumConcurrentRequests <= 0)
+                throw new ExpectedException($"{nameof(context.MaximumConcurrentRequests)} must be greater than 0");
+
+            var upperLimit = 2 * Environment.ProcessorCount;
+
+            if (context.MaximumConcurrentRequests > upperLimit)
+                throw new ExpectedException($"{nameof(context.MaximumConcurrentRequests)} can't exceed {upperLimit}.");
         }
 
         private readonly Context _context;
