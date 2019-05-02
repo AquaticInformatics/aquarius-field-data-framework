@@ -86,6 +86,7 @@
     <Compile Include="FileDetector.cs" />
     <Compile Include="FileLogger.cs" />
     <Compile Include="FileProcessor.cs" />
+    <Compile Include="LimitedConcurrencyContext.cs" />
     <Compile Include="LocalPluginLoader.cs" />
     <Compile Include="MergeMode.cs" />
     <Compile Include="PrivateApis.cs" />

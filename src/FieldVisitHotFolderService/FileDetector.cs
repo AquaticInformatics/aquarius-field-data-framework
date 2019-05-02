@@ -247,7 +247,8 @@ namespace FieldVisitHotFolderService
                     PartialFolder = PartialFolder,
                     ArchivedFolder = ArchivedFolder,
                     UploadedFolder = UploadedFolder,
-                    FailedFolder = FailedFolder
+                    FailedFolder = FailedFolder,
+                    CancellationToken = CancellationToken
                 }
                 .ProcessFile(sourcePath);
         }

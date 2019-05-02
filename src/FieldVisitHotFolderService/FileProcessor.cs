@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.Helpers;
 using Aquarius.TimeSeries.Client.ServiceModels.Acquisition;
@@ -34,6 +36,7 @@ namespace FieldVisitHotFolderService
         public List<IFieldDataPlugin> Plugins { get; set; }
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
+        public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger {Log = Log4NetLog};
 
         public void ProcessFile(string sourcePath)
@@ -53,7 +56,7 @@ namespace FieldVisitHotFolderService
             try
             {
                 var appendedResults = ParseLocalFile(processingPath);
-                var isPartial = UploadResults(processingPath, appendedResults);
+                var isPartial = UploadResultsConcurrently(processingPath, appendedResults);
 
                 if (isPartial)
                     MoveFile(processingPath, PartialFolder);
@@ -162,39 +165,99 @@ namespace FieldVisitHotFolderService
             return File.ReadAllBytes(path);
         }
 
-        private bool UploadResults(string path, AppendedResults appendedResults)
+        private string UploadedFilename { get; set; }
+
+        private bool UploadResultsConcurrently(string path, AppendedResults appendedResults)
         {
+            var semaphore = new SemaphoreSlim(Context.MaximumConcurrentRequests);
+
+            Log.Info($"Appending {appendedResults.AppendedVisits.Count} visits using {Context.MaximumConcurrentRequests} concurrent requests.");
+
             var isPartial = false;
+
+            UploadedFilename = Path.GetFileName(path) + ".json";
+
+            var visitsByLocation = GetVisitsByLocation(appendedResults);
+
+            Task.WhenAll(visitsByLocation.Keys.OrderBy(location => location).Select(async location =>
+            {
+                using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
+                {
+                    await Task.Run(() =>
+                            UploadLocationVisitsSequentially(
+                                location,
+                                visitsByLocation[location],
+                                appendedResults.FrameworkAssemblyQualifiedName,
+                                appendedResults.PluginAssemblyQualifiedTypeName,
+                                () => isPartial = true)
+                        , CancellationToken);
+                }
+            })).Wait(CancellationToken);
+
+            return isPartial;
+        }
+
+        private static Dictionary<string, List<FieldVisitInfo>> GetVisitsByLocation(AppendedResults appendedResults)
+        {
+            var visitsByLocation = new Dictionary<string, List<FieldVisitInfo>>();
 
             foreach (var visit in appendedResults.AppendedVisits)
             {
-                var singleResult = new AppendedResults
-                {
-                    FrameworkAssemblyQualifiedName = appendedResults.FrameworkAssemblyQualifiedName,
-                    PluginAssemblyQualifiedTypeName = appendedResults.PluginAssemblyQualifiedTypeName,
-                    AppendedVisits = new List<FieldVisitInfo> { visit }
-                };
+                var location = visit.LocationInfo.LocationIdentifier;
 
-                if (ShouldSkipConflictingVisits(visit))
+                if (!visitsByLocation.TryGetValue(location, out var visits))
                 {
-                    isPartial = true;
-                    continue;
+                    visits = new List<FieldVisitInfo>();
+                    visitsByLocation.Add(location, visits);
                 }
 
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
-                {
-                    var uploadedFilename = Path.GetFileName(path) + ".json";
+                visits.Add(visit);
+            }
 
-                    var response = Client.Acquisition.PostFileWithRequest(stream, uploadedFilename, new PostVisitFile
+            return visitsByLocation;
+        }
+
+        private void UploadLocationVisitsSequentially(
+            string location,
+            List<FieldVisitInfo> visits,
+            string frameworkAssemblyQualifiedName,
+            string pluginAssemblyQualifiedTypeName,
+            Action partialAction)
+        {
+            var singleResult = new AppendedResults
+            {
+                FrameworkAssemblyQualifiedName = frameworkAssemblyQualifiedName,
+                PluginAssemblyQualifiedTypeName = pluginAssemblyQualifiedTypeName,
+            };
+
+            Log.Info($"Uploading {visits.Count} visits to '{location}' ...");
+
+            foreach (var visit in visits)
+            {
+                UploadVisit(singleResult, visit, partialAction);
+            }
+        }
+
+        private void UploadVisit(AppendedResults singleResult, FieldVisitInfo visit, Action partialAction)
+        {
+            singleResult.AppendedVisits = new List<FieldVisitInfo> {visit};
+
+            if (ShouldSkipConflictingVisits(visit))
+            {
+                partialAction();
+                return;
+            }
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
+            {
+                var response = Client.Acquisition.PostFileWithRequest(stream, UploadedFilename,
+                    new PostVisitFile
                     {
                         LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
                     });
 
-                    Log.Info($"Uploaded '{uploadedFilename}' to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
-                }
+                Log.Info($"Uploaded '{UploadedFilename}' to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
             }
-
-            return isPartial;
         }
 
         private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
