@@ -38,6 +38,14 @@ You can test your configuration without installing the service just by running t
 
 When not run as Windows Service, the program will run until you type Ctrl-C or Ctrl-Break to exit.
 
+## Having the service monitor a network share
+
+Windows services like `FieldVisitHotFolderService` are normally installed to run using the built-in "Local System" account, which is a lower-permissions account which cannot read files from network shares located on other computers.
+
+If your configured `/HotFolderPath=` setting is located on another system, like the UNC path `/HotFolderPath=//OfficeFiles/FieldVisits`, then you will need to change the service's "Log On" property to a network account with permissions to access and modify files in that folder.
+
+![Picture](images/ChangeServiceLogOn.png)
+
 ## Adding the local plugins
 
 The service requires local plugins, so that it can inspect the field data locally, and determine if a conflicting visit already exists at the location in AQTS.
@@ -148,6 +156,7 @@ Supported -option=value settings (/option=value works too):
   -Password                   AQTS credentials. [default: admin]
   -MaximumConnectionAttempts  The maximum number of connection attempts before exiting. [default: 3]
   -ConnectionRetryDelay       The TimeSpan to wait in between AQTS connection attempts. [default: 00:01:00]
+  -MaximumConcurrentRequests  Maximum concurrent requests during field visit import. [default: 16]
 
   =========================== Visit merge settings
   -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
