@@ -16,13 +16,26 @@ rem Detect admin mode
 reg query "HKU\S-1-5-19" 1>nul 2>&1
 if errorlevel 1 goto :mustRunAsAdmin
 
+
+rem Change directory to the same folder as the script.
+rem This corrects for "Launch as admin", which always starts in C:\Windows\system32
+CD /D %~dp0
+
 rem Uninstall the service
 set ServiceName=FieldVisitHotFolderService
+set ServiceDisplayName=AQUARIUS Field Visit Hot Folder
+
+echo Uninstalling '%ServiceDisplayName%' as a Windows service ...
+echo.
 
 :uninstallService
 NET STOP "%ServiceName%"
 SC DELETE "%ServiceName%"
+IF ERRORLEVEL 1 GOTO :error
 
+echo.
+echo '%ServiceDisplayName%' has been successfully uninstalled.
+echo.
 goto :end
 
 :error
@@ -47,6 +60,5 @@ echo.
 goto :end
 
 :end
-echo Done.
 endlocal
 pause
