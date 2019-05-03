@@ -65,7 +65,16 @@ namespace FieldVisitHotFolderService
             }
             catch (Exception exception)
             {
-                Log.Error(exception.Message);
+                var message = exception.Message;
+
+                if (exception is AggregateException aggregateException)
+                {
+                    message = aggregateException.InnerExceptions.Count == 1
+                        ? aggregateException.InnerExceptions.First().Message
+                        : $"{aggregateException.InnerExceptions.Count} concurrent errors: {string.Join("\n", aggregateException.InnerExceptions.Take(5).Select(e => e.Message))}";
+                }
+
+                Log.Error(message);
 
                 try
                 {
@@ -234,6 +243,8 @@ namespace FieldVisitHotFolderService
 
             foreach (var visit in visits)
             {
+                if (CancellationToken.IsCancellationRequested) return;
+
                 UploadVisit(singleResult, visit, partialAction);
             }
         }
@@ -250,13 +261,20 @@ namespace FieldVisitHotFolderService
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
             {
-                var response = Client.Acquisition.PostFileWithRequest(stream, UploadedFilename,
-                    new PostVisitFile
-                    {
-                        LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
-                    });
+                try
+                {
+                    var response = Client.Acquisition.PostFileWithRequest(stream, UploadedFilename,
+                        new PostVisitFile
+                        {
+                            LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
+                        });
 
-                Log.Info($"Uploaded '{UploadedFilename}' to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
+                    Log.Info($"Uploaded '{UploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
+                }
+                catch (WebServiceException exception)
+                {
+                    throw new ExpectedException($"{UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
+                }
             }
         }
 

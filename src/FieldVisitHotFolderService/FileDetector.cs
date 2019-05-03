@@ -129,9 +129,11 @@ namespace FieldVisitHotFolderService
 
         private IAquariusClient CreateConnectedClient()
         {
-            Log.Info($"{FileHelper.ExeNameAndVersion} connecting to {Context.Server} as '{Context.Username}'");
+            Log.Info($"{FileHelper.ExeNameAndVersion} connecting to {Context.Server} as '{Context.Username}' ...");
 
             var client = AquariusClient.CreateConnectedClient(Context.Server, Context.Username, Context.Password);
+
+            Log.Info($"Connected to {Context.Server} (v{client.ServerVersion})");
 
             return client;
         }
