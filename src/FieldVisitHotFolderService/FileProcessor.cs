@@ -17,6 +17,7 @@ using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using log4net;
+using NodaTime;
 using ServiceStack;
 using ServiceStack.Text;
 using ILog = log4net.ILog;
@@ -212,12 +213,12 @@ namespace FieldVisitHotFolderService
 
             foreach (var visit in appendedResults.AppendedVisits)
             {
-                var location = visit.LocationInfo.LocationIdentifier;
+                var locationIdentifier = visit.LocationInfo.LocationIdentifier;
 
-                if (!visitsByLocation.TryGetValue(location, out var visits))
+                if (!visitsByLocation.TryGetValue(locationIdentifier, out var visits))
                 {
                     visits = new List<FieldVisitInfo>();
-                    visitsByLocation.Add(location, visits);
+                    visitsByLocation.Add(locationIdentifier, visits);
                 }
 
                 visits.Add(visit);
@@ -227,7 +228,7 @@ namespace FieldVisitHotFolderService
         }
 
         private void UploadLocationVisitsSequentially(
-            string location,
+            string locationIdentifier,
             List<FieldVisitInfo> visits,
             string frameworkAssemblyQualifiedName,
             string pluginAssemblyQualifiedTypeName,
@@ -239,25 +240,42 @@ namespace FieldVisitHotFolderService
                 PluginAssemblyQualifiedTypeName = pluginAssemblyQualifiedTypeName,
             };
 
-            Log.Info($"Uploading {visits.Count} visits to '{location}' ...");
+            if (!visits.Any())
+                return;
+
+            Log.Info($"Uploading {visits.Count} visits to '{locationIdentifier}' ...");
+
+            var existingVisits = GetExistingVisits(locationIdentifier, visits);
 
             foreach (var visit in visits)
             {
                 if (CancellationToken.IsCancellationRequested) return;
 
-                UploadVisit(singleResult, visit, partialAction);
+                if (ShouldSkipConflictingVisits(existingVisits, visit))
+                {
+                    partialAction();
+                    continue;
+                }
+
+                UploadVisit(singleResult, visit);
             }
         }
 
-        private void UploadVisit(AppendedResults singleResult, FieldVisitInfo visit, Action partialAction)
+        private List<FieldVisitDescription> GetExistingVisits(string locationIdentifier, List<FieldVisitInfo> visits)
+        {
+            // TODO: Remove the extra day of start/end slop once AQ-24998 is fixed
+            return Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
+                {
+                    LocationIdentifier = locationIdentifier,
+                    QueryFrom = visits.Min(v => v.StartDate).AddDays(-1),
+                    QueryTo = visits.Max(v => v.EndDate).AddDays(1)
+                })
+                .FieldVisitDescriptions;
+        }
+
+        private void UploadVisit(AppendedResults singleResult, FieldVisitInfo visit)
         {
             singleResult.AppendedVisits = new List<FieldVisitInfo> {visit};
-
-            if (ShouldSkipConflictingVisits(visit))
-            {
-                partialAction();
-                return;
-            }
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
             {
@@ -278,17 +296,26 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
+        private bool ShouldSkipConflictingVisits(List<FieldVisitDescription> existingVisits, FieldVisitInfo visit)
         {
-            var existingVisits = Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
-                {
-                    LocationIdentifier = visit.LocationInfo.LocationIdentifier,
-                    QueryFrom = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate,
-                    QueryTo = (Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate).AddTicks(1) // TODO: Remove the extra tick once AQ-24998 is fixed
-                })
-                .FieldVisitDescriptions;
+            var startDate = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate;
+            var endDate = Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate;
 
-            if (!existingVisits.Any())
+            var conflictingPeriod = CreateVisitInterval(startDate, endDate);
+
+            var conflictingVisits = existingVisits
+                .Where(v =>
+                {
+                    if (!v.StartTime.HasValue || !v.EndTime.HasValue)
+                        return false;
+
+                    var existingPeriod = CreateVisitInterval(v.StartTime.Value, v.EndTime.Value);
+
+                    return conflictingPeriod.Intersects(existingPeriod);
+                })
+                .ToList();
+
+            if (!conflictingVisits.Any())
                 return false;
 
             switch (Context.MergeMode)
@@ -296,15 +323,20 @@ namespace FieldVisitHotFolderService
                 case MergeMode.Fail:
                     throw new ExpectedException($"A conflicting visit already exists on {visit.StartDate.Date:yyyy-MM-dd} at location '{visit.LocationInfo.LocationIdentifier}'");
                 case MergeMode.Skip:
-                    Log.Warn($"Skipping conflicting visit {visit.FieldVisitIdentifier} with {string.Join(", ", existingVisits.Select(v => $"{v.StartTime}/{v.EndTime}"))}");
+                    Log.Warn($"Skipping conflicting visit {visit.FieldVisitIdentifier} with {string.Join(", ", conflictingVisits.Select(v => $"{v.StartTime}/{v.EndTime}"))}");
                     return true;
                 case MergeMode.Replace:
                 case MergeMode.ArchiveAndReplace:
-                    DeleteExistingVisits(existingVisits);
+                    DeleteExistingVisits(conflictingVisits);
                     return false;
                 default:
                     throw new ExpectedException($"{Context.MergeMode} is an unsupported {nameof(MergeMode)} value.");
             }
+        }
+
+        private static Interval CreateVisitInterval(DateTimeOffset start, DateTimeOffset end)
+        {
+            return new Interval(Instant.FromDateTimeOffset(start), Instant.FromDateTimeOffset(end.AddTicks(1)));
         }
 
         private void DeleteExistingVisits(List<FieldVisitDescription> existingVisits)
