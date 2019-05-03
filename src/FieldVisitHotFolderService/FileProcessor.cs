@@ -57,9 +57,11 @@ namespace FieldVisitHotFolderService
             try
             {
                 var appendedResults = ParseLocalFile(processingPath);
-                var isPartial = UploadResultsConcurrently(processingPath, appendedResults);
+                var results = UploadResultsConcurrently(processingPath, appendedResults);
 
-                if (isPartial)
+                if (results.IsFailure)
+                    MoveFile(processingPath, FailedFolder);
+                else if (results.IsPartial)
                     MoveFile(processingPath, PartialFolder);
                 else
                     MoveFile(processingPath, UploadedFolder);
@@ -177,109 +179,56 @@ namespace FieldVisitHotFolderService
 
         private string UploadedFilename { get; set; }
 
-        private bool UploadResultsConcurrently(string path, AppendedResults appendedResults)
+        private (bool IsPartial, bool IsFailure) UploadResultsConcurrently(string path, AppendedResults appendedResults)
         {
             var semaphore = new SemaphoreSlim(Context.MaximumConcurrentRequests);
 
             Log.Info($"Appending {appendedResults.AppendedVisits.Count} visits using {Context.MaximumConcurrentRequests} concurrent requests.");
 
             var isPartial = false;
+            var isFailure = false;
 
             UploadedFilename = Path.GetFileName(path) + ".json";
 
-            var visitsByLocation = GetVisitsByLocation(appendedResults);
-
-            Task.WhenAll(visitsByLocation.Keys.OrderBy(location => location).Select(async location =>
+            Task.WhenAll(appendedResults.AppendedVisits.Select(async visit =>
             {
                 using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
                 {
                     await Task.Run(() =>
-                            UploadLocationVisitsSequentially(
-                                location,
-                                visitsByLocation[location],
-                                appendedResults.FrameworkAssemblyQualifiedName,
-                                appendedResults.PluginAssemblyQualifiedTypeName,
-                                () => isPartial = true)
+                            UploadVisit(
+                                visit,
+                                appendedResults,
+                                () => isPartial = true,
+                                () => isFailure = true)
                         , CancellationToken);
                 }
             })).Wait(CancellationToken);
 
-            return isPartial;
+            return (IsPartial: isPartial, IsFailure: isFailure);
         }
 
-        private static Dictionary<string, List<FieldVisitInfo>> GetVisitsByLocation(AppendedResults appendedResults)
+        private void UploadVisit(
+            FieldVisitInfo visit,
+            AppendedResults appendedResults,
+            Action partialAction,
+            Action failureAction)
         {
-            var visitsByLocation = new Dictionary<string, List<FieldVisitInfo>>();
-
-            foreach (var visit in appendedResults.AppendedVisits)
+            if (ShouldSkipConflictingVisits(visit))
             {
-                var locationIdentifier = visit.LocationInfo.LocationIdentifier;
-
-                if (!visitsByLocation.TryGetValue(locationIdentifier, out var visits))
-                {
-                    visits = new List<FieldVisitInfo>();
-                    visitsByLocation.Add(locationIdentifier, visits);
-                }
-
-                visits.Add(visit);
+                partialAction();
+                return;
             }
 
-            return visitsByLocation;
-        }
-
-        private void UploadLocationVisitsSequentially(
-            string locationIdentifier,
-            List<FieldVisitInfo> visits,
-            string frameworkAssemblyQualifiedName,
-            string pluginAssemblyQualifiedTypeName,
-            Action partialAction)
-        {
             var singleResult = new AppendedResults
             {
-                FrameworkAssemblyQualifiedName = frameworkAssemblyQualifiedName,
-                PluginAssemblyQualifiedTypeName = pluginAssemblyQualifiedTypeName,
+                FrameworkAssemblyQualifiedName = appendedResults.FrameworkAssemblyQualifiedName,
+                PluginAssemblyQualifiedTypeName = appendedResults.PluginAssemblyQualifiedTypeName,
+                AppendedVisits = new List<FieldVisitInfo> { visit }
             };
 
-            if (!visits.Any())
-                return;
-
-            Log.Info($"Uploading {visits.Count} visits to '{locationIdentifier}' ...");
-
-            var existingVisits = GetExistingVisits(locationIdentifier, visits);
-
-            foreach (var visit in visits)
+            try
             {
-                if (CancellationToken.IsCancellationRequested) return;
-
-                if (ShouldSkipConflictingVisits(existingVisits, visit))
-                {
-                    partialAction();
-                    continue;
-                }
-
-                UploadVisit(singleResult, visit);
-            }
-        }
-
-        private List<FieldVisitDescription> GetExistingVisits(string locationIdentifier, List<FieldVisitInfo> visits)
-        {
-            // TODO: Remove the extra day of start/end slop once AQ-24998 is fixed
-            return Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
-                {
-                    LocationIdentifier = locationIdentifier,
-                    QueryFrom = visits.Min(v => v.StartDate).AddDays(-1),
-                    QueryTo = visits.Max(v => v.EndDate).AddDays(1)
-                })
-                .FieldVisitDescriptions;
-        }
-
-        private void UploadVisit(AppendedResults singleResult, FieldVisitInfo visit)
-        {
-            singleResult.AppendedVisits = new List<FieldVisitInfo> {visit};
-
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
-            {
-                try
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
                 {
                     var response = Client.Acquisition.PostFileWithRequest(stream, UploadedFilename,
                         new PostVisitFile
@@ -289,19 +238,22 @@ namespace FieldVisitHotFolderService
 
                     Log.Info($"Uploaded '{UploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
                 }
-                catch (WebServiceException exception)
-                {
-                    throw new ExpectedException($"{UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
-                }
+            }
+            catch (WebServiceException exception)
+            {
+                Log.Error($"{UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
+                failureAction();
             }
         }
 
-        private bool ShouldSkipConflictingVisits(List<FieldVisitDescription> existingVisits, FieldVisitInfo visit)
+        private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
         {
             var startDate = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate;
             var endDate = Context.OverlapIncludesWholeDay ? EndOfDay(visit.EndDate) : visit.EndDate;
 
             var conflictingPeriod = CreateVisitInterval(startDate, endDate);
+
+            var existingVisits = GetExistingVisits(visit.LocationInfo.LocationIdentifier, conflictingPeriod);
 
             var conflictingVisits = existingVisits
                 .Where(v =>
@@ -337,6 +289,18 @@ namespace FieldVisitHotFolderService
         private static Interval CreateVisitInterval(DateTimeOffset start, DateTimeOffset end)
         {
             return new Interval(Instant.FromDateTimeOffset(start), Instant.FromDateTimeOffset(end.AddTicks(1)));
+        }
+
+        private List<FieldVisitDescription> GetExistingVisits(string locationIdentifier, Interval overlapInterval)
+        {
+            // TODO: Remove the extra minute of start/end slop once AQ-24998 is fixed
+            return Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
+                {
+                    LocationIdentifier = locationIdentifier,
+                    QueryFrom = overlapInterval.Start.ToDateTimeOffset().AddMinutes(-1),
+                    QueryTo = overlapInterval.End.ToDateTimeOffset().AddMinutes(1)
+                })
+                .FieldVisitDescriptions;
         }
 
         private void DeleteExistingVisits(List<FieldVisitDescription> existingVisits)
