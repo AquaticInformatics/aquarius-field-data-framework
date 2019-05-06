@@ -1,0 +1,122 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="839px" height="483px" viewBox="0 0 839 483" style="overflow: hidden; display: block; width: 839px; height: 483px;"><rect width="839px" height="483px" fill="#FFF"/><defs><path fill="rgb(51,102,153)" stroke="rgb(51,102,153)" d="M 5,-5 L 0,0 L 5,5 Z" fill-opacity="1" stroke-opacity="1" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" id="ygc194_0"/><style xmlns="http://www.w3.org/1999/xhtml" type="text/css">@font-face{font-family:'Roboto'; src: url(data:application/font-ttf;charset=utf-8;base64,undefined) format('truetype');}</style></defs><g style="pointer-events:visiblePainted" transform="translate(416 372.5)" image-rendering="auto" shape-rendering="auto"><g><path fill="none" stroke="rgb(51,102,153)" d="M -180.5,-279 L 108.75,-279" stroke-opacity="1" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"/><use xlink:href="#ygc194_0" transform="matrix(-0.75 0 0 -0.75 111.96966991411009 -279)" style="pointer-events: none;"/></g><g><svg xmlns="http://www.w3.org/2000/svg" id="server" viewBox="-18 -14 70 70" x="113.5" y="-330.5" width="88" height="103" preserveAspectRatio="none">
+  <path d="M0 .97h35v53.7H0z" fill="#515151"/>
+  <path d="M5.5.97c7.9-1.3 16-1.3 24 0v53.7c-7.9 1.3-16 1.3-24 0V.98z" fill="#c6c6c6"/>
+  <path d="M5.5 14.68h24v40c-7.9 1.3-16 1.3-24 0v-40z" fill="#515151"/>
+  <path d="M5.5 4.78c8-.6 16-.6 24 0v8.1h-24v-8.1z" opacity=".43" fill="#afafaf"/>
+  <path d="M5.5 4.78c8-.6 16-.6 24 0v8.1h-24v-8.1z" opacity=".43" fill="#4d4d4d"/>
+  <path d="M6.5 5.78l3.4-.2v1.1l-3.4.1z" stroke-miterlimit="10" opacity=".43" fill="#565656" stroke="#4d4d4d" stroke-width=".01"/>
+  <path stroke-miterlimit="10" d="M31.3 2.58H35v1.5h-3.7zm0 3.2H35v1.5h-3.7z" fill="#c8ff00" stroke="#717171" stroke-width=".19"/>
+  <path d="M5.5 14.88v39.7c7.9 1.3 16 1.3 23.9 0v-39.7H5.5zm22.9 3.8h-2.2v-2.9h2.2v2.9zm-12 23.8v-2.9h2.2v2.9h-2.2zm2.2 1.1v2.9h-2.2v-2.9h2.2zm0-15.8v2.9h-2.2v-2.9h2.2zm-2.2-1.1v-2.9h2.2v2.9h-2.2zm0 7.9v-2.9h2.2v2.9h-2.2zm2.2 1.1v2.9h-2.2v-2.9h2.2zm-3.3-5h-2.2v-2.9h2.2v2.9zm0 1v2.9h-2.2v-2.9h2.2zm0 4v2.9c-.7 0-1.5 0-2.2-.1v-2.9c.7.1 1.5.1 2.2.1zm0 3.9v2.9c-.7 0-1.5 0-2.2-.1v-2.9c.7.1 1.5.1 2.2.1zm4.3 0c.7 0 1.5 0 2.2-.1v2.9c-.7 0-1.5.1-2.2.1v-2.9zm0-1v-2.9h2.2v2.9c-.7-.1-1.4 0-2.2 0zm0-4v-2.9h2.2v2.9h-2.2zm0-3.9v-2.9h2.2v2.9c-.7-.1-1.4-.1-2.2 0zm0-4v-2.9h2.2v2.9h-2.2zm0-3.9v-2.9h2.2v2.9h-2.2zm-1 0h-2.2v-2.9h2.2v2.9zm-3.3 0h-2.2v-2.9h2.2v2.9zm0 1v2.9h-2.2v-2.9h2.2zm-3.3 2.9c-.7 0-1.5 0-2.2-.1v-2.8H12v2.9zm0 1v2.9c-.7 0-1.5 0-2.2-.1v-2.9c.8.1 1.5.1 2.2.1zm0 4v2.9c-.7 0-1.5-.1-2.2-.1v-2.9c.8 0 1.5 0 2.2.1zm0 3.9v2.9c-.7 0-1.5-.1-2.2-.1v-2.9c.7 0 1.5.1 2.2.1zm0 3.9v2.9c-.7 0-1.5-.1-2.2-.1v-2.9c.7.1 1.5.1 2.2.1zm0 4v2.9c-.7 0-1.5-.1-2.2-.1v-2.8c.7-.1 1.5-.1 2.2 0zm1.1 0c.7 0 1.5.1 2.2.1v2.9c-.7 0-1.5 0-2.2-.1v-2.9zm2.2 4v2.9c-.7 0-1.5 0-2.2-.1v-2.9c.7.1 1.5.1 2.2.1zm1.1 0h2.2v2.9h-2.2v-2.9zm3.2 0c.7 0 1.5 0 2.2-.1v2.9c-.7 0-1.5.1-2.2.1v-2.9zm0-1v-2.9c.7 0 1.5 0 2.2-.1v2.9c-.7 0-1.4 0-2.2.1zm3.3-3c.7 0 1.5-.1 2.2-.1v2.8c-.7.1-1.5.1-2.2.2v-2.9zm0-1.1v-2.9c.7 0 1.5-.1 2.2-.1v2.9c-.7 0-1.4.1-2.2.1zm0-3.9v-2.9c.7 0 1.5-.1 2.2-.1v2.9c-.7 0-1.4 0-2.2.1zm0-4v-2.9c.7 0 1.5-.1 2.2-.1v2.9c-.7.1-1.5.1-2.2.1zm0-3.9v-2.9c.7 0 1.5 0 2.2-.1v2.9c-.7.1-1.5.1-2.2.1zm0-3.9v-2.9h2.2v2.8c-.7 0-1.5 0-2.2.1zm0-4v-2.9h2.2v2.9h-2.2zm0-3.9v-2.9h2.2v2.9h-2.2zm-1 0h-2.2v-2.9h2.2v2.9zm-3.3 0h-2.2v-2.9h2.2v2.9zm-3.3 0h-2.2v-2.9h2.2v2.9zm-3.3 0H9.8v-2.9H12v2.9zm0 1.1v2.9H9.8v-2.9H12zm-3.2 2.8c-.7 0-1.5 0-2.2-.1v-2.8h2.2v2.9zm0 1v2.8c-.7 0-1.5-.1-2.2-.1v-2.8c.7.1 1.4.1 2.2.1zm0 3.9v2.8c-.7 0-1.5-.1-2.2-.1v-2.8c.7.1 1.4.1 2.2.1zm0 3.9v2.9c-.7 0-1.5-.1-2.2-.1v-2.8h2.2zm0 3.9v2.9c-.7-.1-1.5-.1-2.2-.2v-2.8c.7.1 1.4.1 2.2.1zm0 4v2.9c-.7-.1-1.5-.1-2.2-.2v-2.8c.7-.1 1.4 0 2.2.1zm0 3.9v2.8c-.7-.1-1.5-.1-2.2-.2v-2.8c.7 0 1.4.1 2.2.2zm0 3.8v2.9l-2.2-.3v-2.8c.7.1 1.4.2 2.2.2zm1 .1c.7.1 1.5.1 2.2.2v2.9c-.7 0-1.5-.1-2.2-.2v-2.9zm2.2 4.1v2.9c-.7-.1-1.5-.1-2.2-.2v-2.9c.7.1 1.5.2 2.2.2zm1.1.1c.7 0 1.5.1 2.2.1v2.9c-.7 0-1.5-.1-2.2-.1v-2.9zm3.3.1h2.2v2.9h-2.2v-2.9zm3.2 0c.7 0 1.5 0 2.2-.1v2.9c-.7 0-1.5.1-2.2.1v-2.9zm3.3-.2c.7 0 1.5-.1 2.2-.2v2.9c-.7.1-1.5.1-2.2.2v-2.9zm0-1v-2.9c.7 0 1.5-.1 2.2-.2v2.9c-.7.1-1.4.1-2.2.2zm3.3-3.2c.7-.1 1.5-.1 2.2-.2v2.8l-2.2.3v-2.9zm0-1v-2.8c.7-.1 1.5-.1 2.2-.2v2.8c-.7.1-1.5.1-2.2.2zm0-3.9v-2.8c.7-.1 1.5-.1 2.2-.2v2.8c-.7.1-1.5.1-2.2.2zm0-3.9v-2.9c.7 0 1.5-.1 2.2-.1v2.8c-.7.1-1.5.1-2.2.2zm0-3.9v-2.9c.7 0 1.5-.1 2.2-.1v2.8c-.7.1-1.5.1-2.2.2zm0-3.9v-2.8c.7 0 1.5-.1 2.2-.1v2.8c-.7 0-1.5 0-2.2.1zm0-3.9v-2.8c.7 0 1.5 0 2.2-.1v2.8c-.7 0-1.5 0-2.2.1zm0-3.9v-2.9h2.2v2.8c-.7 0-1.5.1-2.2.1zm-17.4-6.8v2.9H6.6v-2.8c.7-.1 1.4-.1 2.2-.1zm-2.3 34.9l2.2.3v2.9l-2.2-.3v-2.9zm19.7 3.1v-2.9l2.2-.3v2.8c-.7.2-1.5.3-2.2.4z" fill="#c6c6c6"/>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" id="database" viewBox="0 0 70 70" x="227.5" y="-306" width="40" height="40" preserveAspectRatio="none">
+  <style>
+    .st0{fill:#61ace0}.st1{fill:#96cdea}.st2{fill:#3c89c9}
+  </style>
+  <g id="disk_3_ygc1_">
+    <path fill="#61ace0" d="M35 46.2c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2V42c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 46.2c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M35 35.9c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.7 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_2_ygc1_">
+    <path fill="#61ace0" d="M35 32.7c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 32.7c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M34.9 22.4c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.6 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_1_ygc1_">
+    <path fill="#61ace0" d="M35 19.5c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 19.5c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <ellipse fill="#61ace0" cx="35" cy="13.3" rx="18.4" ry="3.9"/>
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" id="workstation" viewBox="3 7 65 60" x="-324.5" y="-347.5" width="144" height="137" preserveAspectRatio="none">
+  <path fill="#afafaf" d="M54.6 59.5c.2.5-.1.8-.6.8H3.9c-.5 0-.6-.3-.2-.6l8-7.2c.4-.3 1.1-.6 1.6-.6h37.3c.5 0 1.1.4 1.3.8l2.7 6.8z"/>
+  <path d="M54.6 59.5c.2.5-.1.8-.6.8H3.9c-.5 0-.6-.3-.2-.6l8-7.2c.4-.3 1.1-.6 1.6-.6h37.3c.5 0 1.1.4 1.3.8l2.7 6.8z" fill="none" stroke="#8d8d8d" stroke-width=".25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10"/>
+  <path fill="#6e6e6e" d="M35.4 58.1c0 .3-.2.5-.5.5H7.3c-.3 0-.3-.1-.1-.3l5.6-5.2c.2-.2.5-.3.8-.3H35c.3 0 .5.2.5.5l-.1 4.8zm8.6.1c.1.2.4.4.6.4h7.5c.3 0 .4-.2.3-.4l-2-4.9c-.1-.2-.4-.4-.6-.4h-7.2c-.3 0-.4.2-.3.4l1.7 4.9zm-7.8-.1c0 .3.2.5.5.5h6.1c.3 0 .4-.2.3-.4l-.2-.4c-.1-.2-.4-.4-.6-.4h-1c-.3 0-.5-.2-.6-.4v-.1c-.1-.2-.3-.4-.6-.4h-1.3c-.3 0-.4.2-.4.5v.1c0 .3-.2.5-.4.5h-1.3c-.3 0-.5.2-.5.5zm0-3.5c0 .3.2.5.5.5h4.8c.3 0 .4-.2.3-.4l-.4-1.3c-.1-.2-.3-.4-.6-.4h-4.2c-.3 0-.5.2-.5.5.1-.2.1 1.1.1 1.1zm14.2-6.5c0 1-6.8 1.4-12.4 1.4-3.9 0-10.9-.3-11.4-1.3v1.7c0 .7 4.8 1.2 11.4 1.2s12.4-.6 12.4-1.4v-1.6z"/>
+  <path d="M38.5 46.9c6.6 0 11.9.6 11.9 1.3s-5.3 1.4-11.9 1.4c-6.7 0-11.9-.7-11.9-1.4s5.3-1.3 11.9-1.3z" fill="gray"/>
+  <path fill="#6e6e6e" d="M41 48.5s-1.5.1-2.5.1-2.5-.1-2.5-.1v-9.8h5v9.8z"/>
+  <path fill="#6e6e6e" d="M12.8 9.7c0-1.1.9-2 2-2H63a2 2 0 0 1 2 2v30.1a2 2 0 0 1-2 2H14.8a2 2 0 0 1-2-2V9.7z"/>
+  <path d="M12.8 9.7c0-1.1.9-2 2-2H63a2 2 0 0 1 2 2v30.1a2 2 0 0 1-2 2H14.8a2 2 0 0 1-2-2V9.7z" fill="none" stroke="#666" stroke-width=".24" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10"/>
+  <path fill="#afafaf" d="M13.8 10.7c0-1.1.9-2 2-2h46.4a2 2 0 0 1 2 2v27.8a2 2 0 0 1-2 2H15.8a2 2 0 0 1-2-2V10.7z"/>
+  <path d="M14.4 11.2c0-1.1.9-2 2-2h45.3a2 2 0 0 1 2 2v26.9a2 2 0 0 1-2 2H16.4a2 2 0 0 1-2-2V11.2z" fill="#61ace0"/>
+  <path d="M62.1 54.2c-.2-.1-.4-.3-.7-.5.2.1.5.3.7.5z" fill="#c9c9c9"/>
+  <path fill="#afafaf" d="M62.1 54.2h.2c.6-.1 1.3-.2 2.2-.1 2 1.5 3.8 4.6 1.2 5.8-2 .9-3.5.8-4.7-.5-.6-.7-1.2-1.5-1.7-2.3.2-1.2.9-2.5 2.8-2.9z"/>
+  <path fill="#afafaf" d="M59.3 57.1c-.9-1.4-1.4-2.9-.7-3.5.2-.2.5-.4.9-.6.6.1 1.3.3 1.9.7.3.2.5.4.7.5-1.9.4-2.6 1.7-2.8 2.9z"/>
+  <path fill="#afafaf" d="M59.5 53c1.4-.6 3.3-.3 5 1l.1.1c-.9-.1-1.8 0-2.4.1-.1-.1-.8-.4-.7-.4-.7-.5-1.4-.8-2-.8z"/>
+  <path fill="none" stroke="#717171" stroke-width=".11" stroke-linecap="round" d="M59.5 53c1.4-.6 3.3-.3 5 1l.1.1c2 1.5 3.8 4.6 1.2 5.8-2 .9-3.5.8-4.7-.5-.6-.7-1.2-1.5-1.7-2.3-.9-1.4-1.4-2.9-.7-3.5.2-.3.4-.5.8-.6z"/>
+  <path fill="none" stroke="#717171" stroke-width=".11" stroke-linecap="round" d="M62.1 54.2c.1 0 .2 0 .3-.1.6-.1 1.3-.2 2.2-.1m-5.3 3.1c.3-1.1.9-2.5 2.8-2.9m-.7-.5c-.6-.3-1.3-.6-1.9-.7m2.6 1.2c-.2-.2-.4-.3-.7-.5"/>
+  <path d="M61.6 53.5c.4.3.4.5.5.6-.1 0-.2 0-.3.1-.4-.4-1-.7-1-.7.2-.2.6-.1.8 0z" fill="#4d4d4d"/>
+</svg></g><g data-referencesafe="true" transform="translate(-379.5 -178)"><rect fill="#68B0E3" stroke="#FFF" stroke-width="1px" width="304" height="264"/><rect fill="#FFF" y="22" x="4" width="296" height="238"/><g class="demo-collapse-button" transform="translate(287 5)"><rect fill="#FFF" width="12" height="12" rx="1" ry="1"/><rect width="8" height="2" x="2" y="5" fill="#68B0E3" stroke-width="0"/></g></g><g><svg xmlns="http://www.w3.org/2000/svg" id="database" viewBox="0 0 70 70" x="-341.5" y="-129" width="40" height="40" preserveAspectRatio="none">
+  <style>
+    .st0{fill:#61ace0}.st1{fill:#96cdea}.st2{fill:#3c89c9}
+  </style>
+  <g id="disk_3_ygc3_">
+    <path fill="#61ace0" d="M35 46.2c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2V42c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 46.2c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M35 35.9c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.7 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_2_ygc3_">
+    <path fill="#61ace0" d="M35 32.7c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 32.7c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M34.9 22.4c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.6 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_1_ygc3_">
+    <path fill="#61ace0" d="M35 19.5c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 19.5c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <ellipse fill="#61ace0" cx="35" cy="13.3" rx="18.4" ry="3.9"/>
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" id="database" viewBox="0 0 70 70" x="-341.5" y="-81" width="40" height="40" preserveAspectRatio="none">
+  <style>
+    .st0{fill:#61ace0}.st1{fill:#96cdea}.st2{fill:#3c89c9}
+  </style>
+  <g id="disk_3_ygc4_">
+    <path fill="#61ace0" d="M35 46.2c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2V42c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 46.2c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M35 35.9c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.7 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_2_ygc4_">
+    <path fill="#61ace0" d="M35 32.7c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 32.7c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M34.9 22.4c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.6 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_1_ygc4_">
+    <path fill="#61ace0" d="M35 19.5c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 19.5c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <ellipse fill="#61ace0" cx="35" cy="13.3" rx="18.4" ry="3.9"/>
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" id="database" viewBox="0 0 70 70" x="-341.5" y="-33" width="40" height="40" preserveAspectRatio="none">
+  <style>
+    .st0{fill:#61ace0}.st1{fill:#96cdea}.st2{fill:#3c89c9}
+  </style>
+  <g id="disk_3_ygc5_">
+    <path fill="#61ace0" d="M35 46.2c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2V42c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 46.2c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M35 35.9c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.7 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_2_ygc5_">
+    <path fill="#61ace0" d="M35 32.7c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 32.7c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M34.9 22.4c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.6 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_1_ygc5_">
+    <path fill="#61ace0" d="M35 19.5c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 19.5c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <ellipse fill="#61ace0" cx="35" cy="13.3" rx="18.4" ry="3.9"/>
+  </g>
+</svg></g><g><svg xmlns="http://www.w3.org/2000/svg" id="database" viewBox="0 0 70 70" x="-341.5" y="15" width="40" height="40" preserveAspectRatio="none">
+  <style>
+    .st0{fill:#61ace0}.st1{fill:#96cdea}.st2{fill:#3c89c9}
+  </style>
+  <g id="disk_3_ygc6_">
+    <path fill="#61ace0" d="M35 46.2c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2V42c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 46.2c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M35 35.9c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.7 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_2_ygc6_">
+    <path fill="#61ace0" d="M35 32.7c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 32.7c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <path fill="#3c89c9" d="M34.9 22.4c10.2 0 19.6 2.8 19.6 2.8-.4 2.7-5.4 5.4-19.6 5.4-12.1 0-18.5-2.5-19.5-4.9-.3-.6 9.3-3.3 19.5-3.3z"/>
+  </g>
+  <g id="disk_1_ygc6_">
+    <path fill="#61ace0" d="M35 19.5c-10.8 0-19.6-1.9-19.6-4.2v10c0 2.3 8.8 4.2 19.6 4.2s19.6-1.9 19.6-4.2v-10c0 2.3-8.8 4.2-19.6 4.2z"/>
+    <path fill="#96cdea" d="M35 19.5c10.8 0 19.6-1.9 19.6-4.2l-1.2-2c0 2.2-8.2 3.9-18.4 3.9-9.5 0-17.4-2-18.4-3.9l-1.2 2c0 2.3 8.8 4.2 19.6 4.2z"/>
+    <ellipse fill="#61ace0" cx="35" cy="13.3" rx="18.4" ry="3.9"/>
+  </g>
+</svg></g><g transform="translate(-97 -274)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(63.5 0)">JSON field visit uploads</text></g><g transform="translate(111 -222.5)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(46.5 0)">AQTS app server</text></g><g transform="translate(272.5 -293)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(63 0)">JSON Field Data plugin</text></g><g transform="translate(-391 -205.5)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(138.5 0)">Your system running FieldVisitHotFolderService.exe</text></g><g transform="translate(-375.5 -174)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="start" fill="rgb(255,255,255)" fill-opacity="1" transform="translate(0 0)"><tspan dy="0.9166666666666666em" x="0">&lt;FieldVisitService&gt;\LocalPlugins</tspan></text></g><g transform="translate(-296.5 -116)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(54 0)">FlowTracker2 plugin</text></g><g transform="translate(-296.5 -68)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(46.5 0)">Survey123 plugin</text></g><g transform="translate(-296.5 -20)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(86 0)">StageDischargeReadings plugin</text></g><g transform="translate(-296.5 28)"><text font-family="'Arial'" font-size="12px" font-style="normal" font-weight="normal" text-anchor="middle" fill="rgb(0,0,0)" fill-opacity="1" dy="0.9166666666666666em" transform="translate(40.5 0)">MultiFile plugin</text></g></g></svg>
