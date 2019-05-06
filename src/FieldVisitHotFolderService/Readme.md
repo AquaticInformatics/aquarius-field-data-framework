@@ -10,6 +10,8 @@ The `FieldVisitHotFolderService.exe` tool is a .NET console tool which can:
 
 The service can be run on any Windows system with the .NET 4.7.2 runtime. This includes every Windows 10 desktop and Windows 2016 Server, and any Windows 7 desktop and Windows 2008 R2 Server with the most recent Windows Update patches.
 
+![Field Visit Hot Folder Service](images/FieldVisitHotFolderService.svg "Field Visit Hot Folder Service")
+
 # Installing the service
 
 - Download the `FieldVisitHotFolderService.zip` archive from the [releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest) and unzip the contents into a folder.

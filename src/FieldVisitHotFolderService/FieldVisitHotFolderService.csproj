@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="images\ChangeServiceLogOn.png" />
+    <Content Include="images\FieldVisitHotFolderService.svg" />
     <Content Include="LocalPlugins\Place your plugins here.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
