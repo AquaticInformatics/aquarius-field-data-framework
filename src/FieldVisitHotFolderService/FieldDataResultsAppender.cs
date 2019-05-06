@@ -60,7 +60,10 @@ namespace FieldVisitHotFolderService
                     location.UniqueId,
                     location.UtcOffset.ToTimeSpan().TotalHours);
 
-            LocationCache.Add(locationInfo);
+            if (LocationCache.SingleOrDefault(l => l.LocationIdentifier == locationInfo.LocationIdentifier) == null)
+            {
+                LocationCache.Add(locationInfo);
+            }
 
             return locationInfo;
         }
