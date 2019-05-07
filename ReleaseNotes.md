@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 18.4.14
+- There have been a few rapid 18.4.x point releases, as the new JSON plugin, MultiFile plugin, and FieldVisitHotFolderService have stabilized.
+- The 2018.4 framework itself posted to NuGet has not changed and functionality since the 18.4.0 release.
+
 ### 18.4.7
 - Added [JSON plugin](./src/JsonFieldData/Readme.md), [Multi-file plugin](./src/MultiFile/Readme.md), and the [Field visit hot folder service](./src/FieldVisitHotFolderService/Readme.md)
 
