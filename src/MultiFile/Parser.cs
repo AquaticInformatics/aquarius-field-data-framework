@@ -112,9 +112,7 @@ namespace MultiFile
             // ReSharper disable once PossibleNullReferenceException
             var sourceFolders = parentFolder
                 .GetDirectories()
-                .Where(di => !ExcludedFolderNames.Contains(di.Name)
-                             && di.FullName != pluginFolder.FullName
-                             && di.GetFiles("*.dll").Any())
+                .Where(di => IsPeerPluginFolder(di, pluginFolder))
                 .ToList();
 
             var pluginCopyRoot = new DirectoryInfo(Path.Combine(pluginFolder.FullName, "PluginCopies"));
@@ -123,15 +121,7 @@ namespace MultiFile
 
             var copiesToDelete = pluginCopyRoot
                 .GetDirectories()
-                .Where(copy =>
-                {
-                    if (sourceFolders.All(source => source.Name != copy.Name))
-                        return true;
-
-                    return sourceFolders
-                        .First(source => source.Name == copy.Name)
-                        .LastWriteTimeUtc > copy.LastWriteTimeUtc;
-                })
+                .Where(copy => IsStalePluginCopy(copy, sourceFolders))
                 .ToList();
 
             foreach (var copy in copiesToDelete)
@@ -155,12 +145,77 @@ namespace MultiFile
                 .ToList();
         }
 
+        private static bool IsPeerPluginFolder(DirectoryInfo folder, DirectoryInfo pluginFolder)
+        {
+            return !ExcludedFolderNames.Contains(folder.Name)
+                   && folder.FullName != pluginFolder.FullName
+                   && folder.GetFiles("*.dll").Any();
+        }
+
         private static readonly HashSet<string> ExcludedFolderNames = new HashSet<string>
         {
             "Library",  // Ignore the framework folder on AQTS app servers
             "Release",  // Ignore the common bin folders when run from the Visual Studio build folder
             "Debug"
         };
+
+        private bool IsStalePluginCopy(DirectoryInfo copy, List<DirectoryInfo> sourceFolders)
+        {
+            if (sourceFolders.All(source => source.Name != copy.Name))
+            {
+                // There is no matching folder in the source plugin collection
+                return true;
+            }
+
+            var sourceFolder = sourceFolders
+                .First(source => source.Name == copy.Name);
+
+            var sourceFiles = GetAllFiles(sourceFolder);
+            var copyFiles = GetAllFiles(copy);
+
+            if (sourceFiles.Count != copyFiles.Count)
+            {
+                // The file list is different
+                return true;
+            }
+
+            return copyFiles.Any(file =>
+            {
+                if (!sourceFiles.TryGetValue(file.Key, out var sourceFile))
+                {
+                    // The file doesn't exist in the source
+                    return true;
+                }
+
+                var copyFile = file.Value;
+
+                if (sourceFile.Length != copyFile.Length)
+                {
+                    // Source file length has changed
+                    return true;
+                }
+
+                if (sourceFile.LastWriteTimeUtc > copyFile.LastWriteTimeUtc)
+                {
+                    // Source file has been updated since the last copy
+                    return true;
+                }
+
+                // No file change detected
+                return false;
+            });
+        }
+
+        private static Dictionary<string,FileInfo> GetAllFiles(DirectoryInfo folder)
+        {
+            var files = folder.GetFiles("*", SearchOption.AllDirectories);
+
+            return files
+                .ToDictionary(
+                    f => f.FullName.Substring(folder.FullName.Length + 1),
+                    f => f,
+                    StringComparer.InvariantCultureIgnoreCase);
+        }
 
         private void CopyFolder(DirectoryInfo source, string copyPath)
         {
@@ -224,7 +279,8 @@ namespace MultiFile
 
                     if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
                     {
-                        return ParseFileResult.CannotParse();
+                        Log.Error($"Plugin {plugin.GetType().FullName} failed to parse '{entry.FullName}' with {result.Status}('{result.ErrorMessage}')");
+                        return result;
                     }
 
                     isParsed = true;
