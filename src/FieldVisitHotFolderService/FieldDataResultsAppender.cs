@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
@@ -12,14 +13,18 @@ using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
+using log4net;
 using ServiceStack;
 using DischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
+using ILog = log4net.ILog;
 using Reading = FieldDataPluginFramework.DataModel.Readings.Reading;
 
 namespace FieldVisitHotFolderService
 {
     public class FieldDataResultsAppender : IFieldDataResultsAppender
     {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
 
@@ -39,12 +44,19 @@ namespace FieldVisitHotFolderService
                     {LocationIdentifier = locationIdentifier})
                 .LocationDescriptions;
 
-            if (locationDescriptions.Count != 1)
+            var locationDescription = locationDescriptions
+                .SingleOrDefault(l => l.Identifier == locationIdentifier);
+
+            if (locationDescription == null)
             {
-                throw new ArgumentException($"Location {locationIdentifier} does not exist");
+                Log.Error(!locationDescriptions.Any()
+                    ? $"Location '{locationIdentifier}' does not exist."
+                    : $"Location '{locationIdentifier}' has ambiguously found {locationDescriptions.Count} matches: {string.Join(", ", locationDescriptions.Select(l => l.Identifier))}");
+
+                throw new ArgumentException($"Location '{locationIdentifier}' does not exist.");
             }
 
-            var location = Client.Provisioning.Get(new GetLocation {LocationUniqueId = locationDescriptions[0].UniqueId});
+            var location = Client.Provisioning.Get(new GetLocation {LocationUniqueId = locationDescription.UniqueId});
 
             return AddLocationInfo(location);
         }
@@ -86,6 +98,8 @@ namespace FieldVisitHotFolderService
             }
             catch (WebServiceException)
             {
+                Log.Error($"LocationUniqueId {uniqueId:N} does not exist");
+
                 throw new ArgumentException($"LocationUniqueId {uniqueId:N} does not exist");
             }
         }
