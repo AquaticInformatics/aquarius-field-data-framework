@@ -12,7 +12,6 @@ using Common;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using log4net;
-using FieldDataPlugin = Aquarius.TimeSeries.Client.ServiceModels.Provisioning.FieldDataPlugin;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -37,17 +36,13 @@ namespace FieldVisitHotFolderService
 
         public void Run()
         {
-            Validate();
-
             WaitForStableServerVersion();
 
-            if (CancellationToken.IsCancellationRequested)
-                return;
-
-            ThrowIfJsonPluginNotInstalled();
+            ConnectAndThrowIfJsonPluginNotInstalled();
 
             while (!CancellationToken.IsCancellationRequested)
             {
+                Validate();
                 ProcessNewFiles();
                 WaitForNewFiles();
             }
@@ -87,7 +82,7 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private static readonly char[] FileMaskDelimiters = {','};
+        private static readonly char[] FileMaskDelimiters = {',', ';'};
 
         private static Regex CreateRegexFromDosWildcard(string mask)
         {
@@ -173,17 +168,20 @@ namespace FieldVisitHotFolderService
 
         private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("18.4");
 
-        private void ThrowIfJsonPluginNotInstalled()
+        private void ConnectAndThrowIfJsonPluginNotInstalled()
         {
+            if (CancellationToken.IsCancellationRequested)
+                return;
+
             using (Client = CreateConnectedClient())
             {
-                GetInstalledJsonPlugin();
+                ThrowIfJsonPluginNotInstalled();
             }
 
             Client = null;
         }
 
-        private FieldDataPlugin GetInstalledJsonPlugin()
+        private void ThrowIfJsonPluginNotInstalled()
         {
             var plugins = Client.Provisioning.Get(new GetFieldDataPlugins())
                 .Results;
@@ -192,9 +190,7 @@ namespace FieldVisitHotFolderService
                 .FirstOrDefault(p => p.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin"));
 
             if (jsonPlugin == null)
-                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/json-field-data-plugin/releases");
-
-            return jsonPlugin;
+                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
         }
 
         private void ProcessNewFiles()
@@ -212,6 +208,8 @@ namespace FieldVisitHotFolderService
 
                 using (Client = CreateConnectedClient())
                 {
+                    ThrowIfJsonPluginNotInstalled();
+
                     foreach (var file in files)
                     {
                         if (CancellationToken.IsCancellationRequested)
