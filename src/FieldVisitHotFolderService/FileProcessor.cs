@@ -38,7 +38,7 @@ namespace FieldVisitHotFolderService
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
         public CancellationToken CancellationToken { get; set; }
-        private FileLogger Log { get; } = new FileLogger {Log = Log4NetLog};
+        private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
         public void ProcessFile(string sourcePath)
         {
@@ -109,6 +109,13 @@ namespace FieldVisitHotFolderService
             }
 
             Log.Info($"Moving '{path}' to '{targetPath}'");
+
+            if (!Directory.Exists(targetFolder))
+            {
+                Log.Info($"Creating '{targetFolder}'");
+                Directory.CreateDirectory(targetFolder);
+            }
+
             File.Move(path, targetPath);
 
             if (writeTargetLog)
@@ -124,7 +131,8 @@ namespace FieldVisitHotFolderService
             var appender = new FieldDataResultsAppender
             {
                 Client = Client,
-                LocationCache = LocationCache
+                LocationCache = LocationCache,
+                Log = Log
             };
 
             foreach (var plugin in Plugins)
@@ -133,11 +141,9 @@ namespace FieldVisitHotFolderService
 
                 try
                 {
-                    var logger = Log4NetLogger.Create(LogManager.GetLogger(plugin.GetType()));
-
                     using (var stream = new MemoryStream(fileBytes))
                     {
-                        var result = plugin.ParseFile(stream, appender, logger);
+                        var result = plugin.ParseFile(stream, appender, Log);
 
                         // TODO: Support Zip-with-attachments
 
@@ -183,28 +189,58 @@ namespace FieldVisitHotFolderService
         {
             var semaphore = new SemaphoreSlim(Context.MaximumConcurrentRequests);
 
-            Log.Info($"Appending {appendedResults.AppendedVisits.Count} visits using {Context.MaximumConcurrentRequests} concurrent requests.");
+            var unknownVisits = appendedResults
+                .AppendedVisits
+                .Where(IsUnknownLocation)
+                .ToList();
 
-            var isPartial = false;
-            var isFailure = false;
+            var visitsToAppend = appendedResults
+                .AppendedVisits
+                .Where(visit => !unknownVisits.Contains(visit))
+                .ToList();
+
+            if (unknownVisits.Any())
+            {
+                if (visitsToAppend.Any())
+                {
+                    Log.Warn($"Skipping {unknownVisits.Count} visits for unknown locations");
+                }
+                else
+                {
+                    Log.Error($"All {unknownVisits.Count} visits are for unknown locations.");
+                }
+            }
+
+            var isFailure = unknownVisits.Any() && !visitsToAppend.Any();
+            var isPartial = !isFailure && unknownVisits.Any();
 
             UploadedFilename = Path.GetFileName(path) + ".json";
 
-            Task.WhenAll(appendedResults.AppendedVisits.Select(async visit =>
+            if (visitsToAppend.Any())
             {
-                using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
+                Log.Info($"Appending {visitsToAppend.Count} visits using {Context.MaximumConcurrentRequests} concurrent requests.");
+
+                Task.WhenAll(visitsToAppend.Select(async visit =>
                 {
-                    await Task.Run(() =>
-                            UploadVisit(
-                                visit,
-                                appendedResults,
-                                () => isPartial = true,
-                                () => isFailure = true)
-                        , CancellationToken);
-                }
-            })).Wait(CancellationToken);
+                    using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
+                    {
+                        await Task.Run(() =>
+                                UploadVisit(
+                                    visit,
+                                    appendedResults,
+                                    () => isPartial = true,
+                                    () => isFailure = true)
+                            , CancellationToken);
+                    }
+                })).Wait(CancellationToken);
+            }
 
             return (IsPartial: isPartial, IsFailure: isFailure);
+        }
+
+        private bool IsUnknownLocation(FieldVisitInfo visit)
+        {
+            return !Guid.TryParse(visit.LocationInfo.UniqueId, out var uniqueId) || uniqueId == Guid.Empty;
         }
 
         private void UploadVisit(

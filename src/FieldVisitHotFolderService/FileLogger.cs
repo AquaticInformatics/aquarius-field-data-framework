@@ -2,11 +2,19 @@
 using System.Text;
 using log4net;
 
+using Log4NetILog = log4net.ILog;
+using PluginILog = FieldDataPluginFramework.ILog;
+
 namespace FieldVisitHotFolderService
 {
-    public class FileLogger
+    public class FileLogger : PluginILog
     {
-        public ILog Log { get; set; }
+        public FileLogger(Log4NetILog log)
+        {
+            Log = log;
+        }
+
+        private ILog Log { get; }
         private StringBuilder Builder { get; } = new StringBuilder();
 
         public void Info(string message)

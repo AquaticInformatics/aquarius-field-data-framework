@@ -17,6 +17,7 @@ namespace FieldVisitHotFolderService
         public Context Context { get; set; }
         private CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
         private Task FileDetectorTask { get; set; }
+        private StatusIndicator StatusIndicator { get; set; }
 
         public void RunUntilStopped()
         {
@@ -47,10 +48,13 @@ namespace FieldVisitHotFolderService
         {
             Log.Info($"Starting {FileHelper.ExeNameAndVersion}.");
 
+            StatusIndicator = new StatusIndicator();
+
             var fileProcessor = new FileDetector
             {
                 Context = Context,
-                CancellationToken = CancellationTokenSource.Token
+                CancellationToken = CancellationTokenSource.Token,
+                StatusIndicator = StatusIndicator
             };
 
             await Task.Run(() => fileProcessor.Run(), CancellationTokenSource.Token);
@@ -100,9 +104,11 @@ namespace FieldVisitHotFolderService
                 WaitForFileDetectorTask();
 
                 CancellationTokenSource.Dispose();
+                StatusIndicator.Dispose();
             }
             catch (Exception e)
             {
+                StatusIndicator.Dispose();
                 Log.Fatal("Failed to stop file processor normally; exiting process", e);
                 Environment.Exit(20);
             }
