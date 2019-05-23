@@ -22,6 +22,7 @@ namespace FieldVisitHotFolderService
 
         public Context Context { get; set; }
         public CancellationToken CancellationToken { get; set; }
+        public StatusIndicator StatusIndicator { get; set; }
 
         private string SourceFolder { get; set; }
         private List<Regex> FileMasks { get; set; }
@@ -59,11 +60,13 @@ namespace FieldVisitHotFolderService
 
             ThrowIfFolderIsMissing(SourceFolder);
 
-            ProcessingFolder = CreateFolderPath(Context.ProcessingFolder);
-            PartialFolder = CreateFolderPath(Context.PartialFolder);
-            ArchivedFolder = CreateFolderPath(Context.ArchivedFolder);
-            UploadedFolder = CreateFolderPath(Context.UploadedFolder);
-            FailedFolder = CreateFolderPath(Context.FailedFolder);
+            StatusIndicator.Activate(SourceFolder);
+
+            ProcessingFolder = ResolveSourceFolderPath(Context.ProcessingFolder);
+            PartialFolder = ResolveSourceFolderPath(Context.PartialFolder);
+            ArchivedFolder = ResolveSourceFolderPath(Context.ArchivedFolder);
+            UploadedFolder = ResolveSourceFolderPath(Context.UploadedFolder);
+            FailedFolder = ResolveSourceFolderPath(Context.FailedFolder);
 
             FileMasks = (Context.FileMask ?? "*.*")
                 .Split(FileMaskDelimiters, StringSplitOptions.RemoveEmptyEntries)
@@ -89,19 +92,6 @@ namespace FieldVisitHotFolderService
             return new Regex(
                 $@"^{mask.Replace(".", "\\.").Replace("*", ".*")}$",
                 RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
-        }
-
-        private string CreateFolderPath(string relativeOrAbsolutePath)
-        {
-            var path = ResolveSourceFolderPath(relativeOrAbsolutePath);
-
-            if (!Directory.Exists(path))
-            {
-                Log.Info($"Creating '{path}'");
-                Directory.CreateDirectory(path);
-            }
-
-            return path;
         }
 
         private string ResolveSourceFolderPath(string relativeOrAbsolutePath)
@@ -226,7 +216,7 @@ namespace FieldVisitHotFolderService
         private List<string> GetNewFiles()
         {
             return Directory.GetFiles(SourceFolder)
-                .Where(f => FileMasks.Any(m => m.IsMatch(f)))
+                .Where(f => FileMasks.Any(m => m.IsMatch(f)) && !StatusIndicator.FilesToIgnore.Contains(Path.GetFileName(f)))
                 .ToList();
         }
 
@@ -274,6 +264,8 @@ namespace FieldVisitHotFolderService
 
             void CreatedHandler(object s, FileSystemEventArgs e)
             {
+                if (StatusIndicator.FilesToIgnore.Contains(e.Name)) return;
+
                 tcs.TrySetResult(true);
                 watcher.Created -= CreatedHandler;
                 watcher.Dispose();
@@ -281,6 +273,8 @@ namespace FieldVisitHotFolderService
 
             void ChangedHandler(object s, FileSystemEventArgs e)
             {
+                if (StatusIndicator.FilesToIgnore.Contains(e.Name)) return;
+
                 tcs.TrySetResult(true);
                 watcher.Changed -= ChangedHandler;
                 watcher.Dispose();
@@ -288,6 +282,8 @@ namespace FieldVisitHotFolderService
 
             void RenamedHandler(object s, RenamedEventArgs e)
             {
+                if (StatusIndicator.FilesToIgnore.Contains(e.Name)) return;
+
                 tcs.TrySetResult(true);
                 watcher.Renamed -= RenamedHandler;
                 watcher.Dispose();

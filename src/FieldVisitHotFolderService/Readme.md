@@ -101,6 +101,14 @@ The `/MergeMode` option controls how the service behaves when a file contains ac
 - For every successfully parsed visit, the service will check if a visit already exists on that day at the requested location. These "conflicting visits" will be skipped with a `WARN` log line, but will not cause a failure.
 - If no plugins can parse the file successfully, or if an upload error occurs, the file will be considered to have failed, and will be moved to the `/FailedFolder`.
 
+## How can I tell if the hot folder service is running?
+
+When the service is running, a special file named `_ServiceIsRunning_.txt` will be created in the `/HotFolderPath` folder.
+
+When the service has been stopped, this special file will be automatically deleted.
+
+This will help network users know if the service is actually monitoring the folder for incoming files.
+
 ## Conditions which can cause a file to be "failed"
 
 Any of these conditions will cause the file to be considered failed, and will be moved to the `/FailedFolder`:

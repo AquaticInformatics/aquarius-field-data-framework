@@ -109,6 +109,13 @@ namespace FieldVisitHotFolderService
             }
 
             Log.Info($"Moving '{path}' to '{targetPath}'");
+
+            if (!Directory.Exists(targetFolder))
+            {
+                Log.Info($"Creating '{targetFolder}'");
+                Directory.CreateDirectory(targetFolder);
+            }
+
             File.Move(path, targetPath);
 
             if (writeTargetLog)
