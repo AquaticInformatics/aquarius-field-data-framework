@@ -38,7 +38,7 @@ namespace FieldVisitHotFolderService
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
         public CancellationToken CancellationToken { get; set; }
-        private FileLogger Log { get; } = new FileLogger {Log = Log4NetLog};
+        private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
         public void ProcessFile(string sourcePath)
         {
@@ -133,11 +133,9 @@ namespace FieldVisitHotFolderService
 
                 try
                 {
-                    var logger = Log4NetLogger.Create(LogManager.GetLogger(plugin.GetType()));
-
                     using (var stream = new MemoryStream(fileBytes))
                     {
-                        var result = plugin.ParseFile(stream, appender, logger);
+                        var result = plugin.ParseFile(stream, appender, Log);
 
                         // TODO: Support Zip-with-attachments
 
