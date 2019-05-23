@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
@@ -13,20 +12,18 @@ using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
-using log4net;
+using NodaTime;
 using ServiceStack;
 using DischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
-using ILog = log4net.ILog;
 using Reading = FieldDataPluginFramework.DataModel.Readings.Reading;
 
 namespace FieldVisitHotFolderService
 {
     public class FieldDataResultsAppender : IFieldDataResultsAppender
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
+        public ILog Log { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -53,7 +50,7 @@ namespace FieldVisitHotFolderService
                     ? $"Location '{locationIdentifier}' does not exist."
                     : $"Location '{locationIdentifier}' has ambiguously found {locationDescriptions.Count} matches: {string.Join(", ", locationDescriptions.Select(l => l.Identifier))}");
 
-                throw new ArgumentException($"Location '{locationIdentifier}' does not exist.");
+                return AddUnknownLocationInfo(locationIdentifier);
             }
 
             var location = Client.Provisioning.Get(new GetLocation {LocationUniqueId = locationDescription.UniqueId});
@@ -63,14 +60,31 @@ namespace FieldVisitHotFolderService
 
         private LocationInfo AddLocationInfo(Location location)
         {
+            return AddLocationInfo(
+                location.LocationName,
+                location.Identifier,
+                location.UtcOffset,
+                location.UniqueId);
+        }
+
+        private LocationInfo AddUnknownLocationInfo(string locationIdentifier)
+        {
+            return AddLocationInfo(
+                $"Unknown {locationIdentifier}",
+                locationIdentifier,
+                Offset.Zero);
+        }
+
+        private LocationInfo AddLocationInfo(string locationName, string locationIdentifier, Offset utcOffset, Guid? uniqueId = null)
+        {
             const long dummyId = 0;
             var locationInfo =
                 InternalConstructor<LocationInfo>.Invoke(
-                    location.LocationName,
-                    location.Identifier,
+                    locationName,
+                    locationIdentifier,
                     dummyId,
-                    location.UniqueId,
-                    location.UtcOffset.ToTimeSpan().TotalHours);
+                    uniqueId ?? Guid.Empty,
+                    utcOffset.ToTimeSpan().TotalHours);
 
             if (LocationCache.SingleOrDefault(l => l.LocationIdentifier == locationInfo.LocationIdentifier) == null)
             {

@@ -4,6 +4,12 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 18.4.15
+- The FieldVisitHotFolderService has a few bug fixes:
+    - [Issue #82](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/82) - Skip visits for unknown locations
+    - [Issue #81](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/81) - Show when the service is running
+    - [Issue #80](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/80) - Capture all logged messages
+
 ### 18.4.14
 - There have been a few rapid 18.4.x point releases, as the new JSON plugin, MultiFile plugin, and FieldVisitHotFolderService have stabilized.
 - The 2018.4 framework itself posted to NuGet has not changed and functionality since the 18.4.0 release.

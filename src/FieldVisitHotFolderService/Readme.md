@@ -113,7 +113,7 @@ This will help network users know if the service is actually monitoring the fold
 
 Any of these conditions will cause the file to be considered failed, and will be moved to the `/FailedFolder`:
 - The file was not recognized by one of the local `/Plugin` parsers.
-- The location identifiers referenced in the file do not exist on the AQTS system.
+- All of the location identifiers referenced in the file do not exist on the AQTS system.
 - A validation error occurred when the visit was uploaded to AQTS.
 
 ## "Partial uploads" - Conflicting visits on the same day cannot be overwritten
