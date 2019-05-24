@@ -158,6 +158,13 @@ namespace FieldVisitHotFolderService
                 },
                 new CommandLineOption
                 {
+                    Key = nameof(context.FileScanInterval),
+                    Setter = value => context.FileScanInterval = TimeSpan.Parse(value),
+                    Getter = () => context.FileScanInterval.ToString(),
+                    Description = "Maximum timespan between scanning for new files."
+                },
+                new CommandLineOption
+                {
                     Key = nameof(context.ProcessingFolder),
                     Setter = value => context.ProcessingFolder = value,
                     Getter = () => context.ProcessingFolder,
@@ -260,6 +267,15 @@ namespace FieldVisitHotFolderService
 
             if (context.MaximumConcurrentRequests > upperLimit)
                 throw new ExpectedException($"{nameof(context.MaximumConcurrentRequests)} can't exceed {upperLimit}.");
+
+            if (context.FileScanInterval <= TimeSpan.Zero)
+                throw new ExpectedException($"{nameof(context.FileScanInterval)} must be positive.");
+
+            if (context.FileQuietDelay <= TimeSpan.Zero)
+                throw new ExpectedException($"{nameof(context.FileQuietDelay)} must be positive.");
+
+            if (context.ConnectionRetryDelay <= TimeSpan.Zero)
+                throw new ExpectedException($"{nameof(context.ConnectionRetryDelay)} must be positive.");
         }
 
         private readonly Context _context;

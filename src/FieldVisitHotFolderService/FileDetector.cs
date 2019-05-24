@@ -245,12 +245,19 @@ namespace FieldVisitHotFolderService
 
         private void WaitForNewFiles()
         {
-            if (CancellationToken.IsCancellationRequested)
-                return;
-
-            Log.Info($"Waiting for file changes in '{SourceFolder}' ...");
+            Log.Info($"Waiting for file changes in '{SourceFolder}' with a scan interval of {Context.FileScanInterval} ...");
             var task = WhenFileCreated();
-            task.Wait(CancellationToken);
+
+            while(true)
+            {
+                if (CancellationToken.IsCancellationRequested)
+                    return;
+
+                if (GetNewFiles().Any())
+                    break;
+
+                task.Wait(Context.FileScanInterval.Milliseconds, CancellationToken);
+            }
 
             var timeSpan = Context.FileQuietDelay;
             Log.Info($"Waiting {timeSpan} for file activity to settle at '{SourceFolder}'");
