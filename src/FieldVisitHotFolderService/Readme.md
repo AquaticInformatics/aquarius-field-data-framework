@@ -176,6 +176,7 @@ Supported -option=value settings (/option=value works too):
   -HotFolderPath              The root path to monitor for field visit files.
   -FileMask                   A comma-separated list of file patterns to monitor. [defaults to '*.*' if omitted]
   -FileQuietDelay             Timespan of no file activity before processing begins. [default: 00:00:05]
+  -FileScanInterval           Maximum timespan between scanning for new files. [default: 00:01:00]
   -ProcessingFolder           Move files to this folder during processing. [default: Processing]
   -UploadedFolder             Move files to this folder after successful uploads. [default: Uploaded]
   -PartialFolder              Move files to this folder if when partial uploads are performed to avoid duplicates. [default: PartialUploads]

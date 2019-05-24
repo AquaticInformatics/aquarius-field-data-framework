@@ -16,6 +16,7 @@ namespace FieldVisitHotFolderService
         public string ArchivedFolder { get; set; } = "Archived";
         public string FailedFolder { get; set; } = "Failed";
         public TimeSpan FileQuietDelay { get; set; } = TimeSpan.FromSeconds(5);
+        public TimeSpan FileScanInterval { get; set; } = TimeSpan.FromMinutes(1);
         public int MaximumConnectionAttempts { get; set; } = 3;
         public TimeSpan ConnectionRetryDelay { get; set; } = TimeSpan.FromMinutes(1);
         public MergeMode MergeMode { get; set; } = MergeMode.Skip;
