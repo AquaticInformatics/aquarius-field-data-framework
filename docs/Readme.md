@@ -14,10 +14,11 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
-### AQTS 2019.2 - Framework version 2.2
+### AQTS 2019.2 - Framework version 2.3
 
 - Added optional MeasurementGrade property to DischargeActivity. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
 - Added QualitativeUncertaintyType enumeration and optional property on DischargeActivity.
+- Added support for Inspections and Calibrations.
 
 ### AQTS 2019.1 - Framework version 2.1
 
