@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,6 +35,8 @@ namespace FieldVisitHotFolderService
         private List<IFieldDataPlugin> Plugins { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
+        private int ProcessedFileCount { get; set; }
+        public Action CancellationAction { get; set; }
 
         public void Run()
         {
@@ -206,6 +209,15 @@ namespace FieldVisitHotFolderService
                             return;
 
                         ProcessFile(file);
+
+                        ++ProcessedFileCount;
+
+                        if (ProcessedFileCount >= Context.MaximumFileCount)
+                        {
+                            Log.Info($"Stopping processing after {ProcessedFileCount} files.");
+                            CancellationAction();
+                            return;
+                        }
                     }
                 }
 
@@ -245,8 +257,18 @@ namespace FieldVisitHotFolderService
 
         private void WaitForNewFiles()
         {
-            Log.Info($"Waiting for file changes in '{SourceFolder}' with a scan interval of {Context.FileScanInterval} ...");
+            var remainingFileStatus = Context.MaximumFileCount.HasValue
+                ? $"{Context.MaximumFileCount - ProcessedFileCount} of {Context.MaximumFileCount} "
+                : string.Empty;
+
+            var maximumWaitStatus = Context.MaximumFileWaitInterval.HasValue
+                ? $"up to {Context.MaximumFileWaitInterval} "
+                : string.Empty;
+
+            Log.Info($"Waiting {maximumWaitStatus}for {remainingFileStatus}file changes in '{SourceFolder}' with a scan interval of {Context.FileScanInterval} ...");
             var task = WhenFileCreated();
+
+            var stopwatch = Stopwatch.StartNew();
 
             while(true)
             {
@@ -256,7 +278,14 @@ namespace FieldVisitHotFolderService
                 if (GetNewFiles().Any())
                     break;
 
-                task.Wait(Context.FileScanInterval.Milliseconds, CancellationToken);
+                if (stopwatch.Elapsed >= Context.MaximumFileWaitInterval)
+                {
+                    Log.Info($"Stopping processing after {stopwatch.Elapsed} with no detected file activity.");
+                    CancellationAction();
+                    return;
+                }
+
+                task.Wait((int)Context.FileScanInterval.TotalMilliseconds, CancellationToken);
             }
 
             var timeSpan = Context.FileQuietDelay;
