@@ -198,6 +198,20 @@ namespace FieldVisitHotFolderService
                     Getter = () => context.FailedFolder,
                     Description = "Move files to this folder if an upload error occurs."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumFileCount),
+                    Setter = value => context.MaximumFileCount = int.Parse(value),
+                    Getter = () => $"{context.MaximumFileCount}",
+                    Description = "Maximum number of files to process before exiting. [default: Keep running forever]"
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumFileWaitInterval),
+                    Setter = value => context.MaximumFileWaitInterval = TimeSpan.Parse(value),
+                    Getter = () => $"{context.MaximumFileWaitInterval}",
+                    Description = "Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]"
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(

@@ -145,6 +145,17 @@ When the service is started, and immediately before processing any detected file
 - If the AQTS server is not running AQTS 2018.4-or-newer, the service will exit.
 - If the AQTS server does not have the [JSON field data plugin](../JsonFieldData/Readme.md) installed, the service will exit.
 
+# Forcing the service to exit after certain conditions are met
+
+Two advanced options are provided to force the service to exit under certain conditions:
+
+- `/MaximumFileCount=limit` will force the service to exit after processing the given number of files.
+- `/MaximumFileWaitInterval=timespan` will force the service to exit after an interval elapses with no new files.
+
+These options default to "keep the service running forever", and the options can be combined together.
+
+These options are not meant for a normal production deployment, but can be useful when scripting together migration workflows which only need to upload a certain number of field visit files and then continue on to perform other work.
+
 # Log files
 
 The service creates a `FieldVisitHotFolderService.log` file in the same directory as the EXE.
@@ -182,6 +193,8 @@ Supported -option=value settings (/option=value works too):
   -PartialFolder              Move files to this folder if when partial uploads are performed to avoid duplicates. [default: PartialUploads]
   -ArchivedFolder             Any visits replaced via /MergeMode=ArchiveAndReplace will be archived here before being replace with new visits. [default: Archived]
   -FailedFolder               Move files to this folder if an upload error occurs. [default: Failed]
+  -MaximumFileCount           Maximum number of files to process before exiting. [default: Keep running forever]
+  -MaximumFileWaitInterval    Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]
 
 Use the @optionsFile syntax to read more options from a file.
 

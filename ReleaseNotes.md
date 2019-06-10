@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 18.4.18
+- Added [Issue #86](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/86) options `/MaximumFileCount` and `/MaximumFileWaitInterval` to help migration workflows.
+
 ### 18.4.16
 - The FieldVisitHotFolderService has a few bug fixes:
     - [Issue #84](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/84) - Added periodic file scan at `/FileScanInterval`

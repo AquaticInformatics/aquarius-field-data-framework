@@ -22,5 +22,7 @@ namespace FieldVisitHotFolderService
         public MergeMode MergeMode { get; set; } = MergeMode.Skip;
         public bool OverlapIncludesWholeDay { get; set; }
         public int MaximumConcurrentRequests { get; set; } = Environment.ProcessorCount;
+        public int? MaximumFileCount { get; set; }
+        public TimeSpan? MaximumFileWaitInterval { get; set; }
     }
 }

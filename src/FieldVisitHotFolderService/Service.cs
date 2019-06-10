@@ -54,7 +54,8 @@ namespace FieldVisitHotFolderService
             {
                 Context = Context,
                 CancellationToken = CancellationTokenSource.Token,
-                StatusIndicator = StatusIndicator
+                StatusIndicator = StatusIndicator,
+                CancellationAction = () => CancellationTokenSource.Cancel()
             };
 
             await Task.Run(() => fileProcessor.Run(), CancellationTokenSource.Token);
