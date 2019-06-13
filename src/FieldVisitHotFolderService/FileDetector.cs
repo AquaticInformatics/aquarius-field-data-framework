@@ -84,7 +84,7 @@ namespace FieldVisitHotFolderService
 
             foreach (var plugin in Plugins)
             {
-                Log.Info($"{plugin.GetType().AssemblyQualifiedName}");
+                Log.Info($"{LocalPluginLoader.GetPluginNameAndVersion(plugin)}");
             }
         }
 
