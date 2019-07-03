@@ -303,9 +303,22 @@ namespace MultiFile
             {
                 var proxyLog = ProxyLog.Create(Log, plugin, entry);
 
-                return locationInfo == null
+                var result = locationInfo == null
                     ? plugin.ParseFile(memoryStream, ResultsAppender, proxyLog)
                     : plugin.ParseFile(memoryStream, locationInfo, ResultsAppender, proxyLog);
+
+                switch (result.Status)
+                {
+                    case ParseFileStatus.CannotParse:
+                        result = ParseFileResult.CannotParse($"{proxyLog.Prefix}: {result.ErrorMessage}");
+                        break;
+
+                    case ParseFileStatus.SuccessfullyParsedButDataInvalid:
+                        result = ParseFileResult.SuccessfullyParsedButDataInvalid($"{proxyLog.Prefix}: {result.ErrorMessage}");
+                        break;
+                }
+
+                return result;
             }
         }
     }
