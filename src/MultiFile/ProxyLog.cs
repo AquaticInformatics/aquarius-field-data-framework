@@ -6,13 +6,13 @@ namespace MultiFile
 {
     class ProxyLog : ILog
     {
-        public static ILog Create(ILog log, IFieldDataPlugin plugin, ZipArchiveEntry entry)
+        public static ProxyLog Create(ILog log, IFieldDataPlugin plugin, ZipArchiveEntry entry)
         {
             return new ProxyLog(log, plugin, entry);
         }
 
         private ILog Log { get; }
-        private string Prefix { get; }
+        public string Prefix { get; }
 
         private ProxyLog(ILog log, IFieldDataPlugin plugin, ZipArchiveEntry entry)
         {
