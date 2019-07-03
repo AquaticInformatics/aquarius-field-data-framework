@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
 using FieldDataPluginFramework;
@@ -152,27 +150,5 @@ namespace FieldVisitHotFolderService
                 }
             }
         }
-
-        public static string GetPluginNameAndVersion(IFieldDataPlugin plugin)
-        {
-            var pluginType = plugin.GetType();
-
-            return $"{pluginType.FullName} v{GetTypeVersion(pluginType)}";
-        }
-
-        private static string GetTypeVersion(Type type)
-        {
-            var match = AssemblyVersionRegex.Match(type.AssemblyQualifiedName ?? string.Empty);
-
-            const string defaultAssemblyVersion = "1.0.0.0";
-
-            var version = match.Success ? match.Groups["Version"].Value : defaultAssemblyVersion;
-
-            return version != defaultAssemblyVersion
-                ? version
-                : FileVersionInfo.GetVersionInfo(type.Assembly.Location).FileVersion;
-        }
-
-        private static readonly Regex AssemblyVersionRegex = new Regex(@"\bVersion=(?<Version>\d+(\.\d+)*)");
     }
 }

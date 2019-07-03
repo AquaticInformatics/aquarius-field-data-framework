@@ -137,7 +137,7 @@ namespace FieldVisitHotFolderService
 
             foreach (var plugin in Plugins)
             {
-                var pluginName = LocalPluginLoader.GetPluginNameAndVersion(plugin);
+                var pluginName = PluginLoader.GetPluginNameAndVersion(plugin);
 
                 try
                 {
