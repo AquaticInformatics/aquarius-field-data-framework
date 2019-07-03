@@ -11,6 +11,24 @@ If each the files within the ZIP archive can be parsed by one the other plugins,
 This plugin allows you to:
 - Go into the field on Wednesday
 - Take a discharge measurement using a [FlowTracker2](https://github.com/AquaticInformatics/flowtracker2-field-data-plugin) device, saved as `WednesdayDischarge.ft`
-- Take other environmental reasings (like Air temperature, and battery voltage), saved in the [StageDischargeReadings CSV format](https://github.com/AquaticInformatics/stage-discharge-readings-field-data-plugin) as 'WednesdayReadings.csv`
+- Take other environmental readings (like Air temperature, and battery voltage), saved in the [StageDischargeReadings CSV format](https://github.com/AquaticInformatics/stage-discharge-readings-field-data-plugin) as 'WednesdayReadings.csv`
 - Combine both files into `Wednesday.zip`
 - Upload `Wednesday.zip` to AQTS, and see the Wednesday visit with both the discharge measurement and the on-site readings.
+
+## Expected layout of ZIP archives
+
+The MultiFile plugin will only process files at the root of the ZIP archive.
+
+Files contained within nested subfolders will not be considered for parsing by other plugins.
+
+The `Wednesday.zip` archive should have a layout like:
+```
+WednesdayDischarge.ft
+WednesdayReadings.csv
+```
+
+A ZIP archive like this, with nested folders, will not be parsed by the MultiFile plugin.
+```
+FlowTracker\WednesdayDischarge.ft
+Readings\WednesdayReadings.csv
+```

@@ -279,7 +279,7 @@ namespace MultiFile
 
                     if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
                     {
-                        Log.Error($"Plugin {plugin.GetType().FullName} failed to parse '{entry.FullName}' with {result.Status}('{result.ErrorMessage}')");
+                        Log.Error($"Plugin {PluginLoader.GetPluginNameAndVersion(plugin)} failed to parse '{entry.FullName}' with {result.Status}('{result.ErrorMessage}')");
                         return result;
                     }
 
@@ -301,9 +301,11 @@ namespace MultiFile
             using (var reader = new BinaryReader(entryStream))
             using (var memoryStream = new MemoryStream(reader.ReadBytes((int)entry.Length)))
             {
+                var proxyLog = ProxyLog.Create(Log, plugin, entry);
+
                 return locationInfo == null
-                    ? plugin.ParseFile(memoryStream, ResultsAppender, Log)
-                    : plugin.ParseFile(memoryStream, locationInfo, ResultsAppender, Log);
+                    ? plugin.ParseFile(memoryStream, ResultsAppender, proxyLog)
+                    : plugin.ParseFile(memoryStream, locationInfo, ResultsAppender, proxyLog);
             }
         }
     }
