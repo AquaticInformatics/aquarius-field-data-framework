@@ -17,7 +17,10 @@ If you would like to see more examples of field data plug-ins, please visit our 
 ### AQTS 2019.2 - Framework version 2.3
 
 - Added optional MeasurementGrade property to DischargeActivity. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
-- Added QualitativeUncertaintyType enumeration and optional property on DischargeActivity.
+- Added ActiveUncertaintyType enumeration and optional property on DischargeActivity. Can be one of `None`, `Quantitative` or `Qualitative` and is used to indicate which uncertainty property the system will use for Field Visit Readings in the Rating Development Toolbox.
+- Added QualitativeUncertaintyType enumeration and property on DischargeActivity. This property is required when ActiveUncertaintyType is `Qualitative` otherwise, optional.
+- Added QuantitativeUncertainty property to DischargeActivity. This property is required when ActiveUncertaintyType is `Quantitative` otherwise, optional.
+- Added optional QualityAssuranceComments property to DischargeActivity.
 - Added support for Inspections and Calibrations.
 
 ### AQTS 2019.1 - Framework version 2.1
