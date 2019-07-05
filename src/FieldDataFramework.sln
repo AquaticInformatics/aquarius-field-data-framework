@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2704BB2-F23E-45EA-8B12-3611F413F454}"
 	ProjectSection(SolutionItems) = preProject
@@ -34,6 +34,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldDataPluginFramework.Serialization.UnitTests", "FieldDataPluginFramework.Serialization.UnitTests\FieldDataPluginFramework.Serialization.UnitTests.csproj", "{432C6A68-EC05-41F2-B34A-57B537D5C868}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldVisitHotFolderService", "FieldVisitHotFolderService\FieldVisitHotFolderService.csproj", "{E969F2EE-FD40-4387-A3B0-2C61B96D8F4F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0F13B0D-0120-4A6C-BD39-147C4AFCC436} = {C0F13B0D-0120-4A6C-BD39-147C4AFCC436}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{3C14AFF1-F815-4BE1-8072-E510917D04E4}"
 EndProject
