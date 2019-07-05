@@ -19,6 +19,13 @@ namespace FieldVisitHotFolderService
 
         private DirectoryInfo Root { get; } = new DirectoryInfo(Path.Combine(FileHelper.ExeDirectory, "LocalPlugins"));
 
+        public string JsonPluginPath { get; set; }
+
+        public static bool IsJsonPlugin(FieldDataPlugin plugin)
+        {
+            return plugin.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin");
+        }
+
         public List<IFieldDataPlugin> LoadPlugins()
         {
             var pluginBundles = Root
@@ -71,6 +78,11 @@ namespace FieldVisitHotFolderService
 
                 if (!otherEntries.Any())
                     throw new Exception($"Invalid plugin bundle. No file entries found to install.");
+
+                if (IsJsonPlugin(plugin))
+                {
+                    JsonPluginPath = archiveInfo.FullName;
+                }
 
                 var pluginFolder = new DirectoryInfo(Path.Combine(Root.FullName, plugin.PluginFolderName));
 

@@ -33,6 +33,7 @@ namespace FieldVisitHotFolderService
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<IFieldDataPlugin> Plugins { get; set; }
+        private string JsonPluginPath { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
         private int ProcessedFileCount { get; set; }
@@ -77,8 +78,7 @@ namespace FieldVisitHotFolderService
                 .Select(CreateRegexFromDosWildcard)
                 .ToList();
 
-            Plugins = new LocalPluginLoader()
-                .LoadPlugins();
+            LoadLocalPlugins();
 
             Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
 
@@ -113,6 +113,16 @@ namespace FieldVisitHotFolderService
         {
             if (!Directory.Exists(path))
                 throw new ExpectedException($"'{path}' is not an existing folder.");
+        }
+
+        private void LoadLocalPlugins()
+        {
+            var localPluginLoader = new LocalPluginLoader();
+
+            Plugins = localPluginLoader
+                .LoadPlugins();
+
+            JsonPluginPath = localPluginLoader.JsonPluginPath;
         }
 
         private IAquariusClient CreateConnectedClient()
@@ -168,6 +178,7 @@ namespace FieldVisitHotFolderService
 
             using (Client = CreateConnectedClient())
             {
+                LoadLocalPlugins();
                 ThrowIfJsonPluginNotInstalled();
             }
 
@@ -176,14 +187,32 @@ namespace FieldVisitHotFolderService
 
         private void ThrowIfJsonPluginNotInstalled()
         {
+            var jsonPlugin = GetServerPlugin(LocalPluginLoader.IsJsonPlugin);
+
+            if (jsonPlugin != null)
+                return;
+
+            if (!string.IsNullOrEmpty(JsonPluginPath))
+            {
+                Log.Info($"Installing JSON field data plugin from '{JsonPluginPath}' ...");
+
+                jsonPlugin = Client.Provisioning.PostFileWithRequest(JsonPluginPath, new PostFieldDataPluginFile());
+
+                Log.Info($"Successfully installed {jsonPlugin.PluginFolderName}: {nameof(jsonPlugin.PluginPriority)}={jsonPlugin.PluginPriority} {nameof(jsonPlugin.AssemblyQualifiedTypeName)}={jsonPlugin.AssemblyQualifiedTypeName}");
+
+                return;
+            }
+
+            throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
+        }
+
+        private FieldDataPlugin GetServerPlugin(Func<FieldDataPlugin,bool> predicate)
+        {
             var plugins = Client.Provisioning.Get(new GetFieldDataPlugins())
                 .Results;
 
-            var jsonPlugin = plugins
-                .FirstOrDefault(p => p.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin"));
-
-            if (jsonPlugin == null)
-                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
+            return plugins
+                .FirstOrDefault(predicate);
         }
 
         private void ProcessNewFiles()
