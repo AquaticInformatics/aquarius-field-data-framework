@@ -63,6 +63,10 @@ the service also requires the [JSON plugin](../JsonFieldData/Readme.md) to be in
 The service will upload all of its locally parsed field visit activities to AQTS in JSON format,
 according to the configured `/MergeMode` setting.
 
+The JSON plugin is automatically included in the `LocalPlugins` folder, and will be automatically installed on your AQTS app server if needed.
+
+However, if the service fails to automatically install the JSON plugin (usually because the supplied credentials lack permission to change the server configuration), you will need to install the JSON plugin manually on your AQTS app server.
+
 ## Folder configuration
 
 There are six configurable folders which are used to process field visit files.
