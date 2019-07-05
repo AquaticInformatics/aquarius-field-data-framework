@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
+using FieldDataPluginFramework.DataModel.Calibrations;
 using FieldDataPluginFramework.DataModel.ChannelMeasurements;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.Results;
@@ -161,6 +163,20 @@ namespace MultiFile
             fieldVisit.Readings.Add(reading);
 
             ExtendVisitPeriod(fieldVisit, reading.DateTimeOffset);
+        }
+
+        public void AddCalibration(FieldVisitInfo fieldVisit, Calibration calibration)
+        {
+            fieldVisit.Calibrations.Add(calibration);
+
+            ExtendVisitPeriod(fieldVisit, calibration.DateTimeOffset);
+        }
+
+        public void AddInspection(FieldVisitInfo fieldVisit, Inspection inspection)
+        {
+            fieldVisit.Inspections.Add(inspection);
+
+            ExtendVisitPeriod(fieldVisit, inspection.DateTimeOffset);
         }
 
         public void AddCrossSectionSurvey(FieldVisitInfo fieldVisit, CrossSectionSurvey crossSectionSurvey)

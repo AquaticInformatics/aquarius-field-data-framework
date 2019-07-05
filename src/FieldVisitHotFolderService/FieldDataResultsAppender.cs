@@ -14,7 +14,9 @@ using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using NodaTime;
 using ServiceStack;
+using Calibration = FieldDataPluginFramework.DataModel.Calibrations.Calibration;
 using DischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
+using Inspection = FieldDataPluginFramework.DataModel.Inspections.Inspection;
 using Reading = FieldDataPluginFramework.DataModel.Readings.Reading;
 
 namespace FieldVisitHotFolderService
@@ -145,6 +147,16 @@ namespace FieldVisitHotFolderService
         public void AddReading(FieldVisitInfo fieldVisit, Reading reading)
         {
             fieldVisit.Readings.Add(reading);
+        }
+
+        public void AddCalibration(FieldVisitInfo fieldVisit, Calibration calibration)
+        {
+            fieldVisit.Calibrations.Add(calibration);
+        }
+
+        public void AddInspection(FieldVisitInfo fieldVisit, Inspection inspection)
+        {
+            fieldVisit.Inspections.Add(inspection);
         }
 
         public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)
