@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 19.1.0
+- Added support for AQTS 2019.1 plugins
+- See [2019.1 release notes](docs#aqts-20191---framework-version-21) for details of new features.
+
 ### 18.4.18
 - Added [Issue #86](https://github.com/AquaticInformatics/aquarius-field-data-framework/issues/86) options `/MaximumFileCount` and `/MaximumFileWaitInterval` to help migration workflows.
 
@@ -24,18 +28,18 @@ Not all changes will be listed, but you can always [compare by version tags](htt
 ### 18.4.0
 - Added support for 2018.4 plugins
 - Updated the target .NET framework to .NET 4.7.2 to match the AQTS 2018.4 requirements
-- See [2018.4 release notes](docs#aqts-20184) for details of new features.
+- See [2018.4 release notes](docs#aqts-20184---framework-version-20) for details of new features.
 
 ### 18.3.1
 - Added "missing plugin" detection logic to the Field Data Plugin Tool.
 
 ### 18.3.0
 - Added support for AQTS 2018.3 plugins
-- See [2018.3 release notes](docs#aqts-20183) for details of new features.
+- See [2018.3 release notes](docs#aqts-20183---framework-version-13) for details of new features.
 
 ### 18.2.0
 - Added support for AQTS 2018.2 plugins
-- See [2018.2 release notes](docs#aqts-20182) for details of new features.
+- See [2018.2 release notes](docs#aqts-20182---framework-version-12) for details of new features.
 
 ### 18.1.1
 - Improved the `FieldDataPluginTool` to always copy the server's framework assembly into the installed plugin folder. This allows plugins written for 2017.4 to work on 2018.1 systems, just by re-installing the plugin. There is no need to recompile the plugin from source code.
