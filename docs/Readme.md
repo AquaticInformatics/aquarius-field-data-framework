@@ -14,6 +14,10 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2019.1 - Framework version 2.1
+
+- Added optional `MeterCalibration` property to `ManualGaugingDischargeSection`.
+
 ### AQTS 2018.4 - Framework version 2.0
 
 - Field data plug-ins do not need to be re-installed following an upgrade to AQUARIUS Time-Series
