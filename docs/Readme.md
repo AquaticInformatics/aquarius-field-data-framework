@@ -14,6 +14,15 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2019.2 - Framework version 2.3
+
+- Added optional MeasurementGrade property to DischargeActivity. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
+- Added ActiveUncertaintyType enumeration and optional property on DischargeActivity. Can be one of `None`, `Quantitative` or `Qualitative` and is used to indicate which uncertainty property the system will use for Field Visit Readings in the Rating Development Toolbox.
+- Added QualitativeUncertaintyType enumeration and property on DischargeActivity. This property is required when ActiveUncertaintyType is `Qualitative` otherwise, optional.
+- Added QuantitativeUncertainty property to DischargeActivity. This property is required when ActiveUncertaintyType is `Quantitative` otherwise, optional.
+- Added optional QualityAssuranceComments property to DischargeActivity.
+- Added support for Inspections and Calibrations.
+
 ### AQTS 2019.1 - Framework version 2.1
 
 - Added optional `MeterCalibration` property to `ManualGaugingDischargeSection`.
@@ -125,6 +134,12 @@ In AQUARIUS Time-Series, certain field visit activity properties are pick lists,
 
 In the Framework, pick list properties are defined as data type, **PickList**.  The **PickList** data type is similar to an enumeration, but the possible values are only known at run time.  A **PickList** instance is constructed by specifying either the identifier or the display name of a **PickListItem** that belongs to the pick list.  When the Framework saves the field data to the AQUARIUS Time-Series Server, it will validate the **PickList**.  If the **PickList** specifies an invalid **PickListItem**, the Framework will return an error message that lists all of the **PickListItems** that belong to the pick list.
 
+## Grade Data Type
+
+Similar to pick lists, Time-Series has a customizable collection of **Grades**. A Grade has a numeric code, display name, and other properties which can be viewed and edited with the Provisioning API or System Config page.
+
+In the Framework, grades are defined as the **Grade** data type. Grades can be specified using either the numeric code or display name (the "Name" property in Provisioning), using the static methods **Grade.FromCode** or **Grade.FromDisplayName**. The two options are provided for convenience. In either case, the Framework looks up and assigns the matching **Grade** to the graded object. If it cannot find a matching **Grade**, the Framework will return an error message.
+
 # Setting up a Development Environment
 
 Plug-ins are 64-bit libraries written using .NET Framework 4.7.2.  If the .NET Framework 4.7.2 developer pack is not already installed, it can be downloaded [here](https://support.microsoft.com/en-ca/help/4054531/microsoft-net-framework-4-7-2-web-installer-for-windows).
@@ -153,9 +168,9 @@ A plug-in implements the interface, **IFieldDataPlugin**:
                                       IFieldDataResultsAppender fieldDataResultsAppender, 
                                       ILog logger);
             ParseFileResult ParseFile(Stream fileStream, 
-	                                  LocationInfo targetLocation, 
-	                                  IFieldDataResultsAppender fieldDataResultsAppender, 
-	                                  ILog logger);
+                                      LocationInfo targetLocation, 
+                                      IFieldDataResultsAppender fieldDataResultsAppender, 
+                                      ILog logger);
         }
     }
 
@@ -189,14 +204,14 @@ A plug-in is responsible for reading the field data file and mapping its content
             //Read data from file.
         }
     }
-
+    
     private static StreamReader CreateStreamReader(Stream stream, Encoding fileEncoding)
     {
         const int defaultByteBufferSize = 1024;
         //NOTE: Make sure to set leaveOpen property on StreamReader so the Stream’s
-	    //Dispose() method is not called when StreamReader.Dispose() is called.
+        //Dispose() method is not called when StreamReader.Dispose() is called.
         //Framework will take care of closing the Stream.
-
+    
         return new StreamReader(fileStream, fileEncoding,
    		                        detectEncodingFromByteOrderMarks: true,
    		                        bufferSize: defaultByteBufferSize, leaveOpen: true);
