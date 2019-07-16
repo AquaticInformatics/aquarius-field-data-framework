@@ -5,9 +5,11 @@ using System.Linq;
 using System.Reflection;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
+using FieldDataPluginFramework.DataModel.Calibrations;
 using FieldDataPluginFramework.DataModel.ChannelMeasurements;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Meters;
 using FieldDataPluginFramework.DataModel.PickLists;
@@ -244,6 +246,14 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => new Reading(
                     json.Get<string>(nameof(Reading.ParameterId)),
                     json.GetObject<Measurement>(nameof(Reading.Measurement))));
+
+            Configure(json => new Calibration(
+                json.Get<string>(nameof(Calibration.ParameterId)),
+                json.Get<string>(nameof(Calibration.UnitId)),
+                json.Get<double>(nameof(Calibration.Value))));
+
+            Configure(json => new Inspection(
+                json.Get<InspectionType>(nameof(Inspection.InspectionType))));
 
             Configure(BackwardsCompatibleCrossSectionPointFactory);
 
