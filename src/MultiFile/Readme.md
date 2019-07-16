@@ -1,6 +1,6 @@
-﻿# Multi-file field data plugin
+﻿# MultiFile field data plugin
 
-The Multi-file field data plugin is a plugin for AQTS 2018.4-or-newer which can create same-day field visits from data parsed by separate plugins.
+The MultiFile field data plugin is a plugin for AQTS 2018.4-or-newer which can create same-day field visits from data parsed by separate plugins.
 
 Download the latest version of the MultiFile plugin [from the releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest).
 
@@ -14,6 +14,34 @@ This plugin allows you to:
 - Take other environmental readings (like Air temperature, and battery voltage), saved in the [StageDischargeReadings CSV format](https://github.com/AquaticInformatics/stage-discharge-readings-field-data-plugin) as 'WednesdayReadings.csv`
 - Combine both files into `Wednesday.zip`
 - Upload `Wednesday.zip` to AQTS, and see the Wednesday visit with both the discharge measurement and the on-site readings.
+
+## Plugin Compatibility Matrix
+
+The MultiFile field data plugin is tightly coupled to the specific framework version used to build it.
+
+When you install the MultiFile plugin on your AQTS app server, it is recommended that you use the most recent version of the JSON plugin that matches your AQTS server version.
+
+| AQTS Version | Latest compatible plugin Version |
+| --- | --- |
+| AQTS 2019.2 | [v19.2.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.0/MultiFile.plugin) |
+| AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/MultiFile.plugin) |
+| AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/MultiFile.plugin) |
+
+## Install the MultiFile plugin with the highest PluginPriority
+
+It is recommended to install the MultiFile plugin with the highest PluginPriority value,
+so that it runs last in the chain, after all other installed plugins get a chance to parse a file.
+
+![Use Highest Priority](UseHighestPriority.png)
+
+Normally, when installing a plugin, there is no need to specify a priority, and the server will
+install the new plugin at the front of the processing chain, with the lowest `PluginPriority` valute. This is **not** the recommended choice for `MultiFile`, which should be installed at the back of the chain instead.
+
+When the AQTS app server receives a field data file, it will:
+- Try each installed plugin, from lowest `PluginPriority` value to highest `PluginPriority` value
+- Stop processing when the first plugin returns `SuccessfullyParsedAndDataValid`.
+
+By installing the MultiFile plugin with the largest `PluginPriority` value of all installed plugins, you will minimize conflicts with other installed plugins which may also want to process a ZIP archive.
 
 ## Expected layout of ZIP archives
 
