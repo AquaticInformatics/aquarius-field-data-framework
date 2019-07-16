@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 19.2.0
+- Added support for AQTS 2019.2 plugins
+- See [2019.2 release notes](docs#aqts-20192---framework-version-23) for details of new features.
+
 ### 19.1.0
 - Added support for AQTS 2019.1 plugins
 - See [2019.1 release notes](docs#aqts-20191---framework-version-21) for details of new features.

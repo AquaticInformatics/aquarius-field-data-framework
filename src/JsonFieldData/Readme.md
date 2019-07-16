@@ -8,6 +8,18 @@ The JSON content supported by this plugin is the [AppendedResults](../FieldDataP
 
 This is the same JSON format produced by the [PluginTester.exe /Json=outputPath](../PluginTester/Readme.md#saving-json-results) option.
 
+## Plugin Compatibility Matrix
+
+The JSON field data plugin is tightly coupled to the specific framework version used to build it.
+
+When you install the JSON plugin on your AQTS app server, it is recommended that you use the most recent version of the JSON plugin that matches your AQTS server version.
+
+| AQTS Version | Latest compatible plugin Version |
+| --- | --- |
+| AQTS 2019.2 | [v19.2.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.0/JsonFieldData.plugin) |
+| AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/JsonFieldData.plugin) |
+| AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/JsonFieldData.plugin) |
+
 ## Outer document
 
 The outer JSON document contains 3 properties:
