@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.CrossSection;
+using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.PickLists;
 using FieldDataPluginFramework.DataModel.Verticals;
 using FluentAssertions;
@@ -117,6 +118,18 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
 
         [TestCaseSource(nameof(MeasurementConditionDataTests))]
         public void MeasurementConditionData_RoundTripsCorrectly(MeasurementConditionData expected, string reason)
+        {
+            AssertObjectRoundTripsCorrectly(expected, reason);
+        }
+
+        private static readonly IEnumerable<TestCaseData> GradeTests = new[]
+        {
+            new TestCaseData(Grade.FromCode(123), "Grade.Code = 123"),
+            new TestCaseData(Grade.FromDisplayName("SomeName"), "Grade.DisplayName = 'SomeName'"),
+        };
+
+        [TestCaseSource(nameof(GradeTests))]
+        public void Grade_RoundTripsCorrectly(Grade expected, string reason)
         {
             AssertObjectRoundTripsCorrectly(expected, reason);
         }

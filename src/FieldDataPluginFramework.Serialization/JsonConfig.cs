@@ -281,6 +281,10 @@ namespace FieldDataPluginFramework.Serialization
                     json.AddItems(nameof(item.ChannelMeasurements), item.ChannelMeasurements);
                 });
 
+            Configure(json => json.HasProperty(nameof(Grade.Code))
+                ? Grade.FromCode(json.Get<int>(nameof(Grade.Code)))
+                : Grade.FromDisplayName(json.Get<string>(nameof(Grade.DisplayName))));
+
             Configure(json => new GageHeightMeasurement(
                 json.GetObject<Measurement>(nameof(GageHeightMeasurement.GageHeight)),
                 json.Get<DateTimeOffset>(nameof(GageHeightMeasurement.MeasurementTime)),
