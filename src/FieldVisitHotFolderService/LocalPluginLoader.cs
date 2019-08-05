@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
 using FieldDataPluginFramework;
@@ -20,6 +21,7 @@ namespace FieldVisitHotFolderService
         private DirectoryInfo Root { get; } = new DirectoryInfo(Path.Combine(FileHelper.ExeDirectory, "LocalPlugins"));
 
         public string JsonPluginPath { get; set; }
+        public AquariusServerVersion JsonPluginVersion { get; set; }
 
         public static bool IsJsonPlugin(FieldDataPlugin plugin)
         {
@@ -82,6 +84,7 @@ namespace FieldVisitHotFolderService
                 if (IsJsonPlugin(plugin))
                 {
                     JsonPluginPath = archiveInfo.FullName;
+                    JsonPluginVersion = AquariusServerVersion.Create(PluginLoader.GetPluginVersion(plugin.AssemblyQualifiedTypeName));
                 }
 
                 var pluginFolder = new DirectoryInfo(Path.Combine(Root.FullName, plugin.PluginFolderName));
