@@ -34,6 +34,7 @@ namespace FieldVisitHotFolderService
         private string FailedFolder { get; set; }
         private List<IFieldDataPlugin> Plugins { get; set; }
         private string JsonPluginPath { get; set; }
+        private AquariusServerVersion JsonPluginVersion { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
         private int ProcessedFileCount { get; set; }
@@ -123,6 +124,7 @@ namespace FieldVisitHotFolderService
                 .LoadPlugins();
 
             JsonPluginPath = localPluginLoader.JsonPluginPath;
+            JsonPluginVersion = localPluginLoader.JsonPluginVersion;
         }
 
         private IAquariusClient CreateConnectedClient()
@@ -169,7 +171,7 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("18.4");
+        private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("19.2");
 
         private void ConnectAndThrowIfJsonPluginNotInstalled()
         {
@@ -187,23 +189,27 @@ namespace FieldVisitHotFolderService
 
         private void ThrowIfJsonPluginNotInstalled()
         {
-            var jsonPlugin = GetServerPlugin(LocalPluginLoader.IsJsonPlugin);
+            var serverPlugin = GetServerPlugin(LocalPluginLoader.IsJsonPlugin);
 
-            if (jsonPlugin != null)
+            var serverPluginVersion = serverPlugin != null
+                ? AquariusServerVersion.Create(PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName))
+                : null;
+
+            if (JsonPluginVersion == null && serverPluginVersion != null)
+                // There is no local Json plugin to deploy, so assume the server plugin will be good enough
                 return;
 
-            if (!string.IsNullOrEmpty(JsonPluginPath))
+            if (serverPlugin == null)
             {
-                Log.Info($"Installing JSON field data plugin from '{JsonPluginPath}' ...");
-
-                jsonPlugin = Client.Provisioning.PostFileWithRequest(JsonPluginPath, new PostFieldDataPluginFile());
-
-                Log.Info($"Successfully installed {jsonPlugin.PluginFolderName}: {nameof(jsonPlugin.PluginPriority)}={jsonPlugin.PluginPriority} {nameof(jsonPlugin.AssemblyQualifiedTypeName)}={jsonPlugin.AssemblyQualifiedTypeName}");
-
+                InstallJsonPlugin();
                 return;
             }
 
-            throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
+            if (!serverPluginVersion?.IsLessThan(JsonPluginVersion) ?? false)
+                // The server JSON plugin is newer, so keep it
+                return;
+
+            ReplaceJsonPlugin(serverPlugin);
         }
 
         private FieldDataPlugin GetServerPlugin(Func<FieldDataPlugin,bool> predicate)
@@ -213,6 +219,30 @@ namespace FieldVisitHotFolderService
 
             return plugins
                 .FirstOrDefault(predicate);
+        }
+
+        private void InstallJsonPlugin(int? pluginPriority = null)
+        {
+            if (string.IsNullOrEmpty(JsonPluginPath))
+                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
+
+            Log.Info($"Installing JSON field data plugin v{JsonPluginVersion} from '{JsonPluginPath}' ...");
+
+            var serverPlugin = Client.Provisioning.PostFileWithRequest(JsonPluginPath, new PostFieldDataPluginFile
+            {
+                PluginPriority = pluginPriority ?? 0
+            });
+
+            Log.Info($"Successfully installed v{PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName)} {serverPlugin.PluginFolderName}: {nameof(serverPlugin.PluginPriority)}={serverPlugin.PluginPriority}");
+        }
+
+        private void ReplaceJsonPlugin(FieldDataPlugin serverPlugin)
+        {
+            Log.Info($"Removing v{PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName)} {serverPlugin.PluginFolderName} ...");
+
+            Client.Provisioning.Delete(new DeleteFieldDataPlugin {UniqueId = serverPlugin.UniqueId});
+
+            InstallJsonPlugin(serverPlugin.PluginPriority);
         }
 
         private void ProcessNewFiles()

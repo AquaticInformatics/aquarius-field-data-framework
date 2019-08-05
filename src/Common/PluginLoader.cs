@@ -185,17 +185,29 @@ namespace Common
             return $"{pluginType.FullName} v{GetTypeVersion(pluginType)}";
         }
 
+        public static string GetPluginVersion(string assemblyQualifiedName)
+        {
+            return GetAssemblyVersion(assemblyQualifiedName);
+        }
+
         private static string GetTypeVersion(Type type)
         {
-            var match = AssemblyVersionRegex.Match(type.AssemblyQualifiedName ?? string.Empty);
+            var version = GetAssemblyVersion(type.AssemblyQualifiedName);
 
-            const string defaultAssemblyVersion = "1.0.0.0";
-
-            var version = match.Success ? match.Groups["Version"].Value : defaultAssemblyVersion;
-
-            return version != defaultAssemblyVersion
+            return version != DefaultAssemblyVersion
                 ? version
                 : FileVersionInfo.GetVersionInfo(type.Assembly.Location).FileVersion;
+        }
+
+        private const string DefaultAssemblyVersion = "1.0.0.0";
+
+        private static string GetAssemblyVersion(string assemblyQualifiedName)
+        {
+            var match = AssemblyVersionRegex.Match(assemblyQualifiedName ?? string.Empty);
+
+            return match.Success
+                ? match.Groups["Version"].Value
+                : DefaultAssemblyVersion;
         }
 
         private static readonly Regex AssemblyVersionRegex = new Regex(@"\bVersion=(?<Version>\d+(\.\d+)*)");

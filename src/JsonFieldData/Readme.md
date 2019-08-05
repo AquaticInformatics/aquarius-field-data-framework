@@ -16,7 +16,7 @@ When you install the JSON plugin on your AQTS app server, it is recommended that
 
 | AQTS Version | Latest compatible plugin Version |
 | --- | --- |
-| AQTS 2019.2 | [v19.2.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.0/JsonFieldData.plugin) |
+| AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/JsonFieldData.plugin) |
 | AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/JsonFieldData.plugin) |
 | AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/JsonFieldData.plugin) |
 
