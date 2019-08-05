@@ -12,6 +12,18 @@ The service can be run on any Windows system with the .NET 4.7.2 runtime. This i
 
 ![Field Visit Hot Folder Service](images/FieldVisitHotFolderService.svg "Field Visit Hot Folder Service")
 
+## Compatibility Matrix
+
+The `FieldVisitHotFolderService.exe` tool is tightly coupled to the specific framework version used to build it.
+
+When you upgrade your AQTS app server, it is recommended that you use the most recent version of the hot folder service that matches your AQTS server version.
+
+| AQTS Version | Latest compatible plugin Version |
+| --- | --- |
+| AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/FieldVisitHotFolderService.zip) |
+| AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/FieldVisitHotFolderService.zip) |
+| AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/FieldVisitHotFolderService.zip) |
+
 # Installing the service
 
 - Download the `FieldVisitHotFolderService.zip` archive from the [releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest) and unzip the contents into a folder.
