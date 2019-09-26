@@ -14,6 +14,11 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2019.3 - Framework version 2.5
+- Added optional SensorUniqueId property to Reading and Calibration. Set the UniqueId of an existing Sensor to associate the Reading / Calibration with the physical device used to retrieve the measurement. The SensorUnique Id can be retrieved from the Sensors/Gauges tab in Springboard or by using the Publish or Provisioning APIs.
+- Added optional ReadingQualifiers property to Reading. Allows adding multiple qualifiers to a Reading.
+- Deprecated ReadingQualifier property on Reading. Replaced with ReadingQualifiers. 
+
 ### AQTS 2019.2 - Framework version 2.3
 
 - Added optional MeasurementGrade property to DischargeActivity. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
