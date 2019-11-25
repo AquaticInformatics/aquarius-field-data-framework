@@ -18,9 +18,9 @@ The `FieldVisitHotFolderService.exe` tool is tightly coupled to the specific fra
 
 When you upgrade your AQTS app server, it is recommended that you use the most recent version of the hot folder service that matches your AQTS server version.
 
-| AQTS Version | Latest compatible plugin Version |
+| AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2019.3 | [v19.3.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.0/FieldVisitHotFolderService.zip) |
+| AQTS 2019.3 | [v19.3.1](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.1/FieldVisitHotFolderService.zip) |
 | AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/FieldVisitHotFolderService.zip) |
 | AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/FieldVisitHotFolderService.zip) |
 | AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/FieldVisitHotFolderService.zip) |
