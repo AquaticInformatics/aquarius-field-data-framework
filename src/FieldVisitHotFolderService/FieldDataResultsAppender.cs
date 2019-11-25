@@ -25,6 +25,7 @@ namespace FieldVisitHotFolderService
     {
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
+        public Dictionary<string, string> LocationAliases { get; set; }
         public ILog Log { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
@@ -34,17 +35,27 @@ namespace FieldVisitHotFolderService
 
         public LocationInfo GetLocationByIdentifier(string locationIdentifier)
         {
-            var locationInfo = LocationCache.SingleOrDefault(l => l.LocationIdentifier == locationIdentifier);
+            var locationInfo = LocationCache.SingleOrDefault(l => l.LocationIdentifier.Equals(locationIdentifier, StringComparison.InvariantCultureIgnoreCase));
 
             if (locationInfo != null)
                 return locationInfo;
+
+            if (LocationAliases.TryGetValue(locationIdentifier, out var aliasedIdentifier))
+            {
+                locationInfo = LocationCache.SingleOrDefault(l => l.LocationIdentifier.Equals(aliasedIdentifier, StringComparison.InvariantCultureIgnoreCase));
+
+                if (locationInfo != null)
+                    return locationInfo;
+
+                locationIdentifier = aliasedIdentifier;
+            }
 
             var locationDescriptions = Client.Publish.Get(new LocationDescriptionListServiceRequest
                     {LocationIdentifier = locationIdentifier})
                 .LocationDescriptions;
 
             var locationDescription = locationDescriptions
-                .SingleOrDefault(l => l.Identifier == locationIdentifier);
+                .SingleOrDefault(l => l.Identifier.Equals(locationIdentifier, StringComparison.InvariantCultureIgnoreCase));
 
             if (locationDescription == null)
             {

@@ -24,5 +24,7 @@ namespace FieldVisitHotFolderService
         public int MaximumConcurrentRequests { get; set; } = Environment.ProcessorCount;
         public int? MaximumFileCount { get; set; }
         public TimeSpan? MaximumFileWaitInterval { get; set; }
+        public int MaximumDuplicateRetry { get; set; } = 3;
+        public Dictionary<string, string> LocationAliases { get; } = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
     }
 }

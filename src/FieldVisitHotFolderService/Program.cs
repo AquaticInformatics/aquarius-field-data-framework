@@ -134,6 +134,15 @@ namespace FieldVisitHotFolderService
                     Description = $"True if a conflict includes any visit on same day. False can generate multiple visits on the same day."
                 },
 
+                new CommandLineOption(), new CommandLineOption{Description = "Location alias settings"},
+                new CommandLineOption
+                {
+                    Key = nameof(context.LocationAliases),
+                    Setter = value => ParseLocationAliases(context, value),
+                    Getter = () => string.Empty,
+                    Description = $"A list of location aliases, in alias=locationIdentifier syntax."
+                },
+
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
                 new CommandLineOption
                 {
@@ -212,6 +221,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => $"{context.MaximumFileWaitInterval}",
                     Description = "Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]"
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumDuplicateRetry),
+                    Setter = value => context.MaximumDuplicateRetry = int.Parse(value),
+                    Getter = () => $"{context.MaximumDuplicateRetry}",
+                    Description = "Maximum number of retries for duplicate visits."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
@@ -256,11 +272,70 @@ namespace FieldVisitHotFolderService
             return args;
         }
 
+        private static void ParseLocationAliases(Context context, string text)
+        {
+            var aliasEntries = text
+                .Split(ListSeparatorChars)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
+
+            foreach (var aliasEntry in aliasEntries)
+            {
+                if (TryParseLocationAlias(aliasEntry, out var alias, out var locationIdentifier))
+                {
+                    AddLocationAlias(context, alias, locationIdentifier);
+                    continue;
+                }
+
+                throw new ExpectedException($"'{aliasEntry}' is not in the expected alias=locationIdentifier syntax.");
+            }
+        }
+
+        private static readonly char[] ListSeparatorChars = {','};
+
+        private static bool TryParseLocationAlias(string text, out string alias, out string locationIdentifier)
+        {
+            alias = null;
+            locationIdentifier = null;
+
+            var parts = text
+                .Split(AliasSeparatorChars, 2)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
+
+            if (parts.Count != 2)
+                return false;
+
+            alias = parts[0];
+            locationIdentifier = parts[1];
+            return true;
+        }
+
+        private static readonly char[] AliasSeparatorChars = {'='};
+
+        private static void AddLocationAlias(Context context, string alias, string locationIdentifier)
+        {
+            if (context.LocationAliases.TryGetValue(alias, out var existingLocationIdentifier) && existingLocationIdentifier == locationIdentifier)
+            {
+                throw new ExpectedException($"An alias of '{alias}' already exists for '{existingLocationIdentifier}'. Aliases can only be set once.");
+            }
+
+            context.LocationAliases[alias] = locationIdentifier;
+        }
+
         private static bool ResolvePositionalArgument(Context context, string arg)
         {
             if (Directory.Exists(arg))
             {
                 context.HotFolderPath = arg;
+                return true;
+            }
+
+            if (TryParseLocationAlias(arg, out var alias, out var locationIdentifier))
+            {
+                AddLocationAlias(context, alias, locationIdentifier);
                 return true;
             }
 
