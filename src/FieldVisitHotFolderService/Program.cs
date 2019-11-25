@@ -212,6 +212,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => $"{context.MaximumFileWaitInterval}",
                     Description = "Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]"
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumDuplicateRetry),
+                    Setter = value => context.MaximumDuplicateRetry = int.Parse(value),
+                    Getter = () => $"{context.MaximumDuplicateRetry}",
+                    Description = "Maximum number of retries for duplicate visits."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(

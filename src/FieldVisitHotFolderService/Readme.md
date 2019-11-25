@@ -212,6 +212,7 @@ Supported -option=value settings (/option=value works too):
   -FailedFolder               Move files to this folder if an upload error occurs. [default: Failed]
   -MaximumFileCount           Maximum number of files to process before exiting. [default: Keep running forever]
   -MaximumFileWaitInterval    Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]
+  -MaximumDuplicateRetry      Maximum number of retries for duplicate visits. [default: 3]
 
 Use the @optionsFile syntax to read more options from a file.
 

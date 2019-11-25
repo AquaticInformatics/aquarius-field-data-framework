@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace FieldVisitHotFolderService
 {
@@ -24,5 +23,6 @@ namespace FieldVisitHotFolderService
         public int MaximumConcurrentRequests { get; set; } = Environment.ProcessorCount;
         public int? MaximumFileCount { get; set; }
         public TimeSpan? MaximumFileWaitInterval { get; set; }
+        public int MaximumDuplicateRetry { get; set; } = 3;
     }
 }

@@ -187,8 +187,6 @@ namespace FieldVisitHotFolderService
 
         private (bool IsPartial, bool IsFailure) UploadResultsConcurrently(string path, AppendedResults appendedResults)
         {
-            var semaphore = new SemaphoreSlim(Context.MaximumConcurrentRequests);
-
             var unknownVisits = appendedResults
                 .AppendedVisits
                 .Where(IsUnknownLocation)
@@ -220,22 +218,63 @@ namespace FieldVisitHotFolderService
             {
                 Log.Info($"Appending {visitsToAppend.Count} visits using {Context.MaximumConcurrentRequests} concurrent requests.");
 
-                Task.WhenAll(visitsToAppend.Select(async visit =>
+                var duplicateVisits = new List<FieldVisitInfo>();
+
+                UploadVisitsConcurrently(appendedResults, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
+
+                if (duplicateVisits.Any())
                 {
-                    using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
+                    for (var retryAttempts = 0; !CancellationToken.IsCancellationRequested && retryAttempts < Context.MaximumDuplicateRetry; ++retryAttempts)
                     {
-                        await Task.Run(() =>
-                                UploadVisit(
-                                    visit,
-                                    appendedResults,
-                                    () => isPartial = true,
-                                    () => isFailure = true)
-                            , CancellationToken);
+                        Log.Info($"Retrying {duplicateVisits.Count} duplicate visits.");
+
+                        visitsToAppend.Clear();
+                        visitsToAppend.AddRange(duplicateVisits);
+                        duplicateVisits.Clear();
+
+                        UploadVisitsConcurrently(appendedResults, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
                     }
-                })).Wait(CancellationToken);
+
+                    if (duplicateVisits.Any())
+                    {
+                        Log.Error($"Could not resolve {duplicateVisits.Count} duplicate visits.");
+                        isFailure = true;
+                    }
+                }
             }
 
             return (IsPartial: isPartial, IsFailure: isFailure);
+        }
+
+        private void UploadVisitsConcurrently(
+            AppendedResults appendedResults,
+            List<FieldVisitInfo> visitsToAppend,
+            List<FieldVisitInfo> duplicateVisits,
+            ref bool isPartial,
+            ref bool isFailure)
+        {
+            var semaphore = new SemaphoreSlim(Context.MaximumConcurrentRequests);
+
+            var localIsPartial = false;
+            var localIsFailure = false;
+
+            Task.WhenAll(visitsToAppend.Select(async visit =>
+            {
+                using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
+                {
+                    await Task.Run(() =>
+                            UploadVisit(
+                                visit,
+                                appendedResults,
+                                () => localIsPartial = true,
+                                () => localIsFailure = true,
+                                () => duplicateVisits.Add(visit))
+                        , CancellationToken);
+                }
+            })).Wait(CancellationToken);
+
+            isPartial |= localIsPartial;
+            isFailure |= localIsFailure;
         }
 
         private bool IsUnknownLocation(FieldVisitInfo visit)
@@ -247,7 +286,8 @@ namespace FieldVisitHotFolderService
             FieldVisitInfo visit,
             AppendedResults appendedResults,
             Action partialAction,
-            Action failureAction)
+            Action failureAction,
+            Action duplicateAction = null)
         {
             if (ShouldSkipConflictingVisits(visit))
             {
@@ -277,9 +317,23 @@ namespace FieldVisitHotFolderService
             }
             catch (WebServiceException exception)
             {
+                if (duplicateAction != null && IsDuplicateFailure(exception))
+                {
+                    Log.Warn($"{UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
+
+                    duplicateAction();
+                    return;
+                }
+
                 Log.Error($"{UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
                 failureAction();
             }
+        }
+
+        private static bool IsDuplicateFailure(WebServiceException exception)
+        {
+            return (exception.ErrorCode?.Equals("FieldDataFileImportFailureException", StringComparison.InvariantCultureIgnoreCase) ?? false)
+                   && exception.ErrorMessage?.IndexOf("Saving parsed data would result in duplicates", StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
 
         private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
