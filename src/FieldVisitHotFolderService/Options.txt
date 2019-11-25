@@ -6,3 +6,5 @@
 
 # Configure the hot folder path to monitor
 /HotFolderPath=D:\Some Folder\Drop Field Visit Files Here
+
+# Add any location aliases here, using the alias=locationIdentifier syntax. Spaces before/after the '=' are ignored.

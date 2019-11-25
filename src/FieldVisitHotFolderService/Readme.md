@@ -37,7 +37,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 Create an `Options.txt` file in the same folder as the EXE, to contain all the configuration options.
 
-The following 9 lines are a good start for the `Options.txt` file:
+The following 11 lines are a good start for the `Options.txt` file:
 ```
 # Enter your AQTS credentials here.
 # The account should have "CanAddData" permission in all locations in order to create field visits.
@@ -47,6 +47,8 @@ The following 9 lines are a good start for the `Options.txt` file:
 
 # Configure the hot folder path to monitor
 /HotFolderPath=D:\Some Folder\Drop Field Visit Files Here
+
+# Add any location aliases here, using the alias=locationIdentifier syntax. Spaces before/after the '=' are ignored.
 ```
 
 You can test your configuration without installing the service just by running the EXE directly from the command line or by double-cliking it from Windows Explorer.
@@ -117,6 +119,31 @@ The `/MergeMode` option controls how the service behaves when a file contains ac
 - The file content will be loaded into memory, and passed to each `/Plugin` option, until a plugin returns a successful parse result.
 - For every successfully parsed visit, the service will check if a visit already exists on that day at the requested location. These "conflicting visits" will be skipped with a `WARN` log line, but will not cause a failure.
 - If no plugins can parse the file successfully, or if an upload error occurs, the file will be considered to have failed, and will be moved to the `/FailedFolder`.
+
+## Adding location aliases
+
+When a plugin tries to find a location by identifier, the `/LocationAliases=` consulted, to help resolve any locations unknown to AQTS.
+
+This is often useful when migrating legacy visit files which contain old location identifiers that have been renamed in the target AQTS system.
+
+By default, no aliases are defined, but your configuration can add as many as you need.
+
+Aliases are defined using a `alias=locationIdentifier` syntax. Whitespace before and after the '=' symbol is ignored.
+
+Aliases can be configured in a few ways:
+- Using the `/LocationAliases=` option, giving a comma-separated list of alias=locationIdentifier entries.
+- Using the "alias=locationIdentifier" positional argument.
+- Using the `@options.txt` file
+
+You can combine any of the above options.
+
+An alias can only be specified once. If you try to specify an alias of "oldLoc=Loc1" and "oldLoc=Loc2", an error message will be shown, since the configuration won't know how to intepret the "oldLoc" alias.
+
+```
+# Add any location aliases here, using the alias=locationIdentifier syntax. Spaces before/after the '@' are ignored.
+oldname1 = NewLoc123
+3000 = 00003000
+```
 
 ## How can I tell if the hot folder service is running?
 
@@ -199,6 +226,9 @@ Supported -option=value settings (/option=value works too):
   =========================== Visit merge settings
   -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
   -OverlapIncludesWholeDay    True if a conflict includes any visit on same day. False can generate multiple visits on the same day. [default: False]
+
+  =========================== Location alias settings
+  -LocationAliases            A list of location aliases, in alias=locationIdentifier syntax.
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.

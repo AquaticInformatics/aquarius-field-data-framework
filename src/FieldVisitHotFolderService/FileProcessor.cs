@@ -132,6 +132,7 @@ namespace FieldVisitHotFolderService
             {
                 Client = Client,
                 LocationCache = LocationCache,
+                LocationAliases = Context.LocationAliases,
                 Log = Log
             };
 
