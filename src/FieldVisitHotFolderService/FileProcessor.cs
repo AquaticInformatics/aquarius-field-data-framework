@@ -225,7 +225,9 @@ namespace FieldVisitHotFolderService
 
                 if (duplicateVisits.Any())
                 {
-                    for (var retryAttempts = 0; !CancellationToken.IsCancellationRequested && retryAttempts < Context.MaximumDuplicateRetry; ++retryAttempts)
+                    for (var retryAttempts = 0; !CancellationToken.IsCancellationRequested
+                                                && duplicateVisits.Any()
+                                                && retryAttempts < Context.MaximumDuplicateRetry; ++retryAttempts)
                     {
                         Log.Info($"Retrying {duplicateVisits.Count} duplicate visits.");
 
