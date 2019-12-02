@@ -7,6 +7,7 @@ The `FieldVisitHotFolderService.exe` tool is a .NET console tool which can:
 - Monitor a hot folder path for new files
 - Try to parse the files using a set of plugins running locally on the client
 - Upload any created visits to AQTS using the [JSON plugin](../JsonFieldData/Readme.md)
+- Supports a `/DryRun=true` option to see what would be done, without actually making any changes.
 
 The service can be run on any Windows system with the .NET 4.7.2 runtime. This includes every Windows 10 desktop and Windows 2016 Server, and any Windows 7 desktop and Windows 2008 R2 Server with the most recent Windows Update patches.
 
@@ -20,7 +21,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2019.3 | [v19.3.1](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.1/FieldVisitHotFolderService.zip) |
+| AQTS 2019.3 | [v19.3.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.3/FieldVisitHotFolderService.zip) |
 | AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/FieldVisitHotFolderService.zip) |
 | AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/FieldVisitHotFolderService.zip) |
 | AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/FieldVisitHotFolderService.zip) |
@@ -81,6 +82,12 @@ according to the configured `/MergeMode` setting.
 The JSON plugin is automatically included in the `LocalPlugins` folder, and will be automatically installed on your AQTS app server if needed.
 
 However, if the service fails to automatically install the JSON plugin (usually because the supplied credentials lack permission to change the server configuration), you will need to install the JSON plugin manually on your AQTS app server.
+
+## `/DryRun=true` is useful for debugging your configuration
+
+You can set the `/DryRun=true` option (or use the `/N` shortcut) to see which visits would be uploaded, and which visits would conflict, without changing any data on your AQTS server.
+
+This option is useful for debugging your configuration before putting it into production.
 
 ## Folder configuration
 
@@ -159,6 +166,7 @@ Any of these conditions will cause the file to be considered failed, and will be
 - The file was not recognized by one of the local `/Plugin` parsers.
 - All of the location identifiers referenced in the file do not exist on the AQTS system.
 - A validation error occurred when the visit was uploaded to AQTS.
+- A visit duration exceeds the `/MaximumVisitDuration=` value (which defaults to 1 day plus 6 hrs).
 
 ## "Partial uploads" - Conflicting visits on the same day cannot be overwritten
 
@@ -226,6 +234,8 @@ Supported -option=value settings (/option=value works too):
   =========================== Visit merge settings
   -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
   -OverlapIncludesWholeDay    True if a conflict includes any visit on same day. False can generate multiple visits on the same day. [default: False]
+  -MaximumVisitDuration       Maximum visit duration. Visits exceeding this duration will not be imported. [default: 1.06:00:00]
+  -DryRun                     True if no visits will be imported. Use /N as a shortcut. [default: False]
 
   =========================== Location alias settings
   -LocationAliases            A list of location aliases, in alias=locationIdentifier syntax.

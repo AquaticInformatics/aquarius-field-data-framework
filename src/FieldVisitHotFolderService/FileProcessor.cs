@@ -60,11 +60,11 @@ namespace FieldVisitHotFolderService
                 var results = UploadResultsConcurrently(processingPath, appendedResults);
 
                 if (results.IsFailure)
-                    MoveFile(processingPath, FailedFolder);
+                    MoveFiles(FailedFolder, results.PathsToMove);
                 else if (results.IsPartial)
-                    MoveFile(processingPath, PartialFolder);
+                    MoveFiles(PartialFolder, results.PathsToMove);
                 else
-                    MoveFile(processingPath, UploadedFolder);
+                    MoveFiles(UploadedFolder, results.PathsToMove);
             }
             catch (Exception exception)
             {
@@ -88,6 +88,16 @@ namespace FieldVisitHotFolderService
                     Log.Warn($"Can't move '{processingPath}' to '{FailedFolder}'", moveException);
                 }
             }
+        }
+
+        private void MoveFiles(string targetFolder, List<string> paths)
+        {
+            foreach (var path in paths.Take(paths.Count - 1))
+            {
+                MoveFile(path, targetFolder, false);
+            }
+
+            MoveFile(paths.Last(), targetFolder);
         }
 
         private string MoveFile(string path, string targetFolder, bool writeTargetLog = true)
@@ -186,32 +196,64 @@ namespace FieldVisitHotFolderService
 
         private string UploadedFilename { get; set; }
 
-        private (bool IsPartial, bool IsFailure) UploadResultsConcurrently(string path, AppendedResults appendedResults)
+        public class UploadedResults
         {
+            public bool IsPartial { get; set; }
+            public bool IsFailure { get; set; }
+            public List<string> PathsToMove { get; } = new List<string>();
+        }
+
+        private UploadedResults UploadResultsConcurrently(string path, AppendedResults appendedResults)
+        {
+            var uploadedResults = new UploadedResults
+            {
+                IsPartial = false,
+                IsFailure = false,
+                PathsToMove = {path}
+            };
+
+            if (!appendedResults.AppendedVisits.Any())
+            {
+                Log.Warn($"No visits parsed from '{path}'");
+
+                return uploadedResults;
+            }
+
             var unknownVisits = appendedResults
                 .AppendedVisits
                 .Where(IsUnknownLocation)
                 .ToList();
 
+            var largeDurationVisits = appendedResults
+                .AppendedVisits
+                .Where(visit => !unknownVisits.Contains(visit) && IsVisitDurationExceeded(visit))
+                .ToList();
+
             var visitsToAppend = appendedResults
                 .AppendedVisits
-                .Where(visit => !unknownVisits.Contains(visit))
+                .Where(visit => !unknownVisits.Contains(visit) && !largeDurationVisits.Contains(visit))
                 .ToList();
 
             if (unknownVisits.Any())
             {
-                if (visitsToAppend.Any())
-                {
-                    Log.Warn($"Skipping {unknownVisits.Count} visits for unknown locations");
-                }
-                else
-                {
-                    Log.Error($"All {unknownVisits.Count} visits are for unknown locations.");
-                }
+                Log.Warn($"Skipping {unknownVisits.Count} visits for unknown locations");
             }
 
-            var isFailure = unknownVisits.Any() && !visitsToAppend.Any();
-            var isPartial = !isFailure && unknownVisits.Any();
+            if (largeDurationVisits.Any())
+            {
+                Log.Warn($"Skipping {largeDurationVisits.Count} visits exceeding /{nameof(Context.MaximumVisitDuration)}={Context.MaximumVisitDuration:g}");
+
+                uploadedResults.PathsToMove.Add(SaveLargeVisits(appendedResults, largeDurationVisits, path));
+            }
+
+            if (!visitsToAppend.Any())
+            {
+                Log.Error($"None of the {appendedResults.AppendedVisits.Count} visits can be imported.");
+            }
+
+            var isIncomplete = unknownVisits.Any() || largeDurationVisits.Any();
+            var isFailure = isIncomplete && !visitsToAppend.Any();
+            var isPartial = !isFailure && isIncomplete;
 
             UploadedFilename = Path.GetFileName(path) + ".json";
 
@@ -246,7 +288,31 @@ namespace FieldVisitHotFolderService
                 }
             }
 
-            return (IsPartial: isPartial, IsFailure: isFailure);
+            uploadedResults.IsPartial = isPartial;
+            uploadedResults.IsFailure = isFailure;
+
+            return uploadedResults;
+        }
+
+        private string SaveLargeVisits(AppendedResults appendedResults, List<FieldVisitInfo> largeVisits, string path)
+        {
+            var largePath = Path.Combine(
+                // ReSharper disable once AssignNullToNotNullAttribute
+                Path.GetDirectoryName(path),
+                $"{Path.GetFileNameWithoutExtension(path)}.LargeDuration.json");
+
+            var largeResults = new AppendedResults
+            {
+                PluginAssemblyQualifiedTypeName = appendedResults.PluginAssemblyQualifiedTypeName,
+                FrameworkAssemblyQualifiedName = appendedResults.FrameworkAssemblyQualifiedName,
+                AppendedVisits = largeVisits
+            };
+
+            Log.Info($"Saving {largeResults.AppendedVisits.Count} visits data to '{largePath}'");
+
+            File.WriteAllText(largePath, largeResults.ToJson().IndentJson());
+
+            return largePath;
         }
 
         private void UploadVisitsConcurrently(
@@ -285,6 +351,11 @@ namespace FieldVisitHotFolderService
             return !Guid.TryParse(visit.LocationInfo.UniqueId, out var uniqueId) || uniqueId == Guid.Empty;
         }
 
+        private bool IsVisitDurationExceeded(FieldVisitInfo visit)
+        {
+            return visit.EndDate - visit.StartDate > Context.MaximumVisitDuration;
+        }
+
         private void UploadVisit(
             FieldVisitInfo visit,
             AppendedResults appendedResults,
@@ -295,6 +366,12 @@ namespace FieldVisitHotFolderService
             if (ShouldSkipConflictingVisits(visit))
             {
                 partialAction();
+                return;
+            }
+
+            if (Context.DryRun)
+            {
+                Log.Warn($"Dry-run: Would upload '{visit.FieldVisitIdentifier}'");
                 return;
             }
 
@@ -408,6 +485,12 @@ namespace FieldVisitHotFolderService
         {
             if (Context.MergeMode == MergeMode.ArchiveAndReplace)
                 ArchiveExistingVisit(visit);
+
+            if (Context.DryRun)
+            {
+                Log.Warn($"Dry-run: Would delete existing visit on {visit.StartTime:yyyy-MM-dd} at location '{visit.LocationIdentifier}'");
+                return;
+            }
 
             Log.Info($"Deleting existing visit on {visit.StartTime:yyyy-MM-dd} at location '{visit.LocationIdentifier}'");
 

@@ -133,6 +133,20 @@ namespace FieldVisitHotFolderService
                     Getter = () => context.OverlapIncludesWholeDay.ToString(),
                     Description = $"True if a conflict includes any visit on same day. False can generate multiple visits on the same day."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.MaximumVisitDuration),
+                    Setter = value => context.MaximumVisitDuration = TimeSpan.Parse(value),
+                    Getter = () => context.MaximumVisitDuration.ToString(),
+                    Description = "Maximum visit duration. Visits exceeding this duration will not be imported."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.DryRun),
+                    Setter = value => context.DryRun = bool.Parse(value),
+                    Getter = () => context.DryRun.ToString(),
+                    Description = $"True if no visits will be imported. Use /N as a shortcut."
+                },
 
                 new CommandLineOption(), new CommandLineOption{Description = "Location alias settings"},
                 new CommandLineOption
@@ -336,6 +350,13 @@ namespace FieldVisitHotFolderService
             if (TryParseLocationAlias(arg, out var alias, out var locationIdentifier))
             {
                 AddLocationAlias(context, alias, locationIdentifier);
+                return true;
+            }
+
+            if (arg.Equals("/n", StringComparison.InvariantCultureIgnoreCase) ||
+                arg.Equals("-n", StringComparison.InvariantCultureIgnoreCase))
+            {
+                context.DryRun = true;
                 return true;
             }
 
