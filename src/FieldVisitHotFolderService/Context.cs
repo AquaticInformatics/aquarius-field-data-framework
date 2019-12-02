@@ -26,5 +26,7 @@ namespace FieldVisitHotFolderService
         public TimeSpan? MaximumFileWaitInterval { get; set; }
         public int MaximumDuplicateRetry { get; set; } = 3;
         public Dictionary<string, string> LocationAliases { get; } = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+        public TimeSpan MaximumVisitDuration { get; set; } = TimeSpan.FromDays(1.25);
+        public bool DryRun { get; set; }
     }
 }
