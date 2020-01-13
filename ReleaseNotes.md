@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 19.4.0
+- Added support for AQTS 2019.4 plugins
+- See [2019.4 release notes](docs#aqts-20194---framework-version-26) for details of new features.
+
 ### 19.3.3
 - FieldVisitHotFolderService now enforces the `/MaximumVisitDuration=` setting, which defaults to 1 day 6 hours. This setting helps catch poorly composed FV data before it ends up in your AQTS system.
 - FieldVisitHotFolderService now supports a `/DryRun=true` option for easier debugging of configurations. No data changes will be made to your AQTS system.

@@ -14,6 +14,9 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2019.4 - Framework version 2.6
+- Added optional UseLocationDatumAsReference property to Reading. Set this property to indicate that the Reading is measured against the local assumed datum of the Reading's location. Cannot be used in combination with a Reference Point.
+
 ### AQTS 2019.3 - Framework version 2.5
 - Added optional SensorUniqueId property to Reading and Calibration. Set the UniqueId of an existing Sensor to associate the Reading / Calibration with the physical device used to retrieve the measurement. The SensorUnique Id can be retrieved from the Sensors/Gauges tab in Springboard or by using the Publish or Provisioning APIs.
 - Added optional ReadingQualifiers property to Reading. Allows adding multiple qualifiers to a Reading.
