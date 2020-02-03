@@ -39,8 +39,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attachment.cs" />
     <Compile Include="CommandLineOption.cs" />
     <Compile Include="CommandLineOptionResolver.cs" />
     <Compile Include="CommandLineUsage.cs" />
@@ -50,6 +52,8 @@
     <Compile Include="Log4NetLogger.cs" />
     <Compile Include="PluginLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ZipLoader.cs" />
+    <Compile Include="ZipWithAttachments.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
