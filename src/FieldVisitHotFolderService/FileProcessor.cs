@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -20,6 +21,7 @@ using log4net;
 using NodaTime;
 using ServiceStack;
 using ServiceStack.Text;
+using Attachment = Common.Attachment;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -56,8 +58,8 @@ namespace FieldVisitHotFolderService
 
             try
             {
-                var appendedResults = ParseLocalFile(processingPath);
-                var results = UploadResultsConcurrently(processingPath, appendedResults);
+                var uploadContext = ParseLocalFile(processingPath);
+                var results = UploadResultsConcurrently(uploadContext);
 
                 if (results.IsFailure)
                     MoveFiles(FailedFolder, results.PathsToMove);
@@ -102,6 +104,9 @@ namespace FieldVisitHotFolderService
 
         private string MoveFile(string path, string targetFolder, bool writeTargetLog = true)
         {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("A path is is required", nameof(path));
+
             var extension = Path.GetExtension(path);
             var baseFilename = Path.GetFileNameWithoutExtension(path);
             string targetPath;
@@ -134,7 +139,7 @@ namespace FieldVisitHotFolderService
             return targetPath;
         }
 
-        private AppendedResults ParseLocalFile(string path)
+        private UploadContext ParseLocalFile(string path)
         {
             var fileBytes = LoadFileBytes(path);
 
@@ -152,28 +157,41 @@ namespace FieldVisitHotFolderService
 
                 try
                 {
-                    using (var stream = new MemoryStream(fileBytes))
-                    {
-                        var result = plugin.ParseFile(stream, appender, Log);
+                    var resultWithAttachments = new ZipLoader
+                        {
+                            Plugin = plugin,
+                            Appender = appender,
+                            Logger = Log,
+                            LocationInfo = null
+                        }
+                        .ParseFile(fileBytes);
 
-                        // TODO: Support Zip-with-attachments
+                    if (resultWithAttachments.Result.Status == ParseFileStatus.CannotParse)
+                        continue;
 
-                        if (result.Status == ParseFileStatus.CannotParse)
-                            continue;
+                    if (resultWithAttachments.Result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
+                        throw new ArgumentException(
+                            $"Error parsing '{path}' with {pluginName}: {resultWithAttachments.Result.ErrorMessage}");
 
-                        if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
-                            throw new ArgumentException(
-                                $"Error parsing '{path}' with {pluginName}: {result.ErrorMessage}");
+                    if (!appender.AppendedResults.AppendedVisits.Any())
+                        throw new ArgumentException($"{pluginName} did not parse any field visits.");
 
-                        if (!appender.AppendedResults.AppendedVisits.Any())
-                            throw new ArgumentException($"{pluginName} did not parse any field visits.");
+                    var attachmentCount = resultWithAttachments.Attachments?.Count ?? 0;
 
-                        Log.Info(
-                            $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Take(10).Select(v => v.FieldVisitIdentifier))}");
-                    }
+                    if (appender.AppendedResults.AppendedVisits.Count > 1 && attachmentCount > 0)
+                        throw new ArgumentException($"Only single-visit data files can be uploaded with attachments.");
+
+                    Log.Info(
+                        $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Take(10).Select(v => v.FieldVisitIdentifier))}");
 
                     appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
-                    return appender.AppendedResults;
+
+                    return new UploadContext
+                    {
+                        Path = path,
+                        AppendedResults = appender.AppendedResults,
+                        Attachments = resultWithAttachments.Attachments
+                    };
                 }
                 catch (Exception e)
                 {
@@ -194,8 +212,6 @@ namespace FieldVisitHotFolderService
             return File.ReadAllBytes(path);
         }
 
-        private string UploadedFilename { get; set; }
-
         public class UploadedResults
         {
             public bool IsPartial { get; set; }
@@ -203,33 +219,41 @@ namespace FieldVisitHotFolderService
             public List<string> PathsToMove { get; } = new List<string>();
         }
 
-        private UploadedResults UploadResultsConcurrently(string path, AppendedResults appendedResults)
+        public class UploadContext
+        {
+            public string Path { get; set; }
+            public string UploadedFilename { get; set; }
+            public AppendedResults AppendedResults { get; set; }
+            public List<Attachment> Attachments { get; set; }
+        }
+
+        private UploadedResults UploadResultsConcurrently(UploadContext uploadContext)
         {
             var uploadedResults = new UploadedResults
             {
                 IsPartial = false,
                 IsFailure = false,
-                PathsToMove = {path}
+                PathsToMove = {uploadContext.Path}
             };
 
-            if (!appendedResults.AppendedVisits.Any())
+            if (!uploadContext.AppendedResults.AppendedVisits.Any())
             {
-                Log.Warn($"No visits parsed from '{path}'");
+                Log.Warn($"No visits parsed from '{uploadContext.Path}'");
 
                 return uploadedResults;
             }
 
-            var unknownVisits = appendedResults
+            var unknownVisits = uploadContext.AppendedResults
                 .AppendedVisits
                 .Where(IsUnknownLocation)
                 .ToList();
 
-            var largeDurationVisits = appendedResults
+            var largeDurationVisits = uploadContext.AppendedResults
                 .AppendedVisits
                 .Where(visit => !unknownVisits.Contains(visit) && IsVisitDurationExceeded(visit))
                 .ToList();
 
-            var visitsToAppend = appendedResults
+            var visitsToAppend = uploadContext.AppendedResults
                 .AppendedVisits
                 .Where(visit => !unknownVisits.Contains(visit) && !largeDurationVisits.Contains(visit))
                 .ToList();
@@ -243,19 +267,19 @@ namespace FieldVisitHotFolderService
             {
                 Log.Warn($"Skipping {largeDurationVisits.Count} visits exceeding /{nameof(Context.MaximumVisitDuration)}={Context.MaximumVisitDuration:g}");
 
-                uploadedResults.PathsToMove.Add(SaveLargeVisits(appendedResults, largeDurationVisits, path));
+                uploadedResults.PathsToMove.Add(SaveLargeVisits(uploadContext.AppendedResults, largeDurationVisits, uploadContext.Path));
             }
 
             if (!visitsToAppend.Any())
             {
-                Log.Error($"None of the {appendedResults.AppendedVisits.Count} visits can be imported.");
+                Log.Error($"None of the {uploadContext.AppendedResults.AppendedVisits.Count} visits can be imported.");
             }
 
             var isIncomplete = unknownVisits.Any() || largeDurationVisits.Any();
             var isFailure = isIncomplete && !visitsToAppend.Any();
             var isPartial = !isFailure && isIncomplete;
 
-            UploadedFilename = Path.GetFileName(path) + ".json";
+            uploadContext.UploadedFilename = Path.GetFileName(uploadContext.Path) + ".json";
 
             if (visitsToAppend.Any())
             {
@@ -263,7 +287,7 @@ namespace FieldVisitHotFolderService
 
                 var duplicateVisits = new List<FieldVisitInfo>();
 
-                UploadVisitsConcurrently(appendedResults, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
+                UploadVisitsConcurrently(uploadContext, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
 
                 if (duplicateVisits.Any())
                 {
@@ -277,7 +301,7 @@ namespace FieldVisitHotFolderService
                         visitsToAppend.AddRange(duplicateVisits);
                         duplicateVisits.Clear();
 
-                        UploadVisitsConcurrently(appendedResults, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
+                        UploadVisitsConcurrently(uploadContext, visitsToAppend, duplicateVisits, ref isPartial, ref isFailure);
                     }
 
                     if (duplicateVisits.Any())
@@ -316,7 +340,7 @@ namespace FieldVisitHotFolderService
         }
 
         private void UploadVisitsConcurrently(
-            AppendedResults appendedResults,
+            UploadContext uploadContext,
             List<FieldVisitInfo> visitsToAppend,
             List<FieldVisitInfo> duplicateVisits,
             ref bool isPartial,
@@ -334,7 +358,7 @@ namespace FieldVisitHotFolderService
                     await Task.Run(() =>
                             UploadVisit(
                                 visit,
-                                appendedResults,
+                                uploadContext,
                                 () => localIsPartial = true,
                                 () => localIsFailure = true,
                                 () => duplicateVisits.Add(visit))
@@ -356,9 +380,8 @@ namespace FieldVisitHotFolderService
             return visit.EndDate - visit.StartDate > Context.MaximumVisitDuration;
         }
 
-        private void UploadVisit(
-            FieldVisitInfo visit,
-            AppendedResults appendedResults,
+        private void UploadVisit(FieldVisitInfo visit,
+            UploadContext uploadContext,
             Action partialAction,
             Action failureAction,
             Action duplicateAction = null)
@@ -377,37 +400,81 @@ namespace FieldVisitHotFolderService
 
             var singleResult = new AppendedResults
             {
-                FrameworkAssemblyQualifiedName = appendedResults.FrameworkAssemblyQualifiedName,
-                PluginAssemblyQualifiedTypeName = appendedResults.PluginAssemblyQualifiedTypeName,
+                FrameworkAssemblyQualifiedName = uploadContext.AppendedResults.FrameworkAssemblyQualifiedName,
+                PluginAssemblyQualifiedTypeName = uploadContext.AppendedResults.PluginAssemblyQualifiedTypeName,
                 AppendedVisits = new List<FieldVisitInfo> { visit }
             };
 
             try
             {
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(singleResult.ToJson())))
+                using (var stream = new MemoryStream(GetUploadFileBytes(singleResult, uploadContext)))
                 {
-                    var response = Client.Acquisition.PostFileWithRequest(stream, UploadedFilename,
+                    var response = Client.Acquisition.PostFileWithRequest(stream, uploadContext.UploadedFilename,
                         new PostVisitFile
                         {
                             LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
                         });
 
-                    Log.Info($"Uploaded '{UploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
+                    Log.Info($"Uploaded '{uploadContext.UploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
                 }
             }
             catch (WebServiceException exception)
             {
                 if (duplicateAction != null && IsDuplicateFailure(exception))
                 {
-                    Log.Warn($"{UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
+                    Log.Warn($"{uploadContext.UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
 
                     duplicateAction();
                     return;
                 }
 
-                Log.Error($"{UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
+                Log.Error($"{uploadContext.UploadedFilename}: {visit.FieldVisitIdentifier}: {exception.ErrorCode} {exception.ErrorMessage}");
                 failureAction();
             }
+        }
+
+        private byte[] GetUploadFileBytes(AppendedResults singleResult, UploadContext uploadContext)
+        {
+            var jsonBytes = Encoding.UTF8.GetBytes(singleResult.ToJson());
+
+            if (uploadContext.Attachments == null || !uploadContext.Attachments.Any())
+                return jsonBytes;
+
+            using (var stream = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(stream, ZipArchiveMode.Create))
+                {
+                    AddArchiveEntry(archive, new Attachment
+                    {
+                        Content = jsonBytes,
+                        Path = uploadContext.UploadedFilename,
+                        LastWriteTime = DateTimeOffset.UtcNow,
+                        ByteSize = jsonBytes.Length
+                    });
+
+                    foreach (var attachment in uploadContext.Attachments)
+                    {
+                        AddArchiveEntry(archive, attachment);
+                    }
+                }
+
+                stream.Position = 0;
+
+                return stream.GetBuffer();
+            }
+        }
+
+        private void AddArchiveEntry(ZipArchive archive, Attachment attachment)
+        {
+            var entry = archive.CreateEntry(attachment.Path, CompressionLevel.Fastest);
+
+            using (var writerStream = entry.Open())
+            using (var binaryWriter = new BinaryWriter(writerStream))
+            {
+                binaryWriter.Write(attachment.Content);
+            }
+
+            entry.LastWriteTime = attachment.LastWriteTime;
         }
 
         private static bool IsDuplicateFailure(WebServiceException exception)
