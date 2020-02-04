@@ -100,11 +100,11 @@ namespace Common
                         .Where(e => e.Name == e.FullName)
                         .ToList();
 
-                    var attachments = fileEntries
+                    var attachmentEntries = fileEntries
                         .Where(e => !rootEntries.Contains(e))
                         .ToList();
 
-                    if (rootEntries.Count != 1 || !attachments.Any())
+                    if (rootEntries.Count != 1 || !attachmentEntries.Any())
                     {
                         result = null;
                         return false;
@@ -114,9 +114,9 @@ namespace Common
 
                     result = new ZipWithAttachments
                     {
-                        PluginDataBytes = ReadAllEntryBytes(pluginDataEntry),
-                        Attachments = attachments
-                            .Select(entry => new Attachment{ Path = entry.FullName, ByteSize = entry.Length})
+                        PluginDataBytes = LoadAttachment(pluginDataEntry).Content,
+                        Attachments = attachmentEntries
+                            .Select(LoadAttachment)
                             .ToList()
                     };
 
@@ -130,14 +130,22 @@ namespace Common
             }
         }
 
-        private static byte[] ReadAllEntryBytes(ZipArchiveEntry entry)
+        private const int MaxAttachmentSize = int.MaxValue;
+
+        private static Attachment LoadAttachment(ZipArchiveEntry entry)
         {
-            if (entry.Length > int.MaxValue)
+            if (entry.Length > MaxAttachmentSize)
                 throw new InvalidDataException($"'{entry.FullName}' is too big. Uncompressed ByteSize={entry.Length}");
 
             using (var reader = new BinaryReader(entry.Open()))
             {
-                return reader.ReadBytes((int)entry.Length);
+                return new Attachment
+                {
+                    Path = entry.FullName,
+                    ByteSize = entry.Length,
+                    LastWriteTime = entry.LastWriteTime,
+                    Content = reader.ReadBytes((int) entry.Length)
+                };
             }
         }
     }
