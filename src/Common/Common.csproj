@@ -50,6 +50,7 @@
     <Compile Include="FileHelper.cs" />
     <Compile Include="LogExtensions.cs" />
     <Compile Include="Log4NetLogger.cs" />
+    <Compile Include="ParseFileResultWithAttachments.cs" />
     <Compile Include="PluginLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZipLoader.cs" />

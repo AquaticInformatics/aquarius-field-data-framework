@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using Common;
 using FieldDataPluginFramework;
-using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using Humanizer;
@@ -66,7 +65,14 @@ namespace PluginTester
 
             try
             {
-                var result = ParseFile(dataBytes, appender, locationInfo);
+                var result = new ZipLoader
+                    {
+                        Plugin = Plugin,
+                        Logger = Logger,
+                        Appender = appender,
+                        LocationInfo = locationInfo
+                    }
+                    .ParseFile(dataBytes);
 
                 SaveAppendedResults(path, appender.AppendedResults);
 
@@ -84,84 +90,6 @@ namespace PluginTester
             }
         }
 
-        private ResultOrException ParseFile(byte[] dataBytes, FieldDataResultsAppender appender, LocationInfo locationInfo)
-        {
-            // Many plugins, like FlowTracker2, accept a ZIP archive that also matches the Zip-with-attachments pattern.
-            // So always try the plugin first with the actual data
-            if (TryParseFile(dataBytes, appender, locationInfo, out var directAttempt)
-                && IsSuccessfulParse(directAttempt.Result))
-                return new ResultOrException
-                {
-                    Result = directAttempt.Result
-                };
-
-            ResultOrException zipAttempt = null;
-
-            if (ZipLoader.TryParse(dataBytes, out var zipWithAttachments)
-                && TryParseFile(zipWithAttachments.PluginDataBytes, appender, locationInfo, out zipAttempt)
-                && IsSuccessfulParse(zipAttempt.Result))
-                return new ResultOrException
-                {
-                    Result = zipAttempt.Result,
-                    Attachments = zipWithAttachments.Attachments
-                };
-
-            if (zipWithAttachments != null)
-            {
-                if (zipAttempt == null)
-                    throw new ArgumentNullException(nameof(zipAttempt));
-
-                // Something failed inside the Zip parser
-                return new ResultOrException
-                {
-                    Result = zipAttempt.Result,
-                    Attachments = zipWithAttachments.Attachments,
-                    Exception = zipAttempt.Exception
-                };
-            }
-
-            return new ResultOrException
-            {
-                Result = directAttempt.Result,
-                Exception = directAttempt.Exception
-            };
-        }
-
-        private static bool IsSuccessfulParse(ParseFileResult result)
-        {
-            return result.Status != ParseFileStatus.CannotParse;
-        }
-
-        private class ResultOrException
-        {
-            public ParseFileResult Result { get; set; }
-            public List<Attachment> Attachments { get; set; }
-            public Exception Exception { get; set; }
-        }
-
-        private bool TryParseFile(byte[] dataBytes, FieldDataResultsAppender appender, LocationInfo locationInfo, out ResultOrException resultOrException)
-        {
-            resultOrException = new ResultOrException();
-
-            try
-            {
-                using (var stream = new MemoryStream(dataBytes))
-                {
-                    resultOrException.Result = locationInfo != null
-                        ? Plugin.ParseFile(stream, locationInfo, appender, Logger)
-                        : Plugin.ParseFile(stream, appender, Logger);
-                }
-
-                return true;
-            }
-            catch (Exception exception)
-            {
-                resultOrException.Exception = exception;
-
-                return false;
-            }
-        }
-
         private void SaveAppendedResults(string sourcePath, AppendedResults appendedResults)
         {
             if (string.IsNullOrEmpty(Context.JsonPath))
@@ -176,17 +104,17 @@ namespace PluginTester
             File.WriteAllText(savePath, appendedResults.ToJson().IndentJson());
         }
 
-        private void SummarizeResults(string path, ResultOrException resultOrException, AppendedResults appendedResults)
+        private void SummarizeResults(string path, ParseFileResultWithAttachments resultWithAttachments, AppendedResults appendedResults)
         {
             try
             {
-                if (resultOrException.Result?.Status == Context.ExpectedStatus)
+                if (resultWithAttachments.Result?.Status == Context.ExpectedStatus)
                 {
-                    SummarizeExpectedResults(path, resultOrException, appendedResults);
+                    SummarizeExpectedResults(path, resultWithAttachments, appendedResults);
                 }
                 else
                 {
-                    SummarizeFailedResults(path, resultOrException, appendedResults);
+                    SummarizeFailedResults(path, resultWithAttachments, appendedResults);
                 }
 
             }
@@ -204,13 +132,13 @@ namespace PluginTester
             }
         }
 
-        private void SummarizeExpectedResults(string path, ResultOrException resultOrException, AppendedResults appendedResults)
+        private void SummarizeExpectedResults(string path, ParseFileResultWithAttachments resultWithAttachments, AppendedResults appendedResults)
         {
-            var result = resultOrException.Result;
+            var result = resultWithAttachments.Result;
 
-            var attachmentSummary = GetAttachmentSummary(resultOrException.Attachments);
+            var attachmentSummary = GetAttachmentSummary(resultWithAttachments.Attachments);
 
-            if (resultOrException.Exception == null && result.Parsed)
+            if (result.Parsed)
             {
                 if (!appendedResults.AppendedVisits.Any())
                 {
@@ -221,7 +149,7 @@ namespace PluginTester
             }
             else
             {
-                var actualError = resultOrException.Exception?.Message ?? result.ErrorMessage ?? string.Empty;
+                var actualError = result.ErrorMessage ?? string.Empty;
                 var expectedError = Context.ExpectedError ?? string.Empty;
 
                 if (!actualError.Equals(expectedError))
@@ -232,14 +160,11 @@ namespace PluginTester
             }
         }
 
-        private void SummarizeFailedResults(string path, ResultOrException resultOrException, AppendedResults appendedResults)
+        private void SummarizeFailedResults(string path, ParseFileResultWithAttachments resultWithAttachments, AppendedResults appendedResults)
         {
-            if (resultOrException.Exception != null)
-                throw new ExpectedException($"Can't parse '{path}'. {resultOrException.Exception.Message}");
+            var result = resultWithAttachments.Result;
 
-            var result = resultOrException.Result;
-
-            var attachmentSummary = GetAttachmentSummary(resultOrException.Attachments);
+            var attachmentSummary = GetAttachmentSummary(resultWithAttachments.Attachments);
 
             if (result.Parsed)
                 throw new ExpectedException(
@@ -249,7 +174,7 @@ namespace PluginTester
                 throw new ExpectedException(
                     $"Result: '{path}' Parsed={result.Parsed} Status={result.Status} ErrorMessage={result.ErrorMessage}{attachmentSummary}");
 
-            var errorMessage = resultOrException.Exception?.Message ?? result.ErrorMessage;
+            var errorMessage = result.ErrorMessage;
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
