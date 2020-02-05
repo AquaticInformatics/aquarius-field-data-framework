@@ -14,17 +14,24 @@ The `PluginTester.exe` console app allows you to run your field data plugin outs
 ```
 Parse a file using a field data plugin, logging the results.
 
-usage: PluginTester [-option=value] ...
+Usage: PluginTester [-option=value] [@optionsFile] ...
 
 Supported -option=value settings (/option=value works too):
 
-  -Plugin               Path to the plugin assembly to debug
-  -Data                 Path to the data file to be parsed. Can be set more than once.
-  -Location             Optional location identifier context
-  -UtcOffset            UTC offset in .NET TimeSpan format. [default: -08:00:00]
-  -Json                 Optional path to write the appended results as JSON
-  -ExpectedError        Expected error message
-  -ExpectedStatus       Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
+  -Plugin           Path to the plugin assembly to debug
+  -Data             Path to the data file to be parsed. Can be set more than once.
+  -RecursiveSearch  Search /Data directories recursively. -R shortcut is also supported. [default: False]
+  -Location         Optional location identifier context
+  -UtcOffset        UTC offset in .NET TimeSpan format. [default: -08:00:00]
+  -Json             Optional path to write the appended results as JSON
+  -ExpectedError    Expected error message
+  -ExpectedStatus   Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
+
+Use the @optionsFile syntax to read more options from a file.
+
+  Each line in the file is treated as a command line option.
+  Blank lines and leading/trailing whitespace is ignored.
+  Comment lines begin with a # or // marker.
 ```
 
 ## Saving JSON results

@@ -83,6 +83,7 @@ namespace PluginTester
             {
                 new CommandLineOption {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
                 new CommandLineOption {Key = "Data", Setter = value => AddDataPath(Context, value), Getter = () => string.Empty, Description = "Path to the data file to be parsed. Can be set more than once."},
+                new CommandLineOption {Key = nameof(Context.RecursiveSearch), Setter = value => Context.RecursiveSearch = bool.Parse(value), Getter = () => $"{Context.RecursiveSearch}", Description = "Search /Data directories recursively. -R shortcut is also supported."},
                 new CommandLineOption {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
                 new CommandLineOption {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
                 new CommandLineOption {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
@@ -95,7 +96,7 @@ namespace PluginTester
 
             var optionResolver = new CommandLineOptionResolver();
 
-            optionResolver.Resolve(args, options, usageMessage);
+            optionResolver.Resolve(args, options, usageMessage, arg => PositionalArgumentResolver(Context, arg));
 
             if (string.IsNullOrEmpty(Context.PluginPath))
                 throw new ExpectedException("No plugin assembly specified.");
@@ -104,15 +105,34 @@ namespace PluginTester
                 throw new ExpectedException("No data file specified.");
         }
 
+
+        private bool PositionalArgumentResolver(Context context, string arg)
+        {
+            if (RecursiveShortcuts.Contains(arg))
+            {
+                Context.RecursiveSearch = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static readonly HashSet<string> RecursiveShortcuts =
+            new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                "-r",
+                "/r"
+            };
+
         private static void AddDataPath(Context context, string dataPath)
         {
-            foreach (var path in ExpandDataPath(dataPath))
+            foreach (var path in ExpandDataPath(context, dataPath))
             {
                 context.DataPaths.Add(path);
             }
         }
 
-        private static IEnumerable<string> ExpandDataPath(string path)
+        private static IEnumerable<string> ExpandDataPath(Context context, string path)
         {
             var dir = Path.GetDirectoryName(path);
             var filename = Path.GetFileName(path);
@@ -123,7 +143,11 @@ namespace PluginTester
             }
             else
             {
-                foreach (var expandedPath in Directory.GetFiles(dir, filename))
+                var searchDepth = context.RecursiveSearch
+                    ? SearchOption.AllDirectories
+                    : SearchOption.TopDirectoryOnly;
+
+                foreach (var expandedPath in Directory.GetFiles(dir, filename, searchDepth))
                 {
                     yield return expandedPath;
                 }

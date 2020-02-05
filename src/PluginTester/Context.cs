@@ -13,5 +13,6 @@ namespace PluginTester
         public string JsonPath { get; set; }
         public ParseFileStatus ExpectedStatus { get; set; } = ParseFileStatus.SuccessfullyParsedAndDataValid;
         public string ExpectedError { get; set; }
+        public bool RecursiveSearch { get; set; }
     }
 }
