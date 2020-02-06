@@ -14,6 +14,9 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2019.4 Update 1 - Framework version 2.7
+- Added optional Grade property to Reading. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
+
 ### AQTS 2019.4 - Framework version 2.6
 - Added optional UseLocationDatumAsReference property to Reading. Set this property to indicate that the Reading is measured against the local assumed datum of the Reading's location. Cannot be used in combination with a Reference Point.
 
