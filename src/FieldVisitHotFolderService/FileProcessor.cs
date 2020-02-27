@@ -125,11 +125,7 @@ namespace FieldVisitHotFolderService
 
             Log.Info($"Moving '{path}' to '{targetPath}'");
 
-            if (!Directory.Exists(targetFolder))
-            {
-                Log.Info($"Creating '{targetFolder}'");
-                Directory.CreateDirectory(targetFolder);
-            }
+            CreateTargetFolder(targetFolder);
 
             File.Move(path, targetPath);
 
@@ -137,6 +133,15 @@ namespace FieldVisitHotFolderService
                 File.WriteAllText($"{targetPath}.log", Log.AllText());
 
             return targetPath;
+        }
+
+        private void CreateTargetFolder(string targetFolder)
+        {
+            if (!Directory.Exists(targetFolder))
+            {
+                Log.Info($"Creating '{targetFolder}'");
+                Directory.CreateDirectory(targetFolder);
+            }
         }
 
         private UploadContext ParseLocalFile(string path)
@@ -225,6 +230,8 @@ namespace FieldVisitHotFolderService
             public string UploadedFilename { get; set; }
             public AppendedResults AppendedResults { get; set; }
             public List<Attachment> Attachments { get; set; }
+
+            public bool HasAttachments => Attachments?.Any() ?? false;
         }
 
         private UploadedResults UploadResultsConcurrently(UploadContext uploadContext)
@@ -409,7 +416,11 @@ namespace FieldVisitHotFolderService
             {
                 using (var stream = new MemoryStream(GetUploadFileBytes(singleResult, uploadContext)))
                 {
-                    var response = Client.Acquisition.PostFileWithRequest(stream, uploadContext.UploadedFilename,
+                    var uploadedFilename = uploadContext.HasAttachments
+                        ? CreateSafeAttachmentUploadFilename(uploadContext)
+                        : uploadContext.UploadedFilename;
+
+                    var response = Client.Acquisition.PostFileWithRequest(stream, uploadedFilename,
                         new PostVisitFile
                         {
                             LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
@@ -433,16 +444,22 @@ namespace FieldVisitHotFolderService
             }
         }
 
+        private static string CreateSafeAttachmentUploadFilename(UploadContext uploadContext)
+        {
+            // AQTS really needs the uploaded filename to end with ".zip" if it has attachments
+            return Path.GetFileNameWithoutExtension(uploadContext.Path) + ".zip";
+        }
+
         private byte[] GetUploadFileBytes(AppendedResults singleResult, UploadContext uploadContext)
         {
             var jsonBytes = Encoding.UTF8.GetBytes(singleResult.ToJson());
 
-            if (uploadContext.Attachments == null || !uploadContext.Attachments.Any())
+            if (!uploadContext.HasAttachments)
                 return jsonBytes;
 
             using (var stream = new MemoryStream())
             {
-                using (var archive = new ZipArchive(stream, ZipArchiveMode.Create))
+                using (var archive = new ZipArchive(stream, ZipArchiveMode.Update, true))
                 {
                     AddArchiveEntry(archive, new Attachment
                     {
@@ -460,7 +477,9 @@ namespace FieldVisitHotFolderService
 
                 stream.Position = 0;
 
-                return stream.GetBuffer();
+                var zipBytes = stream.GetBuffer();
+
+                return zipBytes;
             }
         }
 
@@ -579,6 +598,8 @@ namespace FieldVisitHotFolderService
                     IncludeVerticals = true
                 })
             };
+
+            CreateTargetFolder(ArchivedFolder);
 
             var archiveFilenameBase = Path.Combine(ArchivedFolder, $"{visit.Identifier}_{visit.StartTime?.Date:yyyy-MM-dd}_{visit.LocationIdentifier}");
             

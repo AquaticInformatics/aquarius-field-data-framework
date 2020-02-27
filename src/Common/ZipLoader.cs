@@ -112,11 +112,14 @@ namespace Common
 
                     var pluginDataEntry = rootEntries.First();
 
+                    var pluginDataAttachment = LoadAttachment(pluginDataEntry);
+                    pluginDataAttachment.Path = Path.Combine("PluginData", pluginDataAttachment.Path);
+
                     result = new ZipWithAttachments
                     {
                         PluginDataBytes = LoadAttachment(pluginDataEntry).Content,
-                        Attachments = attachmentEntries
-                            .Select(LoadAttachment)
+                        Attachments = new[] {pluginDataAttachment}
+                            .Concat(attachmentEntries.Select(LoadAttachment))
                             .ToList()
                     };
 
