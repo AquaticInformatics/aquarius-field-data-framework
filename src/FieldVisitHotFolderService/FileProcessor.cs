@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Aquarius.TimeSeries.Client;
@@ -416,9 +417,7 @@ namespace FieldVisitHotFolderService
             {
                 using (var stream = new MemoryStream(GetUploadFileBytes(singleResult, uploadContext)))
                 {
-                    var uploadedFilename = uploadContext.HasAttachments
-                        ? CreateSafeAttachmentUploadFilename(uploadContext)
-                        : uploadContext.UploadedFilename;
+                    var uploadedFilename = ComposeUploadedFilename(uploadContext, visit);
 
                     var response = Client.Acquisition.PostFileWithRequest(stream, uploadedFilename,
                         new PostVisitFile
@@ -426,7 +425,7 @@ namespace FieldVisitHotFolderService
                             LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
                         });
 
-                    Log.Info($"Uploaded '{uploadContext.UploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
+                    Log.Info($"Uploaded '{uploadedFilename}' {visit.FieldVisitIdentifier} to '{visit.LocationInfo.LocationIdentifier}' using {response.HandledByPlugin.Name} plugin");
                 }
             }
             catch (WebServiceException exception)
@@ -444,11 +443,29 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private static string CreateSafeAttachmentUploadFilename(UploadContext uploadContext)
+        private static string ComposeUploadedFilename(UploadContext uploadContext, FieldVisitInfo visit)
+        {
+            var uploadedFilename = uploadContext.HasAttachments
+                ? ComposeSafeAttachmentUploadFilename(uploadContext)
+                : uploadContext.AppendedResults.AppendedVisits.Count <= 1
+                    ? uploadContext.UploadedFilename
+                    : $"{Path.GetFileName(uploadContext.Path)}.{visit.LocationInfo.LocationIdentifier}-{visit.StartDate.Date:yyyy-MM-dd}.json";
+
+            return SanitizeFilename(uploadedFilename);
+        }
+
+        private static string ComposeSafeAttachmentUploadFilename(UploadContext uploadContext)
         {
             // AQTS really needs the uploaded filename to end with ".zip" if it has attachments
             return Path.GetFileNameWithoutExtension(uploadContext.Path) + ".zip";
         }
+
+        private static string SanitizeFilename(string filename)
+        {
+            return InvalidFileNameCharsRegex.Replace(filename, "_");
+        }
+
+        private static readonly Regex InvalidFileNameCharsRegex = new Regex($"[{string.Join("", Path.GetInvalidFileNameChars())}]");
 
         private byte[] GetUploadFileBytes(AppendedResults singleResult, UploadContext uploadContext)
         {

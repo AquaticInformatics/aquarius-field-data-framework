@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 19.4.5
+- Each visit file uploaded by FieldVisitHotFolderService now contains the location identifier and start date in the filename
+
 ### 19.4.4
 - Fixed ZIPs-with-attachments for the FieldVisitHotFolderService
 
