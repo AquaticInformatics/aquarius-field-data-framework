@@ -14,7 +14,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
-### AQTS 2020.1 - Framework version 2.8
+### AQTS 2020.2 - Framework version 2.8
 - Added optional NumberOfVerticals property to ManualGaugingDischargeSection. This property can be used to specify the number of verticals a manual gauging activity has when there are no verticals to be imported. The NumberOfVerticals must be `null` or match the vertical count when the activity has verticals.
 
 ### AQTS 2019.4 Update 1 - Framework version 2.7
