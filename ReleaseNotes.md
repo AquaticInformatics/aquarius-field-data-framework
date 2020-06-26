@@ -4,7 +4,7 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
-### 19.4.6
+### 19.4.12
 - MultiFile plugin: Fixed a bug, so that inspection and calibration activity data is now merged from multiple plugins.
 
 ### 19.4.5
