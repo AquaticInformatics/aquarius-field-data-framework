@@ -49,6 +49,16 @@ namespace MultiFile
                 ActualAppender.AddReading(visit, reading);
             }
 
+            foreach (var calibration in delayedVisit.Calibrations)
+            {
+                ActualAppender.AddCalibration(visit, calibration);
+            }
+
+            foreach (var inspection in delayedVisit.Inspections)
+            {
+                ActualAppender.AddInspection(visit, inspection);
+            }
+
             foreach (var crossSectionSurvey in delayedVisit.CrossSectionSurveys)
             {
                 ActualAppender.AddCrossSectionSurvey(visit, crossSectionSurvey);
