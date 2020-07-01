@@ -190,6 +190,14 @@ namespace Common
             return GetAssemblyVersion(assemblyQualifiedName);
         }
 
+        public static string GetPluginFolderName(IFieldDataPlugin plugin)
+        {
+            var folder = Path.GetDirectoryName(plugin.GetType().Assembly.Location);
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            return new DirectoryInfo(folder)
+                .Name;
+        }
         private static string GetTypeVersion(Type type)
         {
             var version = GetAssemblyVersion(type.AssemblyQualifiedName);

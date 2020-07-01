@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Common;
 using log4net;
@@ -155,6 +157,15 @@ namespace FieldVisitHotFolderService
                     Setter = value => ParseLocationAliases(context, value),
                     Getter = () => string.Empty,
                     Description = $"A list of location aliases, in alias=locationIdentifier syntax."
+                },
+
+                new CommandLineOption(), new CommandLineOption{Description = "Plugin configuration settings"},
+                new CommandLineOption
+                {
+                    Key = nameof(context.PluginSettings),
+                    Setter = value => AddSetting(context, value),
+                    Getter = () => string.Empty,
+                    Description = $"Configure plugin settings as 'pluginFolderName=key=text' or 'pluginFolderName=key=@pathToTextFile' values."
                 },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
@@ -353,6 +364,14 @@ namespace FieldVisitHotFolderService
                 return true;
             }
 
+            var match = SettingRegex.Match(arg);
+
+            if (match.Success)
+            {
+                AddSetting(context, arg);
+                return true;
+            }
+
             if (arg.Equals("/n", StringComparison.InvariantCultureIgnoreCase) ||
                 arg.Equals("-n", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -362,6 +381,31 @@ namespace FieldVisitHotFolderService
 
             return false;
         }
+
+        private static void AddSetting(Context context, string value)
+        {
+            var match = SettingRegex.Match(value);
+
+            if (!match.Success)
+                throw new ExpectedException($"'{value}' does not match a pluginFolderName=key=text or pluginFolderName=key=@pathToTextFile setting.");
+
+            var pluginFolder = match.Groups["pluginFolder"].Value;
+            var key = match.Groups["key"].Value;
+            var text = match.Groups["text"].Value;
+            var pathToText = match.Groups["pathToTextFile"].Value;
+
+            if (!context.PluginSettings.TryGetValue(pluginFolder, out var settings))
+            {
+                settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                context.PluginSettings[pluginFolder] = settings;
+            }
+
+            settings[key] = !string.IsNullOrWhiteSpace(pathToText)
+                ? File.ReadAllText(pathToText)
+                : text;
+        }
+
+        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<pluginFolder>\w+)\s*=\s*(?<key>\w+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
 
         private static void ValidateContext(Context context)
         {

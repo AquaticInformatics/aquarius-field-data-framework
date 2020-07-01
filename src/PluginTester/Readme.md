@@ -24,6 +24,7 @@ Supported -option=value settings (/option=value works too):
   -Location         Optional location identifier context
   -UtcOffset        UTC offset in .NET TimeSpan format. [default: -08:00:00]
   -Json             Optional path to write the appended results as JSON
+  -Setting          Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values.
   -ExpectedError    Expected error message
   -ExpectedStatus   Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
 
