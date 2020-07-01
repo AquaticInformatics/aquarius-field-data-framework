@@ -85,6 +85,11 @@ namespace MultiFile
             return ActualAppender.GetLocationByUniqueId(uniqueId);
         }
 
+        public Dictionary<string, string> GetPluginConfigurations()
+        {
+            return ActualAppender.GetPluginConfigurations();
+        }
+
         private List<FieldVisitInfo> DelayedFieldVisits { get; } = new List<FieldVisitInfo>();
 
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)

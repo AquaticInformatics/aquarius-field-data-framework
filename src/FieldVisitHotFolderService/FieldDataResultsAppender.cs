@@ -131,6 +131,11 @@ namespace FieldVisitHotFolderService
             }
         }
 
+        public Dictionary<string, string> GetPluginConfigurations()
+        {
+            throw new NotImplementedException();
+        }
+
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)
         {
             var fieldVisitInfo = InternalConstructor<FieldVisitInfo>.Invoke(location, fieldVisitDetails);
