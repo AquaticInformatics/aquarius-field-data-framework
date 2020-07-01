@@ -51,6 +51,7 @@ namespace PluginTester
 
         public LocationInfo ForcedLocationInfo { get; set; }
         public TimeSpan UtcOffset { get; set; }
+        public Dictionary<string,string> Settings { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -80,6 +81,11 @@ namespace PluginTester
             var locationInfo = KnownLocations.SingleOrDefault(l => Guid.Parse(l.UniqueId) == uniqueId);
 
             return locationInfo ?? CreateDummyLocationInfoByUniqueId(uniqueId);
+        }
+
+        public Dictionary<string, string> GetPluginConfigurations()
+        {
+            return Settings;
         }
 
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)

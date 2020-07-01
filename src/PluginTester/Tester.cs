@@ -53,7 +53,8 @@ namespace PluginTester
 
             var appender = new FieldDataResultsAppender
             {
-                UtcOffset = Context.LocationUtcOffset
+                UtcOffset = Context.LocationUtcOffset,
+                Settings = Context.Settings,
             };
 
             var locationInfo = !string.IsNullOrEmpty(Context.LocationIdentifier)

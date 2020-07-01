@@ -159,6 +159,15 @@ namespace FieldVisitHotFolderService
 
             foreach (var plugin in Plugins)
             {
+                var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
+
+                if (!Context.PluginSettings.TryGetValue(pluginFolderName, out var settings))
+                {
+                    settings = new Dictionary<string, string>();
+                }
+
+                appender.Settings = settings;
+
                 var pluginName = PluginLoader.GetPluginNameAndVersion(plugin);
 
                 try
