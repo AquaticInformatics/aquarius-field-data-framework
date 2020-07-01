@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Common;
 using FieldDataPluginFramework.Results;
@@ -87,6 +88,7 @@ namespace PluginTester
                 new CommandLineOption {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
                 new CommandLineOption {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
                 new CommandLineOption {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
+                new CommandLineOption {Key = "Setting", Setter = value => AddSetting(Context, value), Getter = () => string.Empty, Description = "Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values."},
                 new CommandLineOption {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
                 new CommandLineOption {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
             };
@@ -114,6 +116,14 @@ namespace PluginTester
                 return true;
             }
 
+            var match = SettingRegex.Match(arg);
+
+            if (match.Success)
+            {
+                AddSetting(context, arg);
+                return true;
+            }
+
             return false;
         }
 
@@ -123,6 +133,24 @@ namespace PluginTester
                 "-r",
                 "/r"
             };
+
+        private static void AddSetting(Context context, string value)
+        {
+            var match = SettingRegex.Match(value);
+
+            if (!match.Success)
+                throw new ExpectedException($"'{value}' does not match a key=text or key=@pathToTextFile setting.");
+
+            var key = match.Groups["key"].Value;
+            var text = match.Groups["text"].Value;
+            var pathToText = match.Groups["pathToTextFile"].Value;
+
+            context.Settings[key] = !string.IsNullOrWhiteSpace(pathToText)
+                ? File.ReadAllText(pathToText)
+                : text;
+        }
+
+        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<key>\w+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
 
         private static void AddDataPath(Context context, string dataPath)
         {

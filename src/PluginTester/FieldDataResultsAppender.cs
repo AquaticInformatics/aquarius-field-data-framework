@@ -51,6 +51,7 @@ namespace PluginTester
 
         public LocationInfo ForcedLocationInfo { get; set; }
         public TimeSpan UtcOffset { get; set; }
+        public Dictionary<string,string> Settings { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -84,7 +85,7 @@ namespace PluginTester
 
         public Dictionary<string, string> GetPluginConfigurations()
         {
-            throw new NotImplementedException();
+            return Settings;
         }
 
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)

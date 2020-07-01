@@ -14,5 +14,6 @@ namespace PluginTester
         public ParseFileStatus ExpectedStatus { get; set; } = ParseFileStatus.SuccessfullyParsedAndDataValid;
         public string ExpectedError { get; set; }
         public bool RecursiveSearch { get; set; }
+        public Dictionary<string,string> Settings { get; } = new Dictionary<string, string>();
     }
 }
