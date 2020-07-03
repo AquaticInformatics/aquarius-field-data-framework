@@ -21,7 +21,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2020.2 | [v20.2.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.0/FieldVisitHotFolderService.zip) |
+| AQTS 2020.2 | [v20.2.1](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.1/FieldVisitHotFolderService.zip) |
 | AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.12](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.12/FieldVisitHotFolderService.zip) |
 | AQTS 2019.4 | [v19.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.0/FieldVisitHotFolderService.zip) |
 | AQTS 2019.3 | [v19.3.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.3/FieldVisitHotFolderService.zip) |
@@ -210,6 +210,21 @@ Two advanced options are provided to force the service to exit under certain con
 These options default to "keep the service running forever", and the options can be combined together.
 
 These options are not meant for a normal production deployment, but can be useful when scripting together migration workflows which only need to upload a certain number of field visit files and then continue on to perform other work.
+
+# Configuring your plugin settings
+
+Some plugins need to access configuration information that is normally set in the Settings tab of the System Config page, in the setting groups following the `FieldDataPluginConfig-{PluginName}` naming convention.
+
+By default, any plugin settings already configured on your AQTS app server will be automatically available to the local plugins as well. So normally you won't need to configure anything special for the hot folder service.
+
+But if your AQTS app server is lacking the configuration settings for your plugin (maybe because your plugin is only installed locally for the hot folder service?) you can use the `/PluginSettings=` option to make specific setting values available to specific plugins, 
+
+The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderName=key=text` or `/PluginSettings=pluginFolderName=key=@pathToTextFile` format. (Yup! That is four equal signs in a single option!)
+
+- The `/PluginSettings=AquaCalc5000=AssumeUsgsSiteIdentifiers=false` option would configure the [AquaCalc5000 plugin](https://github.com/AquaticInformatics/aquacalc-5000-field-data-plugin#configuring-the-plugin) to disable its default behaviour of adding leading zeros to numeric location identifiers, to match the 8-digit USGS site identifier pattern.
+- The `/PluginSettings=TabularCsv=AirTempReadings=@C:\MyConfigs\AirTemperature.toml` option would configure the [Tabular plugin](https://github.com/AquaticInformatics/tabular-field-data-plugin#where-is-each-configuration-file-stored) to load the entire `C:\MyConfigs\AirTemperature.toml` TOML configuration file into the setting named `AirTempReadings`.
+
+If any `/PluginSettings=` options are set for a plugin, then that plugin will only see those settings. Other plugins will continue to retrieve their configuration settings from the AQTS app server, but any plugins named in a `/PlugSettings=` option will only the local settings.
 
 # Log files
 
