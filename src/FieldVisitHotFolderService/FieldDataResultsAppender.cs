@@ -27,7 +27,7 @@ namespace FieldVisitHotFolderService
         public List<LocationInfo> LocationCache { get; set; }
         public Dictionary<string, string> LocationAliases { get; set; }
         public ILog Log { get; set; }
-        public Dictionary<string,string> Settings { get; set; }
+        public Func<Dictionary<string,string>> SettingsFunc { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -134,7 +134,7 @@ namespace FieldVisitHotFolderService
 
         public Dictionary<string, string> GetPluginConfigurations()
         {
-            return Settings;
+            return SettingsFunc();
         }
 
         public FieldVisitInfo AddFieldVisit(LocationInfo location, FieldVisitDetails fieldVisitDetails)

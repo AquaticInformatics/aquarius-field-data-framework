@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.Helpers;
 using Aquarius.TimeSeries.Client.ServiceModels.Acquisition;
+using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using Common;
 using FieldDataPluginFramework;
@@ -159,14 +160,7 @@ namespace FieldVisitHotFolderService
 
             foreach (var plugin in Plugins)
             {
-                var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
-
-                if (!Context.PluginSettings.TryGetValue(pluginFolderName, out var settings))
-                {
-                    settings = new Dictionary<string, string>();
-                }
-
-                appender.Settings = settings;
+                appender.SettingsFunc = () => GetPluginSettings(plugin);
 
                 var pluginName = PluginLoader.GetPluginNameAndVersion(plugin);
 
@@ -225,6 +219,25 @@ namespace FieldVisitHotFolderService
             Log.Info($"Loading data file '{path}'");
 
             return File.ReadAllBytes(path);
+        }
+
+        private Dictionary<string, string> GetPluginSettings(IFieldDataPlugin plugin)
+        {
+            var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
+
+            if (Context.PluginSettings.TryGetValue(pluginFolderName, out var settings))
+                return settings;
+
+            var targetSettingGroup = $"FieldDataPluginConfig-{pluginFolderName}";
+
+            // We ask for all settings and filter the results in-memory to avoid a 404 GroupNameNotFound exception when no configuration exist
+            return Client.Provisioning.Get(new GetSettings())
+                .Results
+                .Where(setting => setting.Group.Equals(targetSettingGroup, StringComparison.InvariantCultureIgnoreCase))
+                .ToDictionary(
+                    setting => setting.Key,
+                    setting => setting.Value,
+                    StringComparer.InvariantCultureIgnoreCase);
         }
 
         public class UploadedResults
@@ -429,7 +442,7 @@ namespace FieldVisitHotFolderService
                     var uploadedFilename = ComposeUploadedFilename(uploadContext, visit);
 
                     var response = Client.Acquisition.PostFileWithRequest(stream, uploadedFilename,
-                        new PostVisitFile
+                        new PostVisitFileToLocation
                         {
                             LocationUniqueId = Guid.Parse(visit.LocationInfo.UniqueId)
                         });

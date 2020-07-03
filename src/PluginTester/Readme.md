@@ -7,6 +7,7 @@ The `PluginTester.exe` console app allows you to run your field data plugin outs
 - An exit code of 0 means the file was successfully parsed by the plugin.
 - An exit code of 1 means "something went wrong".
 - Everything gets logged to `PluginTester.log`
+- Can configure with any required plugin settings.
 - Any appended results from the plugin can be saved to a JSON file.
 
 ## Usage
@@ -59,7 +60,7 @@ Log statements from the tester itself are easily distinguished from log statemen
 This post-build event will test that your plugin can successfully parse the `data\somefile.ext` file. If a parsing error is detected, the build will be marked as failed.
 
 ```
-$(SolutionDir)packages\Aquarius.FieldDataFramework.18.4.0\tools\PluginTester.exe /Plugin=$(TargetPath) /Data=$(SolutionDir)..\data\somefile.ext
+$(SolutionDir)packages\Aquarius.FieldDataFramework.20.2.0\tools\PluginTester.exe /Plugin=$(TargetPath) /Data=$(SolutionDir)..\data\somefile.ext
 ```
 
 ### How does my build know if the tester has failed?
@@ -112,7 +113,7 @@ Use the `PluginTest.exe` to debug your plugin from within Visual Studio.
 
 1. Open your plugin's **Properties** page
 2. Select the **Debug** tab
-3. Select **Start external program:** as the start action and browse to `packages\Aquarius.FieldDataFramework.18.4.0\tools\PluginTester.exe`
+3. Select **Start external program:** as the start action and browse to `packages\Aquarius.FieldDataFramework.20.2.0\tools\PluginTester.exe`
 4. Enter the **Command line arguments:** to launch your plugin
 
 ```
@@ -130,6 +131,24 @@ The `/Plugin=` argument can be the filename of your plugin assembly, without any
 The tester doesn't fully emulate the plugin framework. It simply exercises the `IFieldDataPlugin` interface and collects the data your plugin tries to append.
 
 - The AQTS framework will perform extensive validation on the data being appended. But the tester doesn't (and can't) perform any of that validation.
+
+### My plugin needs configuration text to work.
+
+Some plugins need to access configuration information that is normally set in the Settings tab of the System Config page, and are retrieved at runtime via the `IFieldDataResultsAppender` interface.
+
+```C#
+public interface IFieldDataResultsAppender
+{
+    Dictionary<string, string> GetPluginConfigurations();
+}
+```
+
+Any settings matching the **Group** naming pattern of `FieldDataPluginConfig-{PluginName}` will be returned by the `GetPluginConfigurations()` method.
+
+The plugin tester supports the `/Setting=` option, allowing you to simulate key/value text pairs from the command line, in either a `key=text` or `key=@pathToTextFile` format.
+
+- The `/Setting=AssumeUsgsSiteIdentifiers=false` option would configure the [AquaCalc5000 plugin](https://github.com/AquaticInformatics/aquacalc-5000-field-data-plugin#configuring-the-plugin) to disable its default behaviour of adding leading zeros to numeric location identifiers, to match the 8-digit USGS site identifier pattern.
+- The `"/Setting=AirTempReadings=@C:\My Configs\AirTemperature.toml"` option would configure the [Tabular plugin](https://github.com/AquaticInformatics/tabular-field-data-plugin#where-is-each-configuration-file-stored) to load the entire `C:\My Configs\AirTemperature.toml` TOML configuration file into the setting named `AirTempReadings`.
 
 #### My plugin seems to run fine in the tester. Why won't my plugin work on AQTS?
 

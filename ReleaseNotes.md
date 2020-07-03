@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.2.1
+- FieldVisitHotFolderService now proxies any plugin configuration from the AQTS app server by default.
+
 ### 20.2.0
 - Added support for AQTS 2020.2 plugins.
 - See [2020.2 release notes](docs#aqts-20202---framework-version-29) for details of new features.
