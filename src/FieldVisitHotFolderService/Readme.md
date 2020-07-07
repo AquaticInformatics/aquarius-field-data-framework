@@ -22,7 +22,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 | AQTS Version | Latest compatible service version |
 | --- | --- |
 | AQTS 2020.2 | [v20.2.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.3/FieldVisitHotFolderService.zip) |
-| AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.12](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.12/FieldVisitHotFolderService.zip) |
+| AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.13](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.13/FieldVisitHotFolderService.zip) |
 | AQTS 2019.4 | [v19.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.0/FieldVisitHotFolderService.zip) |
 | AQTS 2019.3 | [v19.3.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.3/FieldVisitHotFolderService.zip) |
 | AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/FieldVisitHotFolderService.zip) |
