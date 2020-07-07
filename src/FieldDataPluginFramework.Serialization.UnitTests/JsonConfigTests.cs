@@ -4,6 +4,7 @@ using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.PickLists;
+using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
 using FluentAssertions;
 using NUnit.Framework;
@@ -132,6 +133,18 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
         public void Grade_RoundTripsCorrectly(Grade expected, string reason)
         {
             AssertObjectRoundTripsCorrectly(expected, reason);
+        }
+
+        private static readonly IEnumerable<TestCaseData> ReadingTests = new[]
+        {
+            new TestCaseData(new Reading("TA", new Measurement(0, "degC")), "Temperature reading with a value"),
+            new TestCaseData(new Reading("TA", "degC", null), "Temperature reading with no value"),
+        };
+
+        [TestCaseSource(nameof(ReadingTests))]
+        public void Reading_RoundTripsCorrectly(Reading reading, string reason)
+        {
+            AssertObjectRoundTripsCorrectly(reading, reason);
         }
     }
 }
