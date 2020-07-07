@@ -229,6 +229,8 @@ namespace FieldDataPluginFramework.Serialization
                     json.AddItems(nameof(item.CrossSectionSurveys), item.CrossSectionSurveys);
                     json.AddItems(nameof(item.LevelSurveys), item.LevelSurveys);
                     json.AddItems(nameof(item.Readings), item.Readings);
+                    json.AddItems(nameof(item.Calibrations), item.Calibrations);
+                    json.AddItems(nameof(item.Inspections), item.Inspections);
                 });
 
             Configure(json => new FieldVisitDetails(
