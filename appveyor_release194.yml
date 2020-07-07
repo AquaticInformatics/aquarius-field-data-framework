@@ -5,6 +5,13 @@
 
 image: Visual Studio 2017
 
+pull_requests:
+  do_not_increment_build_number: true
+
+branches:
+  only:
+    - release/2019.4
+
 platform: Any CPU
 configuration: Release
 
