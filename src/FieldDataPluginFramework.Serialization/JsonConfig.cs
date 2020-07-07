@@ -243,9 +243,7 @@ namespace FieldDataPluginFramework.Serialization
                 json.Get<string>(nameof(MeasurementDevice.Model)),
                 json.Get<string>(nameof(MeasurementDevice.SerialNumber))));
 
-            Configure(json => new Reading(
-                    json.Get<string>(nameof(Reading.ParameterId)),
-                    json.GetObject<Measurement>(nameof(Reading.Measurement))));
+            Configure(ReadingFactory);
 
             Configure(json => new Calibration(
                 json.Get<string>(nameof(Calibration.ParameterId)),
@@ -363,6 +361,20 @@ namespace FieldDataPluginFramework.Serialization
                 : json.JsonText;
 
             return new ControlConditionPickList(conditionType);
+        }
+
+        private static Reading ReadingFactory(JsonParser json)
+        {
+            var value = json.Get<double?>(nameof(Reading.Value));
+
+            return json.HasProperty(nameof(Reading.Measurement))
+                ? new Reading(
+                    json.Get<string>(nameof(Reading.ParameterId)),
+                    json.GetObject<Measurement>(nameof(Reading.Measurement)))
+                : new Reading(
+                    json.Get<string>(nameof(Reading.ParameterId)),
+                    json.Get<string>(nameof(Reading.UnitId)),
+                    value);
         }
     }
 }
