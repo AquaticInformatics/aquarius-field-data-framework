@@ -167,11 +167,15 @@ namespace FieldVisitHotFolderService
                 if (serverVersion.IsLessThan(MinimumVersion))
                     throw new ExpectedException($"{Context.Server} (v{serverVersion}) is below the minimum required version of v{MinimumVersion}");
 
+                if (Context.MergeMode == MergeMode.AllowSameDayVisits && serverVersion.IsLessThan(MinimumVersionSupportingSameDayVisits))
+                    throw new ExpectedException($"{Context.Server} (v{serverVersion}) is below the minimum required version of v{MinimumVersionSupportingSameDayVisits} required to support /{nameof(Context.MergeMode)}={MergeMode.AllowSameDayVisits}.");
+
                 return;
             }
         }
 
         private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("19.2");
+        private static readonly AquariusServerVersion MinimumVersionSupportingSameDayVisits = AquariusServerVersion.Create("2020.1");
 
         private void ConnectAndThrowIfJsonPluginNotInstalled()
         {
