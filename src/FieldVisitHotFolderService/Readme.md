@@ -77,9 +77,11 @@ The `FieldVisitHotFolderService.exe` program will need these file system rights 
 - Move files
 - Create any `Processing`, `Uploaded`, `Partial`, `Archive`, or `Failed` subfolders as needed.
 
-In its simplest configuration, where you only explicitly specify the root `/HotFolderPath=` option and allow other subfolders to be created as needed, then you can usually grant the "Full control" permission for the `/HotFolderPath` and its subfolders and the system will work as expected.
-
 **Note:** When running as a Windows service, the service's configured "Log On" property is the account which must have these granted permissions.
+
+### Simpler configurations are easier to secure
+
+In its simplest configuration, where you only explicitly specify the root `/HotFolderPath=` option and allow other subfolders to be created as needed, then you can usually grant the "Full control" permission for the `/HotFolderPath` and its subfolders and the system will work as expected.
 
 ## Adding the local plugins
 
@@ -138,8 +140,12 @@ These folders can be local to the computer running `FieldVisitHotFolderService.e
 
 ## Controlling the `/MergeMode` behaviour
 
-AQTS does not currently allow a plugin to add any new field visit activities to a location when field visit activities already exist on the same day.
+AQTS 2019.4-and-earlier does not allow a plugin to add any new field visit activities to a location when field visit activities already exist on the same day.
 Attempts to upload such files will result in the dreaded `Saving parsed data would result in duplicates` error message.
+
+AQTS 2020.1 relaxed this constraint a bit, allowing a new visit to be uploaded even when another visit exists on the same day. This will result in two visits on the same day, which is not quite the same as a true "merge" resulting in a single visit containing all the activities on a given day.
+
+AQTS 2020.1 will still reject an attempt to re-import an already-imported field data file.
 
 The `/MergeMode` option controls how the service behaves when a file contains activities which occur on the same day as a visit already in the AQTS system.
 
@@ -149,6 +155,7 @@ The `/MergeMode` option controls how the service behaves when a file contains ac
 | `/MergeMode=Fail` | If any of the new activities conflict with any existing visits, then **none of the new activities** will be uploaded to AQTS. The file will be considered as a failure to upload.<br/><br/>Once processed, the input file will be moved to the `/FailedFolder`, along with its activity log. |
 | `/MergeMode=Replace` | If a new activity conflicts with an existing AQTS visit, **the existing AQTS visit will be deleted without confirmation**, and a new activities will be uploaded to AQTS.<br/><br/>Please use caution with this option, as the delete is a destructive operation which cannot be undone.<br/><br/>Once processed, the input file will be moved to the `/UploadedFolder`, along with its activity log. |
 | `/MergeMode=ArchiveAndReplace` | Same as `/MergeMode=Replace`, but existing visits are archived to the `/ArchiveFolder` before being deleted. |
+| `/MergeMode=AllowSameDayVisits` | Allows same-day visits to be created on AQTS 2020.1 or newer. |
 
 # Operation
 

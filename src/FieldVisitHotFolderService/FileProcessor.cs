@@ -452,6 +452,12 @@ namespace FieldVisitHotFolderService
             }
             catch (WebServiceException exception)
             {
+                if (IsDuplicateAttachmentException(exception))
+                {
+                    Log.Info($"{uploadContext.UploadedFilename}: Skipping already uploaded content.");
+                    return;
+                }
+
                 if (duplicateAction != null && IsDuplicateFailure(exception))
                 {
                     Log.Warn($"{uploadContext.UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
@@ -541,6 +547,11 @@ namespace FieldVisitHotFolderService
                    && exception.ErrorMessage?.IndexOf("Saving parsed data would result in duplicates", StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
 
+        private static bool IsDuplicateAttachmentException(WebServiceException exception)
+        {
+            return exception.ErrorCode?.Equals("DuplicateImportedAttachmentException", StringComparison.InvariantCultureIgnoreCase) ?? false;
+        }
+
         private bool ShouldSkipConflictingVisits(FieldVisitInfo visit)
         {
             var startDate = Context.OverlapIncludesWholeDay ? StartOfDay(visit.StartDate) : visit.StartDate;
@@ -575,6 +586,8 @@ namespace FieldVisitHotFolderService
                 case MergeMode.Replace:
                 case MergeMode.ArchiveAndReplace:
                     DeleteExistingVisits(conflictingVisits);
+                    return false;
+                case MergeMode.AllowSameDayVisits:
                     return false;
                 default:
                     throw new ExpectedException($"{Context.MergeMode} is an unsupported {nameof(MergeMode)} value.");
