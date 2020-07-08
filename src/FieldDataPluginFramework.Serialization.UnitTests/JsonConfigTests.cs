@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoFixture;
+using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
+using FieldDataPluginFramework.DataModel.Calibrations;
+using FieldDataPluginFramework.DataModel.ChannelMeasurements;
+using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.Inspections;
+using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.PickLists;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
@@ -145,6 +152,148 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
         public void Reading_RoundTripsCorrectly(Reading reading, string reason)
         {
             AssertObjectRoundTripsCorrectly(reading, reason);
+        }
+
+        private IFixture Fixture { get; set; }
+
+        [Test]
+        public void AppendedResults_RoundTripsCorrectly()
+        {
+            SetupFixture();
+
+            var results = Fixture
+                .Create<AppendedResults>();
+
+            AssertObjectRoundTripsCorrectly(results, "Foo");
+        }
+
+        private void SetupFixture()
+        {
+            Fixture = new Fixture();
+
+            Fixture.Register(CreateTimeSpan);
+            Fixture.Register(CreateDateTimeInterval);
+            Fixture.Register(CreateLocationInfo);
+            Fixture.Register(CreateFieldVisitInfo);
+            Fixture.Register(CreateEnumValue<InspectionType>);
+            Fixture.Register(CreateDischargeActivity);
+            Fixture.Register(CreateChannelMeasurement);
+        }
+
+        private TEnum CreateEnumValue<TEnum>() where TEnum : struct
+        {
+            var type = typeof(TEnum);
+
+            var values = Enum.GetValues(type);
+
+            var index = 1 + (Fixture.Create<uint>() % (values.Length - 1));
+
+            var value = (TEnum)values.GetValue(index);
+
+            return value;
+        }
+
+        private TimeSpan CreateTimeSpan()
+        {
+            return TimeSpan.FromMinutes(Fixture.Create<int>());
+        }
+
+        private DateTimeInterval CreateDateTimeInterval()
+        {
+            return new DateTimeInterval(
+                Fixture.Create<DateTimeOffset>(),
+                Fixture.Create<TimeSpan>());
+        }
+
+        private LocationInfo CreateLocationInfo()
+        {
+            return InternalConstructor<LocationInfo>.Invoke(
+                Fixture.Create<string>(),
+                Fixture.Create<string>(),
+                Fixture.Create<long>(),
+                Fixture.Create<Guid>(),
+                Fixture.Create<double>());
+        }
+
+        private DischargeActivity CreateDischargeActivity()
+        {
+            var discharge = new DischargeActivity(
+                Fixture.Create<DateTimeInterval>(),
+                Fixture.Create<Measurement>());
+
+            foreach (var item in Fixture.CreateMany<ChannelMeasurementBase>())
+            {
+                discharge.ChannelMeasurements.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<GageHeightMeasurement>())
+            {
+                discharge.GageHeightMeasurements.Add(item);
+            }
+
+            return discharge;
+        }
+
+        private ChannelMeasurementBase CreateChannelMeasurement()
+        {
+            NextIsAdcp = !NextIsAdcp;
+
+            return NextIsAdcp
+                ? CreateAdcpMeasurement()
+                : CreateManualGauging();
+        }
+
+        private bool NextIsAdcp { get; set; }
+
+        private ChannelMeasurementBase CreateManualGauging()
+        {
+            return Fixture.Create<ManualGaugingDischargeSection>();
+        }
+
+        private ChannelMeasurementBase CreateAdcpMeasurement()
+        {
+            return Fixture.Create<AdcpDischargeSection>();
+        }
+
+        private FieldVisitInfo CreateFieldVisitInfo()
+        {
+            var visit = InternalConstructor<FieldVisitInfo>.Invoke(
+                Fixture.Create<LocationInfo>(),
+                Fixture.Create<FieldVisitDetails>());
+
+            visit.ControlConditions.Add(Fixture.Create<ControlCondition>());
+
+            foreach (var item in Fixture.CreateMany<DischargeActivity>())
+            {
+                visit.DischargeActivities.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<Reading>())
+            {
+                visit.Readings.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<Inspection>())
+            {
+                visit.Inspections.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<Calibration>())
+            {
+                visit.Calibrations.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<CrossSectionSurvey>())
+            {
+                visit.CrossSectionSurveys.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<LevelSurvey>())
+            {
+                visit.LevelSurveys.Add(item);
+            }
+
+            return visit;
         }
     }
 }
