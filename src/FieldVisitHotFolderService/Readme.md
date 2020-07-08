@@ -63,9 +63,23 @@ When not run as Windows Service, the program will run until you type Ctrl-C or C
 
 Windows services like `FieldVisitHotFolderService` are normally installed to run using the built-in "Local System" account, which is a lower-permissions account which cannot read files from network shares located on other computers.
 
-If your configured `/HotFolderPath=` setting is located on another system, like the UNC path `/HotFolderPath=//OfficeFiles/FieldVisits`, then you will need to change the service's "Log On" property to a network account with permissions to access and modify files in that folder.
+If your configured [`/HotFolderPath=`](#folder-configuration) setting is located on another system, like the UNC path `/HotFolderPath=//OfficeFiles/FieldVisits`, then you will need to change the service's "Log On" property to a network account with [the required permissions](#required-file-permissions) to access and modify files in that folder.
 
 ![Picture](images/ChangeServiceLogOn.png)
+
+## Required file permissions
+
+The `FieldVisitHotFolderService.exe` program will need these file system rights for all the [configured folders](#folder-configuration):
+
+- Read files
+- Write files
+- Delete files
+- Move files
+- Create any `Processing`, `Uploaded`, `Partial`, `Archive`, or `Failed` subfolders as needed.
+
+In its simplest configuration, where you only explicitly specify the root `/HotFolderPath=` option and allow other subfolders to be created as needed, then you can usually grant the "Full control" permission for the `/HotFolderPath` and its subfolders and the system will work as expected.
+
+**Note:** When running as a Windows service, the service's configured "Log On" property is the account which must have these granted permissions.
 
 ## Adding the local plugins
 
@@ -94,19 +108,33 @@ This option is useful for debugging your configuration before putting it into pr
 
 ## Folder configuration
 
-There are six configurable folders which are used to process field visit files.
+There are six configurable folders which are used to process field visit files. Only one folder is required to be specified, and the rest assume reasonable default values.
 
-- The `/HotFolderPath` option is the folder that will be watched for new files.
+- The `/HotFolderPath` option is the required folder that will be watched for new files.
 - When a new file is detected, it is moved to the `/ProcessingFolder` while it is being processed.
 - After processing, the file will be moved to the `/UploadedFolder` if it can successful upload all of its results to AQTS.
 - The file will be moved to the `/PartialFolder` when at least one visit was skipped with a `WARN` to avoid duplicates in `/MergeMode=Skip`.
 - The `/ArchiveFolder` will receive copies of visits being replaced when `/MergeMode=ArchiveAndReplace` is enabled.
 - Otherwise processed file will be moved to the `/FailedFolder` if it fails to upload anything to AQTS.
 
+| Option | Default |
+| --- | --- |
+| `/HotFolderPath=` | _None. This option is required._ |
+| `/ProcessingFolder=` | `{HotFolderPath}\Processing` |
+| `/UploadedFolder=` | `{HotFolderPath}\Uploaded` |
+| `/PartialFolder=` | `{HotFolderPath}\Partial` |
+| `/ArchiveFolder=` | `{HotFolderPath}\Archive` |
+| `/FailedFolder=` | `{HotFolderPath}\Failed` |
+
+Any default folders will be automatically created as needed.
+
+### Both Absolute and Relative paths are supported
+
+The `/HotFolderPath` option can be an abolute path, like `/HotFolderPath=\\FileServer\Incoming` or `/HotFolderPath=D:\SomePath`, or it can be a path relative to the folder containing `FieldVisitHotFolderService.exe`.
+
 The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, `/ArchivedFolder` and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
 
-- These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path.
-- The program will need file system rights to read, write, delete, and move files in all of these folder locations.
+These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path (see [required file permissions](#required-file-permissions) for details).
 
 ## Controlling the `/MergeMode` behaviour
 
