@@ -133,6 +133,16 @@ namespace JsonFieldData
             {
                 ResultsAppender.AddReading(visit, reading);
             }
+
+            foreach (var inspection in importedVisit.Inspections)
+            {
+                ResultsAppender.AddInspection(visit, inspection);
+            }
+
+            foreach (var calibration in importedVisit.Calibrations)
+            {
+                ResultsAppender.AddCalibration(visit, calibration);
+            }
         }
 
         private static void UpgradeCrossSectionSurvey(CrossSectionSurvey survey)
