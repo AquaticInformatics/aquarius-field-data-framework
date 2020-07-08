@@ -6,5 +6,6 @@
         Fail,
         Replace,
         ArchiveAndReplace,
+        AllowSameDayVisits,
     }
 }

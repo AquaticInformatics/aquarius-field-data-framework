@@ -21,8 +21,8 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2020.2 | [v20.2.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.3/FieldVisitHotFolderService.zip) |
-| AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.13](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.13/FieldVisitHotFolderService.zip) |
+| AQTS 2020.2 | [v20.2.5](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.5/FieldVisitHotFolderService.zip) |
+| AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.14](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.14/FieldVisitHotFolderService.zip) |
 | AQTS 2019.4 | [v19.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.0/FieldVisitHotFolderService.zip) |
 | AQTS 2019.3 | [v19.3.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.3.3/FieldVisitHotFolderService.zip) |
 | AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/FieldVisitHotFolderService.zip) |
@@ -63,9 +63,25 @@ When not run as Windows Service, the program will run until you type Ctrl-C or C
 
 Windows services like `FieldVisitHotFolderService` are normally installed to run using the built-in "Local System" account, which is a lower-permissions account which cannot read files from network shares located on other computers.
 
-If your configured `/HotFolderPath=` setting is located on another system, like the UNC path `/HotFolderPath=//OfficeFiles/FieldVisits`, then you will need to change the service's "Log On" property to a network account with permissions to access and modify files in that folder.
+If your configured [`/HotFolderPath=`](#folder-configuration) setting is located on another system, like the UNC path `/HotFolderPath=//OfficeFiles/FieldVisits`, then you will need to change the service's "Log On" property to a network account with [the required permissions](#required-file-permissions) to access and modify files in that folder.
 
 ![Picture](images/ChangeServiceLogOn.png)
+
+## Required file permissions
+
+The `FieldVisitHotFolderService.exe` program will need these file system rights for all the [configured folders](#folder-configuration):
+
+- Read files
+- Write files
+- Delete files
+- Move files
+- Create any `Processing`, `Uploaded`, `Partial`, `Archive`, or `Failed` subfolders as needed.
+
+**Note:** When running as a Windows service, the service's configured "Log On" property is the account which must have these granted permissions.
+
+### Simpler configurations are easier to secure
+
+In its simplest configuration, where you only explicitly specify the root `/HotFolderPath=` option and allow other subfolders to be created as needed, then you can usually grant the "Full control" permission for the `/HotFolderPath` and its subfolders and the system will work as expected.
 
 ## Adding the local plugins
 
@@ -94,24 +110,42 @@ This option is useful for debugging your configuration before putting it into pr
 
 ## Folder configuration
 
-There are six configurable folders which are used to process field visit files.
+There are six configurable folders which are used to process field visit files. Only one folder is required to be specified, and the rest assume reasonable default values.
 
-- The `/HotFolderPath` option is the folder that will be watched for new files.
+- The `/HotFolderPath` option is the required folder that will be watched for new files.
 - When a new file is detected, it is moved to the `/ProcessingFolder` while it is being processed.
 - After processing, the file will be moved to the `/UploadedFolder` if it can successful upload all of its results to AQTS.
 - The file will be moved to the `/PartialFolder` when at least one visit was skipped with a `WARN` to avoid duplicates in `/MergeMode=Skip`.
 - The `/ArchiveFolder` will receive copies of visits being replaced when `/MergeMode=ArchiveAndReplace` is enabled.
 - Otherwise processed file will be moved to the `/FailedFolder` if it fails to upload anything to AQTS.
 
+| Option | Default |
+| --- | --- |
+| `/HotFolderPath=` | _None. This option is required._ |
+| `/ProcessingFolder=` | `{HotFolderPath}\Processing` |
+| `/UploadedFolder=` | `{HotFolderPath}\Uploaded` |
+| `/PartialFolder=` | `{HotFolderPath}\Partial` |
+| `/ArchiveFolder=` | `{HotFolderPath}\Archive` |
+| `/FailedFolder=` | `{HotFolderPath}\Failed` |
+
+Any default folders will be automatically created as needed.
+
+### Both Absolute and Relative paths are supported
+
+The `/HotFolderPath` option can be an abolute path, like `/HotFolderPath=\\FileServer\Incoming` or `/HotFolderPath=D:\SomePath`, or it can be a path relative to the folder containing `FieldVisitHotFolderService.exe`.
+
 The `/ProcessingFolder`, `/UploadedFolder`, `/PartialFolder`, `/ArchivedFolder` and `/FailedFolder` can be absolute paths, or can be paths relative to the base `/HotFolderPath` folder. The folders will be created if they don't already exist.
 
-- These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path.
-- The program will need file system rights to read, write, delete, and move files in all of these folder locations.
+These folders can be local to the computer running `FieldVisitHotFolderService.exe`, or can be a UNC network path (see [required file permissions](#required-file-permissions) for details).
 
 ## Controlling the `/MergeMode` behaviour
 
-AQTS does not currently allow a plugin to add any new field visit activities to a location when field visit activities already exist on the same day.
+AQTS 2019.4-and-earlier does not allow a plugin to add any new field visit activities to a location when field visit activities already exist on the same day.
 Attempts to upload such files will result in the dreaded `Saving parsed data would result in duplicates` error message.
+
+AQTS 2020.1 relaxed this constraint a bit, allowing a new visit to be uploaded even when another visit exists on the same day. This will result in two visits on the same day, which is not quite the same as a true "merge" resulting in a single visit containing all the activities on a given day.
+
+AQTS 2020.1 will still reject an attempt to re-import an already-imported field data file.
 
 The `/MergeMode` option controls how the service behaves when a file contains activities which occur on the same day as a visit already in the AQTS system.
 
@@ -121,6 +155,7 @@ The `/MergeMode` option controls how the service behaves when a file contains ac
 | `/MergeMode=Fail` | If any of the new activities conflict with any existing visits, then **none of the new activities** will be uploaded to AQTS. The file will be considered as a failure to upload.<br/><br/>Once processed, the input file will be moved to the `/FailedFolder`, along with its activity log. |
 | `/MergeMode=Replace` | If a new activity conflicts with an existing AQTS visit, **the existing AQTS visit will be deleted without confirmation**, and a new activities will be uploaded to AQTS.<br/><br/>Please use caution with this option, as the delete is a destructive operation which cannot be undone.<br/><br/>Once processed, the input file will be moved to the `/UploadedFolder`, along with its activity log. |
 | `/MergeMode=ArchiveAndReplace` | Same as `/MergeMode=Replace`, but existing visits are archived to the `/ArchiveFolder` before being deleted. |
+| `/MergeMode=AllowSameDayVisits` | Allows same-day visits to be created on AQTS 2020.1 or newer. |
 
 # Operation
 
