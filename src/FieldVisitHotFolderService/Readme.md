@@ -31,11 +31,35 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 # Installing the service
 
-- Download the `FieldVisitHotFolderService.zip` archive from the [releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest) and unzip the contents into a folder.
+- Download the `FieldVisitHotFolderService.zip` archive from the [releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest).
+- [Unblock the ZIP archive](#unblock-the-zip-archive-before-extracting-it) to make it safe to extract.
+- Unzip the contents of the unblocked archive into a folder.
 - Run the `InstallService.cmd` batch file with elevated privileges to install the service.
 - Run the `UninstallService.cmd` batch file to uninstall the service.
-- The service expects an `Options.txt` file to exist in the same folder as the EXE.
+- The service expects an `Options.txt` file to exist in the same folder as the EXE. This file will store some settings unique to your configuration.
 - The `Options.txt` file uses the [@options.txt syntax](https://github.com/AquaticInformatics/examples/wiki/Common-command-line-options) to store its configuration options.
+
+## "Unblock" the ZIP archive before extracting it
+
+Windows keeps track of files downloaded from the internet, including files extracted from downloaded ZIP archives.
+
+Right-click the ZIP archive in Windows Explorere and use the **Properties** menu item. This will allow you to unblock the ZIP and make it safe to extract.
+
+This step may be important, depending on your IT department's enforced security policies.
+ 
+![Unblock the downloaded file](images/UnblockDownloadedFile.png)
+
+# Updating an already installed service
+
+When a newer version of the FieldVisitHotFolderService is released, you may want to update your existing deployment to take advantage of any new bug fixes or features.
+
+- Stop the service if it is currently running.
+- Make a backup copy of the current [`Options.txt`](#configuring-the-service) file, since that file contains all your configuration settings and we don't want to lose those.
+- Download the newer `FieldVisitHotFolderService.zip` archive.
+- [Unblock the ZIP archive](#unblock-the-zip-archive-before-extracting-it) to make it safe to extract.
+- Extract the ZIP over top of your existing installation. This will replace the EXE, and a few other files, including the `Options.txt` file.
+- Restore your `Options.txt` file from your backup.
+- Restart the service.
 
 # Configuring the service
 
@@ -69,13 +93,19 @@ If your configured [`/HotFolderPath=`](#folder-configuration) setting is located
 
 ## Required file permissions
 
+Configuring [file permissions on Windows systems](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2003/cc783530(v=ws.10)?redirectedfrom=MSDN#permissions-for-files-and-folders) can be a bit complex.
+
 The `FieldVisitHotFolderService.exe` program will need these file system rights for all the [configured folders](#folder-configuration):
 
-- Read files
-- Write files
-- Delete files
-- Move files
-- Create any `Processing`, `Uploaded`, `Partial`, `Archive`, or `Failed` subfolders as needed.
+| Permission | Description |
+| --- | --- |
+| Modify | To move and delete files between folders, and to create any `Processing`, `Uploaded`, `Partial`, `Archive`, or `Failed` subfolders as needed. |
+| Read & execute | To scan the contents of the hot folder. |
+| List folder contents | Also to scan the contents of the hot folder. We told you permission were weird! |
+| Read | To read file contents. |
+| Write | To write files and their individual log files. |
+
+![Typical File Permissions](images/TypicalFilePermissions.png)
 
 **Note:** When running as a Windows service, the service's configured "Log On" property is the account which must have these granted permissions.
 
