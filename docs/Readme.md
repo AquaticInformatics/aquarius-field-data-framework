@@ -14,6 +14,10 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2020.3 - Framwork version 2.10
+- Added support for "OtherDischargeSection" channel measurements which can be used to record channel measurements measured against any discharge monitoring method.
+- ManualGaugingDischargeSection.DischargeMethod is now optional and will no longer default to "MidSection" if omitted.
+
 ### AQTS 2020.2 - Framework version 2.9
 - Added optional NumberOfVerticals property to ManualGaugingDischargeSection. This property can be used to specify the number of verticals a manual gauging activity has when there are no verticals to be imported. The NumberOfVerticals must be `null` or match the vertical count when the activity has verticals.
 - Added optional MeasurementTime property to DischargeActivity. MeasurementTime is set to half way between the Start and End of the MeasurementPeriod when `null`.
