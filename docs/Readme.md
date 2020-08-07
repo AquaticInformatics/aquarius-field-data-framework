@@ -15,7 +15,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 ## Change Log
 
 ### AQTS 2020.3 - Framwork version 2.10
-- Added support for "OtherDischargeSection" channel measurements which can be used to record channel measurements against any discharge monitoring method.
+- Added support for "OtherDischargeSection" channel measurements which can be used to record channel measurements measured against any discharge monitoring method.
 - ManualGaugingDischargeSection.DischargeMethod is now optional and will no longer default to "MidSection" if omitted.
 
 ### AQTS 2020.2 - Framework version 2.9
