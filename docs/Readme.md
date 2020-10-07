@@ -14,9 +14,10 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
-### AQTS 2020.3 - Framwork version 2.10
+### AQTS 2020.3 - Framework version 2.10
 - Added support for "OtherDischargeSection" channel measurements which can be used to record channel measurements measured against any discharge monitoring method.
 - Added support for "EngineeredStructureDischarge" channel measurements which can be used to record the discharge from a physical structure such as a weir or flume.
+- Added support for "VolumetricDischarge" channel measurements which can be used to record the discharge based on an observation of the amount of time it takes for the stream to fill a container of known volume.
 - ManualGaugingDischargeSection.DischargeMethod is now optional and will no longer default to "MidSection" if omitted.
 
 ### AQTS 2020.2 - Framework version 2.9
