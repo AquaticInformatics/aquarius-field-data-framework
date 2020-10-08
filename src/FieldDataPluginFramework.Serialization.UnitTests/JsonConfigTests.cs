@@ -8,6 +8,7 @@ using FieldDataPluginFramework.DataModel.ChannelMeasurements;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.PickLists;
@@ -178,6 +179,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
             Fixture.Register(CreateEnumValue<InspectionType>);
             Fixture.Register(CreateDischargeActivity);
             Fixture.Register(CreateChannelMeasurement);
+            Fixture.Register(CreateGageZeroFlowActivity);
         }
 
         private TEnum CreateEnumValue<TEnum>() where TEnum : struct
@@ -236,23 +238,67 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
 
         private ChannelMeasurementBase CreateChannelMeasurement()
         {
-            NextIsAdcp = !NextIsAdcp;
+            var channelMeasurement = CreateNextChannelMeasurement();
 
-            return NextIsAdcp
-                ? CreateAdcpMeasurement()
-                : CreateManualGauging();
+            NextMeasurementType = (ChannelMeasurementType) ((1 + (int) NextMeasurementType) % ChannelMeasurementTypeCount);
+
+            return channelMeasurement;
         }
 
-        private bool NextIsAdcp { get; set; }
-
-        private ChannelMeasurementBase CreateManualGauging()
+        private ChannelMeasurementBase CreateNextChannelMeasurement()
         {
-            return Fixture.Create<ManualGaugingDischargeSection>();
+            switch (NextMeasurementType)
+            {
+                case ChannelMeasurementType.ManualGauging:
+                    return Fixture.Create<ManualGaugingDischargeSection>();
+
+                case ChannelMeasurementType.Adcp:
+                    return Fixture.Create<AdcpDischargeSection>();
+
+                case ChannelMeasurementType.Other:
+                    return Fixture.Create<OtherDischargeSection>();
+
+                case ChannelMeasurementType.Volumetric:
+                    return Fixture.Create<VolumetricDischarge>();
+
+                case ChannelMeasurementType.EngineeredStructure:
+                    return Fixture.Create<EngineeredStructureDischarge>();
+
+                default:
+                    throw new InvalidOperationException($"{NextMeasurementType} is not a known {nameof(ChannelMeasurementType)}: {string.Join(", ", Enum.GetNames(typeof(ChannelMeasurementType)))}");
+            }
         }
 
-        private ChannelMeasurementBase CreateAdcpMeasurement()
+        private ChannelMeasurementType NextMeasurementType { get; set; }
+
+        private enum ChannelMeasurementType
         {
-            return Fixture.Create<AdcpDischargeSection>();
+            ManualGauging,
+            Adcp,
+            Other,
+            Volumetric,
+            EngineeredStructure,
+        }
+
+        private static readonly int ChannelMeasurementTypeCount =
+            Enum.GetValues(typeof(ChannelMeasurementType)).Length;
+
+        private GageZeroFlowActivity CreateGageZeroFlowActivity()
+        {
+            var applicableSinceDate = Fixture.Create<DateTimeOffset>();
+            var observationDate = applicableSinceDate + Fixture.Create<TimeSpan>();
+
+            return new GageZeroFlowActivity(
+                observationDate,
+                Fixture.Create<Measurement>(),
+                Fixture.Create<double>(),
+                Fixture.Create<double>())
+            {
+                ApplicableSinceDate = applicableSinceDate,
+                Comments = Fixture.Create<string>(),
+                Party = Fixture.Create<string>(),
+                Certainty = Fixture.Create<double>()
+            };
         }
 
         private FieldVisitInfo CreateFieldVisitInfo()
@@ -263,7 +309,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
 
             visit.ControlConditions.Add(Fixture.Create<ControlCondition>());
 
-            foreach (var item in Fixture.CreateMany<DischargeActivity>())
+            foreach (var item in Fixture.CreateMany<DischargeActivity>(ChannelMeasurementTypeCount))
             {
                 visit.DischargeActivities.Add(item);
             }
@@ -292,6 +338,8 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
             {
                 visit.LevelSurveys.Add(item);
             }
+
+            visit.GageZeroFlowActivities.Add(Fixture.Create<GageZeroFlowActivity>());
 
             return visit;
         }

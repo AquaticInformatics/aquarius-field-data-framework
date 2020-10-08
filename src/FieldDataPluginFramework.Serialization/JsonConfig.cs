@@ -231,6 +231,7 @@ namespace FieldDataPluginFramework.Serialization
                     json.AddItems(nameof(item.Readings), item.Readings);
                     json.AddItems(nameof(item.Calibrations), item.Calibrations);
                     json.AddItems(nameof(item.Inspections), item.Inspections);
+                    json.AddItems(nameof(item.GageZeroFlowActivities), item.GageZeroFlowActivities);
                 });
 
             Configure(json => new FieldVisitDetails(
@@ -290,9 +291,15 @@ namespace FieldDataPluginFramework.Serialization
                 json.Get<DateTimeOffset>(nameof(GageHeightMeasurement.MeasurementTime)),
                 json.Get<bool>(nameof(GageHeightMeasurement.Include))));
 
-            Configure(json => json.HasProperty(nameof(ManualGaugingDischargeSection.VelocityObservationMethod))
-                ? (ChannelMeasurementBase)json.JsonText.FromJson<ManualGaugingDischargeSection>()
-                : json.JsonText.FromJson<AdcpDischargeSection>());
+            Configure(json => json.HasProperty(nameof(ManualGaugingDischargeSection.StartPoint))
+                ?  json.JsonText.FromJson<ManualGaugingDischargeSection>()
+                : json.HasProperty(nameof(AdcpDischargeSection.AdcpDeviceType))
+                    ? json.JsonText.FromJson<AdcpDischargeSection>()
+                    : json.HasProperty(nameof(EngineeredStructureDischarge.StructureEquation))
+                        ? json.JsonText.FromJson<EngineeredStructureDischarge>()
+                        : json.HasProperty(nameof(VolumetricDischarge.MeasurementContainerUnit))
+                            ? (ChannelMeasurementBase)json.JsonText.FromJson<VolumetricDischarge>()
+                            : json.JsonText.FromJson<OtherDischargeSection>());
 
             Configure(json => json.HasProperty(nameof(IceCoveredData.WaterSurfaceToBottomOfIce))
                 ? (MeasurementConditionData)json.JsonText.FromJson<IceCoveredData>()
@@ -332,6 +339,35 @@ namespace FieldDataPluginFramework.Serialization
                     item.WidthValue = json.GetObject<Measurement>(nameof(item.Width))?.Value;
                     item.AreaValue = json.GetObject<Measurement>(nameof(item.Area))?.Value;
                     item.VelocityAverageValue = json.GetObject<Measurement>(nameof(item.VelocityAverage))?.Value;
+                });
+
+            Configure(json => new OtherDischargeSection(
+                    json.GetObject<DateTimeInterval>(nameof(OtherDischargeSection.MeasurementPeriod)),
+                    json.Get<string>(nameof(OtherDischargeSection.ChannelName)),
+                    json.GetObject<Measurement>(nameof(OtherDischargeSection.Discharge)),
+                    json.Get<string>(nameof(OtherDischargeSection.DistanceUnitId)),
+                    json.Get<string>(nameof(OtherDischargeSection.MonitoringMethodCode))));
+
+            Configure(json => new EngineeredStructureDischarge(
+                    json.GetObject<DateTimeInterval>(nameof(EngineeredStructureDischarge.MeasurementPeriod)),
+                    json.Get<string>(nameof(EngineeredStructureDischarge.ChannelName)),
+                    json.GetObject<Measurement>(nameof(EngineeredStructureDischarge.Discharge)),
+                    json.Get<string>(nameof(EngineeredStructureDischarge.DistanceUnitId)),
+                    json.Get<string>(nameof(EngineeredStructureDischarge.MeanHeadUnitId))),
+                (json, item) =>
+                {
+                    item.MeanHeadValue = json.GetObject<Measurement>(nameof(item.MeanHead))?.Value;
+                });
+
+            Configure(json => new VolumetricDischarge(
+                    json.GetObject<DateTimeInterval>(nameof(VolumetricDischarge.MeasurementPeriod)),
+                    json.Get<string>(nameof(VolumetricDischarge.ChannelName)),
+                    json.GetObject<Measurement>(nameof(VolumetricDischarge.Discharge)),
+                    json.Get<string>(nameof(VolumetricDischarge.DistanceUnitId)),
+                    json.Get<string>(nameof(VolumetricDischarge.MeasurementContainerUnit))),
+                (json, item) =>
+                {
+                    item.MeasurementContainerVolume = json.GetObject<Measurement>(nameof(VolumetricDischarge.MeasurementContainer))?.Value;
                 });
 
             Configure(json => new BottomEstimateMethodPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
