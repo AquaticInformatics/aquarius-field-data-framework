@@ -130,6 +130,22 @@ namespace FieldDataPluginFramework.Serialization
             };
         }
 
+
+        // Since no derived class type information is serialized to JSON, this method is used to deserialize a derived class based on property names unique to the derived class.
+        private static TBase FromDerivedClass<TBase>(JsonParser jsonParser, params (string PropertyName, Func<JsonParser, TBase> DerivedFactory)[] propertyExpressions)
+            where TBase : class
+        {
+            foreach (var propertyExpression in propertyExpressions.Take(propertyExpressions.Length - 1))
+            {
+                if (jsonParser.HasProperty(propertyExpression.PropertyName))
+                    return propertyExpression.DerivedFactory(jsonParser);
+            }
+
+            return propertyExpressions
+                .Last()
+                .DerivedFactory(jsonParser);
+        }
+
         private static void SetItemProperties<T>(JsonParser parser, T item) where T : class
         {
             var type = typeof(T);
@@ -291,19 +307,17 @@ namespace FieldDataPluginFramework.Serialization
                 json.Get<DateTimeOffset>(nameof(GageHeightMeasurement.MeasurementTime)),
                 json.Get<bool>(nameof(GageHeightMeasurement.Include))));
 
-            Configure(json => json.HasProperty(nameof(ManualGaugingDischargeSection.StartPoint))
-                ?  json.JsonText.FromJson<ManualGaugingDischargeSection>()
-                : json.HasProperty(nameof(AdcpDischargeSection.AdcpDeviceType))
-                    ? json.JsonText.FromJson<AdcpDischargeSection>()
-                    : json.HasProperty(nameof(EngineeredStructureDischarge.StructureEquation))
-                        ? json.JsonText.FromJson<EngineeredStructureDischarge>()
-                        : json.HasProperty(nameof(VolumetricDischarge.MeasurementContainerUnit))
-                            ? (ChannelMeasurementBase)json.JsonText.FromJson<VolumetricDischarge>()
-                            : json.JsonText.FromJson<OtherDischargeSection>());
+            // deserializing derived classes are a bit more tricky. We need to decide based on the presence of unique properties
+            Configure(json => FromDerivedClass<ChannelMeasurementBase>(json,
+                (nameof(ManualGaugingDischargeSection.StartPoint), j => j.JsonText.FromJson<ManualGaugingDischargeSection>()),
+                (nameof(AdcpDischargeSection.AdcpDeviceType), j => j.JsonText.FromJson<AdcpDischargeSection>()),
+                (nameof(EngineeredStructureDischarge.EngineeredStructureType), j => j.JsonText.FromJson<EngineeredStructureDischarge>()),
+                (nameof(VolumetricDischarge.MeasurementContainerUnit), j => j.JsonText.FromJson<VolumetricDischarge>()),
+                (null, j => j.JsonText.FromJson<OtherDischargeSection>())));
 
-            Configure(json => json.HasProperty(nameof(IceCoveredData.WaterSurfaceToBottomOfIce))
-                ? (MeasurementConditionData)json.JsonText.FromJson<IceCoveredData>()
-                : json.JsonText.FromJson<OpenWaterData>());
+            Configure( json => FromDerivedClass<MeasurementConditionData>(json,
+                (nameof(IceCoveredData.WaterSurfaceToBottomOfIce), j => j.JsonText.FromJson<IceCoveredData>()),
+                (null, j => j.JsonText.FromJson<OpenWaterData>())));
 
             Configure(json => new MeterCalibration(),
                 (json, item) => json.AddItems(nameof(item.Equations), item.Equations));

@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.3.1
+- Fixed a serialization bug for Engineered structures
+
 ### 20.3.0
 - Added support for AQTS 2020.3 plugins.
 - See [2020.3 release notes](docs#aqts-20203---framework-version-210) for details of new features.
