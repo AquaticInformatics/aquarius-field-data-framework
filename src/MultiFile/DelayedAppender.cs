@@ -8,6 +8,7 @@ using FieldDataPluginFramework.DataModel.ChannelMeasurements;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
@@ -192,6 +193,13 @@ namespace MultiFile
             fieldVisit.Inspections.Add(inspection);
 
             ExtendVisitPeriod(fieldVisit, inspection.DateTimeOffset);
+        }
+
+        public void AddGageZeroFlowActivity(FieldVisitInfo fieldVisit, GageZeroFlowActivity gageZeroFlowActivity)
+        {
+            fieldVisit.GageZeroFlowActivities.Add(gageZeroFlowActivity);
+
+            ExtendVisitPeriod(fieldVisit, gageZeroFlowActivity.ObservationDate);
         }
 
         public void AddCrossSectionSurvey(FieldVisitInfo fieldVisit, CrossSectionSurvey crossSectionSurvey)

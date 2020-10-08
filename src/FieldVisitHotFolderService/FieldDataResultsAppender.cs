@@ -9,6 +9,7 @@ using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
+using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
@@ -174,6 +175,11 @@ namespace FieldVisitHotFolderService
         public void AddInspection(FieldVisitInfo fieldVisit, Inspection inspection)
         {
             fieldVisit.Inspections.Add(inspection);
+        }
+
+        public void AddGageZeroFlowActivity(FieldVisitInfo fieldVisit, GageZeroFlowActivity gageZeroFlowActivity)
+        {
+            fieldVisit.GageZeroFlowActivities.Add(gageZeroFlowActivity);
         }
 
         public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)
