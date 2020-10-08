@@ -8,6 +8,7 @@ using FieldDataPluginFramework.DataModel.Calibrations;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
+using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
@@ -125,6 +126,11 @@ namespace PluginTester
         public void AddInspection(FieldVisitInfo fieldVisit, Inspection inspection)
         {
             fieldVisit.Inspections.Add(inspection);
+        }
+
+        public void AddGageZeroFlowActivity(FieldVisitInfo fieldVisit, GageZeroFlowActivity gageZeroFlowActivity)
+        {
+            fieldVisit.GageZeroFlowActivities.Add(gageZeroFlowActivity);
         }
 
         public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)

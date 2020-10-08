@@ -14,29 +14,36 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2020.3 - Framework version 2.10
+- Added support for `GageZeroFlowActivity` activities to record the gage height at zero flow.
+- Added support for `OtherDischargeSection` channel measurements which can be used to record channel measurements measured against any discharge monitoring method.
+- Added support for `EngineeredStructureDischarge` channel measurements which can be used to record the discharge from a physical structure such as a weir or flume.
+- Added support for `VolumetricDischarge` channel measurements which can be used to record the discharge based on an observation of the amount of time it takes for the stream to fill a container of known volume.
+- `ManualGaugingDischargeSection.DischargeMethod` is now optional and will no longer default to `MidSection` if omitted.
+
 ### AQTS 2020.2 - Framework version 2.9
-- Added optional NumberOfVerticals property to ManualGaugingDischargeSection. This property can be used to specify the number of verticals a manual gauging activity has when there are no verticals to be imported. The NumberOfVerticals must be `null` or match the vertical count when the activity has verticals.
-- Added optional MeasurementTime property to DischargeActivity. MeasurementTime is set to half way between the Start and End of the MeasurementPeriod when `null`.
-- Added the `Dictionary<string, string> GetPluginConfigurations()` method to the IFieldDataResultsAppender interface. This method can be used to retrieve configuration settings for each installed plugin. The `Settings` page of the System Config app can be used to change plugin settings in the `FieldDataPluginConfig-{PluginName}` group.
+- Added optional `NumberOfVerticals` property to `ManualGaugingDischargeSection`. This property can be used to specify the number of verticals a manual gauging activity has when there are no verticals to be imported. The `NumberOfVerticals` must be `null` or match the vertical count when the activity has verticals.
+- Added optional `MeasurementTime` property to `DischargeActivity`. `MeasurementTime` is set to half way between the Start and End of the MeasurementPeriod when `null`.
+- Added the `Dictionary<string, string> GetPluginConfigurations()` method to the `IFieldDataResultsAppender` interface. This method can be used to retrieve configuration settings for each installed plugin. The `Settings` page of the System Config app can be used to change plugin settings in the `FieldDataPluginConfig-{PluginName}` group.
 
 ### AQTS 2019.4 Update 1 - Framework version 2.7
-- Added optional Grade property to Reading. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
+- Added optional `Grade` property to `Reading`. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
 
 ### AQTS 2019.4 - Framework version 2.6
-- Added optional UseLocationDatumAsReference property to Reading. Set this property to indicate that the Reading is measured against the local assumed datum of the Reading's location. Cannot be used in combination with a Reference Point.
+- Added optional `UseLocationDatumAsReference` property to `Reading`. Set this property to indicate that the Reading is measured against the local assumed datum of the Reading's location. Cannot be used in combination with a Reference Point.
 
 ### AQTS 2019.3 - Framework version 2.5
-- Added optional SensorUniqueId property to Reading and Calibration. Set the UniqueId of an existing Sensor to associate the Reading / Calibration with the physical device used to retrieve the measurement. The SensorUnique Id can be retrieved from the Sensors/Gauges tab in Springboard or by using the Publish or Provisioning APIs.
-- Added optional ReadingQualifiers property to Reading. Allows adding multiple qualifiers to a Reading.
-- Deprecated ReadingQualifier property on Reading. Replaced with ReadingQualifiers. 
+- Added optional `SensorUniqueId` property to `Reading` and `Calibration`. Set the `UniqueId` of an existing `Sensor` to associate the Reading / Calibration with the physical device used to retrieve the measurement. The SensorUnique Id can be retrieved from the Sensors/Gauges tab in Springboard or by using the Publish or Provisioning APIs.
+- Added optional `ReadingQualifiers` property to `Reading`. Allows adding multiple qualifiers to a `Reading`.
+- Deprecated `ReadingQualifier` property on `Reading`. Replaced with `ReadingQualifiers`. 
 
 ### AQTS 2019.2 - Framework version 2.3
 
-- Added optional MeasurementGrade property to DischargeActivity. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
-- Added ActiveUncertaintyType enumeration and optional property on DischargeActivity. Can be one of `None`, `Quantitative` or `Qualitative` and is used to indicate which uncertainty property the system will use for Field Visit Readings in the Rating Development Toolbox.
-- Added QualitativeUncertaintyType enumeration and property on DischargeActivity. This property is required when ActiveUncertaintyType is `Qualitative` otherwise, optional.
-- Added QuantitativeUncertainty property to DischargeActivity. This property is required when ActiveUncertaintyType is `Quantitative` otherwise, optional.
-- Added optional QualityAssuranceComments property to DischargeActivity.
+- Added optional `MeasurementGrade` property to `DischargeActivity`. See [Grade Data Type](https://github.com/AquaticInformatics/aquarius-field-data-framework/blob/master/docs/Readme.md#grade-data-type) for more details about working with Grades.
+- Added `ActiveUncertaintyType` enumeration and optional property on `DischargeActivity`. Can be one of `None`, `Quantitative` or `Qualitative` and is used to indicate which uncertainty property the system will use for Field Visit Readings in the Rating Development Toolbox.
+- Added `QualitativeUncertaintyType` enumeration and property on `DischargeActivity`. This property is required when `ActiveUncertaintyType` is `Qualitative` otherwise, optional.
+- Added `QuantitativeUncertainty` property to `DischargeActivity`. This property is required when `ActiveUncertaintyType` is `Quantitative` otherwise, optional.
+- Added optional `QualityAssuranceComments` property to `DischargeActivity`.
 - Added support for Inspections and Calibrations.
 
 ### AQTS 2019.1 - Framework version 2.1
