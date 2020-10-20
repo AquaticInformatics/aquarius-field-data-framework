@@ -27,7 +27,7 @@ namespace FieldVisitHotFolderService
 
                 var context = GetContext(new Context(), args);
                 new Program(context)
-                    .Run();
+                    .Run(args);
 
                 Log.Info("Successful exit.");
                 Environment.ExitCode = 0;
@@ -55,6 +55,9 @@ namespace FieldVisitHotFolderService
                     return true;
 
                 case AggregateException aggregateException:
+                    if (aggregateException.InnerExceptions.Count > 1)
+                        Log.Error($"{aggregateException.InnerExceptions.Count} errors are aggregated:");
+
                     aggregateException.Handle(LogException);
                     return true;
 
@@ -97,6 +100,8 @@ namespace FieldVisitHotFolderService
 
         public static Context GetContext(Context context, string[] args)
         {
+            context.LocationAliases.Clear();
+
             var options = new[]
             {
                 new CommandLineOption {Description = "AQTS connection settings"}, 
@@ -462,7 +467,7 @@ namespace FieldVisitHotFolderService
             _context = context;
         }
 
-        private void Run()
+        private void Run(string[] args)
         {
             var service = new Service {Context = _context};
 
@@ -476,7 +481,7 @@ namespace FieldVisitHotFolderService
                     service.Stop();
                 };
 
-                service.RunUntilStopped();
+                service.RunUntilStopped(args);
             }
             else
             {

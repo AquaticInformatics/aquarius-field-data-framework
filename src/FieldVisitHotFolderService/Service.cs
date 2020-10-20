@@ -19,9 +19,9 @@ namespace FieldVisitHotFolderService
         private Task FileDetectorTask { get; set; }
         private StatusIndicator StatusIndicator { get; set; }
 
-        public void RunUntilStopped()
+        public void RunUntilStopped(string[] args)
         {
-            FileDetectorTask = StartAsynchronously();
+            FileDetectorTask = StartAsynchronously(args);
             WaitForFileDetectorTask(true);
         }
 
@@ -36,15 +36,15 @@ namespace FieldVisitHotFolderService
 
             base.OnStart(args);
 
-            FileDetectorTask = StartAsynchronously();
+            FileDetectorTask = StartAsynchronously(args);
         }
 
-        private Task StartAsynchronously()
+        private Task StartAsynchronously(string[] args)
         {
-            return RunFileProcessorAsync();
+            return RunFileProcessorAsync(args);
         }
 
-        private async Task RunFileProcessorAsync()
+        private async Task RunFileProcessorAsync(string[] args)
         {
             Log.Info($"Starting {FileHelper.ExeNameAndVersion}.");
 
@@ -53,6 +53,7 @@ namespace FieldVisitHotFolderService
             var fileProcessor = new FileDetector
             {
                 Context = Context,
+                StartArgs = args,
                 CancellationToken = CancellationTokenSource.Token,
                 StatusIndicator = StatusIndicator,
                 CancellationAction = () => CancellationTokenSource.Cancel()
