@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.3.2
+- FieldVisitHotFolderService - Improved error logging.
+
 ### 20.3.1
 - Fixed a serialization bug for Engineered structures
 
