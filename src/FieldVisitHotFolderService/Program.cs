@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Common;
 using log4net;
+using ServiceStack;
 
 namespace FieldVisitHotFolderService
 {
@@ -31,13 +32,35 @@ namespace FieldVisitHotFolderService
                 Log.Info("Successful exit.");
                 Environment.ExitCode = 0;
             }
-            catch (ExpectedException ex)
+            catch (Exception exception)
             {
-                Log.Error(ex.Message);
+                LogException(exception);
             }
-            catch (Exception ex)
+        }
+
+        private static bool LogException(Exception exception)
+        {
+            switch (exception)
             {
-                Log.Error(ex);
+                case WebServiceException webServiceException:
+                    Log.Error($"{webServiceException.ErrorCode} {webServiceException.ErrorMessage}");
+                    return true;
+
+                case OperationCanceledException _:
+                    Log.Error("Operation cancelled.");
+                    return true;
+
+                case ExpectedException _:
+                    Log.Error(exception.Message);
+                    return true;
+
+                case AggregateException aggregateException:
+                    aggregateException.Handle(LogException);
+                    return true;
+
+                default:
+                    Log.Error(exception);
+                    return false;
             }
         }
 
