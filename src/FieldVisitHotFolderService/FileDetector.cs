@@ -39,6 +39,7 @@ namespace FieldVisitHotFolderService
         private List<LocationInfo> LocationCache { get; set; }
         private int ProcessedFileCount { get; set; }
         public Action CancellationAction { get; set; }
+        public string[] StartArgs { get; set; }
 
         public void Run()
         {
@@ -52,6 +53,11 @@ namespace FieldVisitHotFolderService
                 ProcessNewFiles();
                 WaitForNewFiles();
             }
+        }
+
+        private void ReparseArgs()
+        {
+            Program.GetContext(Context, StartArgs);
         }
 
         private void Validate()
@@ -210,8 +216,11 @@ namespace FieldVisitHotFolderService
             }
 
             if (!serverPluginVersion?.IsLessThan(JsonPluginVersion) ?? false)
+            {
                 // The server JSON plugin is newer, so keep it
+                EnableJsonPlugin(serverPlugin);
                 return;
+            }
 
             ReplaceJsonPlugin(serverPlugin);
         }
@@ -247,6 +256,21 @@ namespace FieldVisitHotFolderService
             Client.Provisioning.Delete(new DeleteFieldDataPlugin {UniqueId = serverPlugin.UniqueId});
 
             InstallJsonPlugin(serverPlugin.PluginPriority);
+        }
+
+        private void EnableJsonPlugin(FieldDataPlugin serverPlugin)
+        {
+            if (serverPlugin.IsEnabled)
+                return;
+
+            Log.Info($"Enabling v{PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName)} {serverPlugin.PluginFolderName} ...");
+
+            Client.Provisioning.Put(new PutFieldDataPlugin
+            {
+                UniqueId = serverPlugin.UniqueId,
+                PluginPriority = serverPlugin.PluginPriority,
+                IsEnabled = true
+            });
         }
 
         private void ProcessNewFiles()
@@ -354,6 +378,8 @@ namespace FieldVisitHotFolderService
             var timeSpan = Context.FileQuietDelay;
             Log.Info($"Waiting {timeSpan} for file activity to settle at '{SourceFolder}'");
             CancellationToken.WaitHandle.WaitOne(timeSpan);
+
+            ReparseArgs();
         }
 
         private Task WhenFileCreated()
