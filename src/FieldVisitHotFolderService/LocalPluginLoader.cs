@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
@@ -48,7 +50,7 @@ namespace FieldVisitHotFolderService
             foreach (var stalePluginFolder in stalePluginFolders)
             {
                 Log.Info($"Deleting stale local plugin folder '{stalePluginFolder.FullName}'");
-                stalePluginFolder.Delete(true);
+                SafelyDeleteDirectory(stalePluginFolder.FullName);
             }
 
             return new PluginLoader
@@ -89,7 +91,7 @@ namespace FieldVisitHotFolderService
 
                 var pluginFolder = new DirectoryInfo(Path.Combine(Root.FullName, plugin.PluginFolderName));
 
-                if (!pluginFolder.Exists || pluginFolder.LastWriteTimeUtc < archiveInfo.LastWriteTimeUtc)
+                if (ShouldExtractLocalPlugin(plugin, pluginFolder, archiveInfo))
                 {
                     ExtractLocalPlugin(pluginFolder, otherEntries);
                 }
@@ -103,6 +105,58 @@ namespace FieldVisitHotFolderService
             ManifestFile,
             FrameworkAssemblyFilename,
         };
+
+        private bool ShouldExtractLocalPlugin(FieldDataPlugin plugin, DirectoryInfo pluginFolder, FileInfo archiveInfo)
+        {
+            if (!pluginFolder.Exists)
+                return true;
+
+            var match = AssemblyQualifiedTypeNameRegex.Match(plugin.AssemblyQualifiedTypeName);
+
+            if (!match.Success)
+            {
+                Log.Warn($"Re-extracting {plugin.PluginFolderName} since unable to extract version from '{plugin.AssemblyQualifiedTypeName}'.");
+                return true;
+            }
+
+            var pluginVersion = AquariusServerVersion.Create(match.Groups["version"].Value.Trim());
+
+            var expectedAssemblyName = $"{match.Groups["assemblyName"].Value.Trim()}.dll";
+
+            var assemblyFileInfo = pluginFolder
+                .GetFiles()
+                .FirstOrDefault(f => f.Name.Equals(expectedAssemblyName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (assemblyFileInfo == null)
+            {
+                Log.Warn($"Re-extracting {plugin.PluginFolderName} since '{expectedAssemblyName}' not found in folder.");
+                return true;
+            }
+
+            var currentAssemblyVersion = GetFileVersion(assemblyFileInfo);
+
+            if (currentAssemblyVersion.IsLessThan(pluginVersion))
+            {
+                Log.Info($"Re-extracting {plugin.PluginFolderName} since current version {currentAssemblyVersion} is older than {pluginVersion}");
+                return true;
+            }
+
+            return false;
+        }
+
+        AquariusServerVersion GetFileVersion(FileInfo fileInfo)
+        {
+            var fileVersion = FileVersionInfo.GetVersionInfo(fileInfo.FullName).FileVersion;
+
+            var parts = fileVersion.Split('.');
+
+            if (parts.Length < 4)
+                fileVersion = $"{fileVersion}.0";
+
+            return AquariusServerVersion.Create(fileVersion);
+        }
+
+        private static readonly Regex AssemblyQualifiedTypeNameRegex = new Regex(@"^(?<typeName>.+),\s+(?<assemblyName>\w+),\s*Version=(?<version>[^,]+)(\s*,\s*(?<propertyName>\w+)=(?<propertyValue>[^,]+))*$");
 
         private ZipArchive LoadPluginArchive(string path)
         {
@@ -141,7 +195,8 @@ namespace FieldVisitHotFolderService
             if (pluginFolder.Exists)
             {
                 Log.Info($"Deleting existing '{pluginFolder.FullName}'");
-                pluginFolder.Delete(true);
+
+                SafelyDeleteDirectory(pluginFolder.FullName);
             }
 
             pluginFolder.Create();
@@ -164,6 +219,15 @@ namespace FieldVisitHotFolderService
                     inStream.CopyTo(outStream);
                 }
             }
+        }
+
+        private static void SafelyDeleteDirectory(string path)
+        {
+            Directory.Delete(path, true);
+
+            // Thanks be to https://stackoverflow.com/questions/4216396/system-io-directorynotfoundexception-after-deleting-an-empty-folder-and-recreati
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
     }
 }
