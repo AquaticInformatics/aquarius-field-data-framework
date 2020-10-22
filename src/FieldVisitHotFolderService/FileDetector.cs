@@ -180,7 +180,7 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("19.2");
+        private static readonly AquariusServerVersion MinimumVersion = AquariusServerVersion.Create("20.3");
         private static readonly AquariusServerVersion MinimumVersionSupportingSameDayVisits = AquariusServerVersion.Create("2020.1");
 
         private void ConnectAndThrowIfJsonPluginNotInstalled()
