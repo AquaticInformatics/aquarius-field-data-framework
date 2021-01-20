@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.3.6
+- No external changes, just some internal build plumbing fixes.
+
 ### 20.3.5
 - FieldVisitHotFolderService - Improved error logging and ensure that AQTS 2020.3-or-newer is running.
 
