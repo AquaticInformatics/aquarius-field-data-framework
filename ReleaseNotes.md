@@ -6,6 +6,7 @@ Not all changes will be listed, but you can always [compare by version tags](htt
 
 ### 20.3.7
 - Addressed [CVE-2018-1285](https://github.com/advisories/GHSA-2cwj-8chv-9pp9) by updating the log4net dependency to 2.0.12. None of the previously-released tools were affected by the vulnerability, but we have updated the dependency to the newer version anyways.
+- Removed the obsolete FieldDataPluginTool
 
 ### 20.3.6
 - No external changes, just some internal build plumbing fixes.
