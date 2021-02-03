@@ -3,7 +3,7 @@
 # Deploy to GitHub releases
 # Deploy to NuGet
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 pull_requests:
   do_not_increment_build_number: true
@@ -52,10 +52,6 @@ artifacts:
     name: FieldDataPluginFramework
     type: zip
   
-  - path: src\FieldDataPluginTool\bin\Release\FieldDataPluginTool.exe
-    name: FieldDataPluginTool
-    type: file
-  
   - path: src\PluginPackager\bin\Release\PluginPackager.exe
     name: PluginPackager
     type: file
@@ -85,7 +81,7 @@ deploy:
     tag: v$(APPVEYOR_BUILD_VERSION)
     release: AQUARIUS Field Data Framework $(APPVEYOR_BUILD_VERSION)
     description: ''
-    artifact: FieldDataPluginFramework,FieldDataPluginTool,PluginPackager,PluginTester,JsonPlugin,FieldVisitHotFolderService,MultiFilePlugin
+    artifact: FieldDataPluginFramework,PluginPackager,PluginTester,JsonPlugin,FieldVisitHotFolderService,MultiFilePlugin
     auth_token: $(GITHUB_AUTH_TOKEN)
     on:
       is_not_pr: true
