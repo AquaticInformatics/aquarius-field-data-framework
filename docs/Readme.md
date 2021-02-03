@@ -177,7 +177,6 @@ This will install:
 - the `lib\FieldDataPluginFramework.dll` assembly, which your plug-in must consume and implement.
 - the [`tools\PluginTester.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginTester) tool, for quickly testing your plug-in without needing an AQTS server.
 - the [`tools\PluginPackager.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) tool, for packaging your plug-in into a single `*.plugin` file for easy deployment.
-- the [`tools\FieldDataPluginTool.exe`](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) tool for easily deploying your packaged plug-in on an AQTS server.
 
 # Writing a Field Data Plug-In
 
@@ -252,17 +251,7 @@ The log messages written to *FieldDataPluginFramework.log* are designed to be ea
 
 # Packaging your Plug-In for Easy Deployment
 
-See the [PluginPacker](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) project for details on adding a build step that will automatically create a `*.plugin` file every time your project builds in Visual Studio. This file can be deployed using the `FieldDataPluginTool`.
-
-# Deploy your plug-in using the FieldDataPluginTool
-
-See the [FieldDataPluginTool](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/FieldDataPluginTool) project for an easy to use GUI tool to correctly install your plug-in on your AQTS server.
-
-# Register and deploy your plug-in using the Provisioning API
-
-Register and deploy your plug-in with the AQUARIUS Time-Series Server using the **POST /fielddataplugins** endpoint in the Provisioning API (http://\<yourservername\>/AQUARIUS/Provisioning/v1).
-
-In a multi-server configuration, the `POST /fielddataplugin` endpoint **must** be run on each server to install the field data plugin.  This is required so that any server in the multi-server configuration can parse a field data file.
+See the [PluginPacker](https://github.com/AquaticInformatics/aquarius-field-data-framework/tree/master/src/PluginPackager) project for details on adding a build step that will automatically create a `*.plugin` file every time your project builds in Visual Studio. This file can be deployed using the System Config page on your AQTS app server.
 
 ## Tips
 
