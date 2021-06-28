@@ -124,6 +124,8 @@ namespace FieldVisitHotFolderService
 
         private void LoadLocalPlugins()
         {
+            FieldDataPluginFramework.Serialization.JsonConfig.Configure();
+
             var localPluginLoader = new LocalPluginLoader();
 
             Plugins = localPluginLoader
