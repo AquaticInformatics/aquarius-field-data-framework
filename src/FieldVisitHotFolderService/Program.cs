@@ -195,6 +195,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => string.Empty,
                     Description = $"Configure plugin settings as 'pluginFolderName=key=text' or 'pluginFolderName=key=@pathToTextFile' values."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.PluginPriority),
+                    Setter = value => AddPluginPriority(context, value),
+                    Getter = () => string.Empty,
+                    Description = $"Configure plugin priority as 'pluginFolderName=integerPriority' [defaults to the AQTS plugin priority]"
+                },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
                 new CommandLineOption
@@ -434,6 +441,19 @@ namespace FieldVisitHotFolderService
         }
 
         private static readonly Regex SettingRegex = new Regex(@"^\s*(?<pluginFolder>\w+)\s*=\s*(?<key>\w+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
+
+        private static void AddPluginPriority(Context context, string value)
+        {
+            var components = value
+                .Split('=')
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
+            if (components.Count != 2 || !int.TryParse(components[1], out var priority))
+                throw new ExpectedException($"'{value}' is not the expected {{PluginFolderName}}={{integerPriority}} format.");
+
+            context.PluginPriority[components[0]] = priority;
+        }
 
         private static void ValidateContext(Context context)
         {

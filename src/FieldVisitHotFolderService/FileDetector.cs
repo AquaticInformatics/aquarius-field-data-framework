@@ -131,8 +131,35 @@ namespace FieldVisitHotFolderService
             Plugins = localPluginLoader
                 .LoadPlugins();
 
+            SortPluginsByPriority();
+
             JsonPluginPath = localPluginLoader.JsonPluginPath;
             JsonPluginVersion = localPluginLoader.JsonPluginVersion;
+        }
+
+        private void SortPluginsByPriority()
+        {
+            if (Client == null)
+                return;
+
+            var serverPlugins = Client.Provisioning.Get(new GetFieldDataPlugins()).Results;
+
+            Plugins = Plugins
+                .OrderBy(plugin =>
+                {
+                    var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
+
+                    if (Context.PluginPriority.TryGetValue(pluginFolderName, out var priority))
+                        return priority;
+
+                    var serverPlugin = serverPlugins
+                        .FirstOrDefault(p =>
+                            p.PluginFolderName.Equals(pluginFolderName, StringComparison.InvariantCultureIgnoreCase));
+
+                    return serverPlugin?.PluginPriority ?? int.MaxValue;
+                })
+                .ThenBy(PluginLoader.GetPluginFolderName)
+                .ToList();
         }
 
         private IAquariusClient CreateConnectedClient()
