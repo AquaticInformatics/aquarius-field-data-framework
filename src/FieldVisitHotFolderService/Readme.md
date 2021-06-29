@@ -21,7 +21,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2020.3 | [v20.3.5](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.5/FieldVisitHotFolderService.zip) |
+| AQTS 2020.3+ | [v20.3.8](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.8/FieldVisitHotFolderService.zip) |
 | AQTS 2020.2 | [v20.2.5](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.5/FieldVisitHotFolderService.zip) |
 | AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.14](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.14/FieldVisitHotFolderService.zip) |
 | AQTS 2019.4 | [v19.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.0/FieldVisitHotFolderService.zip) |
@@ -292,6 +292,14 @@ The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderNam
 
 If any `/PluginSettings=` options are set for a plugin, then that plugin will only see those settings. Other plugins will continue to retrieve their configuration settings from the AQTS app server, but any plugins named in a `/PlugSettings=` option will only the local settings.
 
+# Configuring your local plugin priority
+
+When a new file is detected, the FieldVisitHotFolderService will try each local plugin, in priority order, until a plugin responds with `ParseFileStatus.SuccessfullyParsedAndDataValid`. Plugins are tried from smallest Priority value to highest Priority value.
+
+By default, the FieldVisitHotFolderService uses the same plugin priority order as your AQTS app server. If the FlowTracker2 plugin is installed in the `LocalPlugins` folder, and on your AQTS app server with a `Priority` value of 1250, then the FieldVisitHotFolderService will use a priority value of 1250 for local FlowTracker2 files.
+
+You can override the default plugin priority value with the `/PluginPriority=pluginFolderName=priority` option. Eg. `/PluginPriority=AquaCalc5000=1` will force the AquaCalc 5000 plugin to be tried before any other other plugins.
+
 # Log files
 
 The service creates a `FieldVisitHotFolderService.log` file in the same directory as the EXE.
@@ -316,7 +324,7 @@ Supported -option=value settings (/option=value works too):
   -MaximumConcurrentRequests  Maximum concurrent requests during field visit import. [default: 16]
 
   =========================== Visit merge settings
-  -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace. [default: Skip]
+  -MergeMode                  One of Skip, Fail, Replace, ArchiveAndReplace, AllowSameDayVisits. [default: Skip]
   -OverlapIncludesWholeDay    True if a conflict includes any visit on same day. False can generate multiple visits on the same day. [default: False]
   -MaximumVisitDuration       Maximum visit duration. Visits exceeding this duration will not be imported. [default: 1.06:00:00]
   -DryRun                     True if no visits will be imported. Use /N as a shortcut. [default: False]
@@ -326,6 +334,7 @@ Supported -option=value settings (/option=value works too):
 
   =========================== Plugin configuration settings
   -PluginSettings             Configure plugin settings as 'pluginFolderName=key=text' or 'pluginFolderName=key=@pathToTextFile' values.
+  -PluginPriority             Configure plugin priority as 'pluginFolderName=integerPriority' [defaults to the AQTS plugin priority]
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.

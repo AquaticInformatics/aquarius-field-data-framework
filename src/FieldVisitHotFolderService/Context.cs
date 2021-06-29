@@ -29,5 +29,6 @@ namespace FieldVisitHotFolderService
         public TimeSpan MaximumVisitDuration { get; set; } = TimeSpan.FromDays(1.25);
         public bool DryRun { get; set; }
         public Dictionary<string, Dictionary<string,string>> PluginSettings { get; } = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
+        public Dictionary<string, int> PluginPriority { get; } = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
     }
 }

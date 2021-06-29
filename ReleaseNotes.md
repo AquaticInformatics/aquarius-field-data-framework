@@ -4,6 +4,12 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.3.8
+- FieldVisitHotFolderService - Added -PluginPriority configuration options
+- FieldVisitHotFolderService - Bugfix: Ensure JSON serialization is initialized before uploading any visit data
+- JsonFieldData - Updated to latest ServiceStack.Text JSON parser
+- MultiFile - Updated to latest ServiceStack.Text JSON parser.
+
 ### 20.3.7
 - Addressed [CVE-2018-1285](https://github.com/advisories/GHSA-2cwj-8chv-9pp9) by updating the log4net dependency to 2.0.12. None of the previously-released tools were affected by the vulnerability, but we have updated the dependency to the newer version anyways.
 - Removed the obsolete FieldDataPluginTool
