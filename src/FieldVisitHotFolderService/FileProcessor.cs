@@ -41,6 +41,7 @@ namespace FieldVisitHotFolderService
         public List<IFieldDataPlugin> Plugins { get; set; }
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
+        public ReferencePointCache ReferencePointCache { get; set; }
         public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
@@ -656,7 +657,7 @@ namespace FieldVisitHotFolderService
             var archiveFilenameBase = Path.Combine(ArchivedFolder, $"{visit.Identifier}_{visit.StartTime?.Date:yyyy-MM-dd}_{visit.LocationIdentifier}");
             
             Log.Info($"Archiving existing visit '{archiveFilenameBase}'.json");
-            File.WriteAllText(archiveFilenameBase+".json", archivedVisit.ToJson().IndentJson());
+            File.WriteAllText(archiveFilenameBase+".json", Transform(archivedVisit).ToJson().IndentJson());
 
             var publishClient = Client.Publish as ServiceClientBase;
 
@@ -672,6 +673,92 @@ namespace FieldVisitHotFolderService
                     attachmentFilename,
                     attachmentUrl.GetBytesFromUrl(requestFilter: SetAuthenticationHeaders));
             }
+        }
+
+        private AppendedResults Transform(ArchivedVisit archivedVisit)
+        {
+            var result = new AppendedResults
+            {
+                FrameworkAssemblyQualifiedName = typeof(IFieldDataPlugin).AssemblyQualifiedName,
+                PluginAssemblyQualifiedTypeName = GetJsonPluginAQFN()
+            };
+
+            var appender = new FieldDataResultsAppender
+            {
+                Client = Client,
+                LocationCache = LocationCache,
+                LocationAliases = Context.LocationAliases,
+                Log = Log
+            };
+
+            var mapper = new ArchivedVisitMapper
+            {
+                Appender = appender,
+                ReferencePointCache = ReferencePointCache,
+                ParameterIdsByIdentifier = GetParameterLookup(),
+                MethodLookup = GetMethodLookup()
+            };
+
+            var visit = mapper.Map(archivedVisit);
+
+            result.AppendedVisits = new List<FieldVisitInfo>
+            {
+                visit
+            };
+
+            return result;
+        }
+
+        private string _jsonPluginTypeName;
+
+        // ReSharper disable once InconsistentNaming
+        private string GetJsonPluginAQFN()
+        {
+            if (_jsonPluginTypeName == null)
+            {
+                _jsonPluginTypeName = Plugins
+                    // ReSharper disable once PossibleNullReferenceException
+                    .First(p => p.GetType().AssemblyQualifiedName.Contains("JsonFieldData"))
+                    .GetType().AssemblyQualifiedName;
+            }
+
+            return _jsonPluginTypeName;
+        }
+
+        public Dictionary<string, string> ParameterIdsByIdentifier { get; set; }
+
+        private Dictionary<string, string> GetParameterLookup()
+        {
+            if (ParameterIdsByIdentifier == null)
+            {
+                ParameterIdsByIdentifier = Client.Provisioning.Get(new GetParameters())
+                    .Results
+                    .ToDictionary(
+                        p => p.Identifier,
+                        p => p.ParameterId);
+            }
+
+            return ParameterIdsByIdentifier;
+        }
+
+        public Dictionary<string,Dictionary<string,string>> MethodLookup { get; set; }
+
+        private Dictionary<string, Dictionary<string, string>> GetMethodLookup()
+        {
+            if (MethodLookup == null)
+            {
+                MethodLookup = Client.Provisioning.Get(new GetMonitoringMethods())
+                    .Results
+                    .GroupBy(m => m.ParameterId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g
+                            .ToDictionary(
+                                m => m.DisplayName,
+                                m => m.MethodCode));
+            }
+
+            return MethodLookup;
         }
 
         private void SetAuthenticationHeaders(HttpWebRequest request)

@@ -37,6 +37,7 @@ namespace FieldVisitHotFolderService
         private AquariusServerVersion JsonPluginVersion { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
+        private ReferencePointCache ReferencePointCache { get; set; }
         private int ProcessedFileCount { get; set; }
         public Action CancellationAction { get; set; }
         public string[] StartArgs { get; set; }
@@ -169,6 +170,8 @@ namespace FieldVisitHotFolderService
             var client = AquariusClient.CreateConnectedClient(Context.Server, Context.Username, Context.Password);
 
             Log.Info($"Connected to {Context.Server} (v{client.ServerVersion})");
+
+            ReferencePointCache = new ReferencePointCache(client);
 
             return client;
         }
@@ -360,6 +363,7 @@ namespace FieldVisitHotFolderService
                     Context = Context,
                     Client = Client,
                     LocationCache = LocationCache,
+                    ReferencePointCache = ReferencePointCache,
                     Plugins = Plugins,
                     ProcessingFolder = ProcessingFolder,
                     PartialFolder = PartialFolder,
