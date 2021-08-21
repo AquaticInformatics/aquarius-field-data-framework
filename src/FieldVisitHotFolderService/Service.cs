@@ -50,7 +50,7 @@ namespace FieldVisitHotFolderService
 
             StatusIndicator = new StatusIndicator();
 
-            var fileProcessor = new FileDetector
+            var fileDetector = new FileDetector
             {
                 Context = Context,
                 StartArgs = args,
@@ -59,7 +59,7 @@ namespace FieldVisitHotFolderService
                 CancellationAction = () => CancellationTokenSource.Cancel()
             };
 
-            await Task.Run(() => fileProcessor.Run(), CancellationTokenSource.Token);
+            await Task.Run(() => fileDetector.Run(), CancellationTokenSource.Token);
         }
 
         private void WaitForFileDetectorTask(bool shouldRethrowExpectedExceptions = false)

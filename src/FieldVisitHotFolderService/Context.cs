@@ -30,5 +30,9 @@ namespace FieldVisitHotFolderService
         public bool DryRun { get; set; }
         public Dictionary<string, Dictionary<string,string>> PluginSettings { get; } = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
         public Dictionary<string, int> PluginPriority { get; } = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+        public string ExportFolder { get; set; }
+        public List<string> ExportLocations { get; } = new List<string>();
+        public DateTimeOffset? ExportBefore { get; set; }
+        public DateTimeOffset? ExportAfter { get; set; }
     }
 }

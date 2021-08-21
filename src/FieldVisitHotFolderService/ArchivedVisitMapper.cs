@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
+using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.ChannelMeasurements;
@@ -61,11 +62,28 @@ namespace FieldVisitHotFolderService
     {
         public FieldDataResultsAppender Appender { get; set; }
         public ReferencePointCache ReferencePointCache { get; set; }
-        public Dictionary<string,string> ParameterIdsByIdentifier { get; set; }
+        public Dictionary<string,string> ParameterIdLookup { get; set; }
         public Dictionary<string, Dictionary<string, string>> MethodLookup { get; set; }
+        public List<IFieldDataPlugin> Plugins { get; set; }
 
         private string VisitIdentifier { get; set; }
         private LocationInfo LocationInfo { get; set; }
+
+        private string _jsonPluginTypeName;
+
+        // ReSharper disable once InconsistentNaming
+        public string GetJsonPluginAQFN()
+        {
+            if (_jsonPluginTypeName == null)
+            {
+                _jsonPluginTypeName = Plugins
+                    // ReSharper disable once PossibleNullReferenceException
+                    .First(p => p.GetType().AssemblyQualifiedName.Contains("JsonFieldData"))
+                    .GetType().AssemblyQualifiedName;
+            }
+
+            return _jsonPluginTypeName;
+        }
 
         public FieldVisitInfo Map(ArchivedVisit archivedVisit)
         {
@@ -152,11 +170,19 @@ namespace FieldVisitHotFolderService
             {
                 Comments = source.Comments,
                 Party = source.Party,
-                ConditionType = new ControlConditionPickList(source.ControlCondition),
                 DateCleaned = source.DateCleaned,
                 DistanceToGage = Map(nameof(source.DistanceToGage), source.DistanceToGage),
-                ControlCode = new ControlCodePickList(source.ControlCode)
             };
+
+            if (!string.IsNullOrEmpty(source.ControlCondition))
+            {
+                controlCondition.ConditionType = new ControlConditionPickList(source.ControlCondition);
+            }
+
+            if (!string.IsNullOrEmpty(source.ControlCode))
+            {
+                controlCondition.ControlCode = new ControlCodePickList(source.ControlCode);
+            }
 
             if (TryParseEnum<FrameworkControlCleanedType>($"{source.ControlCleaned}", out var controlCleaned))
             {
@@ -248,7 +274,7 @@ namespace FieldVisitHotFolderService
         {
             var parameterId = source.ParameterId ?? LookupParameterId(source.Parameter);
 
-            var reading = new FrameworkReading(parameterId, source.Unit, source.Value.Numeric)
+            var reading = new FrameworkReading(parameterId, source.Unit, source.Value?.Numeric)
             {
                 Comments = source.Comments,
                 DateTimeOffset = source.Time,
@@ -277,7 +303,7 @@ namespace FieldVisitHotFolderService
 
         private string LookupParameterId(string parameterIdentifier)
         {
-            if (ParameterIdsByIdentifier.TryGetValue(parameterIdentifier, out var parameterId))
+            if (ParameterIdLookup.TryGetValue(parameterIdentifier, out var parameterId))
                 return parameterId;
 
             throw new InvalidOperationException($"{VisitIdentifier}: '{parameterIdentifier}' is an unknown parameter identifier.");
@@ -289,14 +315,11 @@ namespace FieldVisitHotFolderService
                 parameterMethods.TryGetValue(methodName, out var methodCode))
                 return methodCode;
 
-            if (parameterMethods == null)
-            {
-                const string defaultMethodName = "None";
-                const string defaultMethodCode = "DefaultNone";
+            const string defaultMethodName = "None";
+            const string defaultMethodCode = "DefaultNone";
 
-                if (methodName.Equals(defaultMethodName))
-                    return defaultMethodCode;
-            }
+            if (methodName.Equals(defaultMethodName))
+                return defaultMethodCode;
 
             var expectedNames = parameterMethods != null
                 ? parameterMethods.Keys.ToList()
@@ -315,7 +338,12 @@ namespace FieldVisitHotFolderService
 
         private GroundWaterMeasurementDetails Map(GroundWaterMeasurement source)
         {
-            if (source == null)
+            var anyValue = source?.Cut?.Numeric
+                           ?? source?.Hold?.Numeric
+                           ?? source?.TapeCorrection?.Numeric
+                           ?? source?.WaterLevel?.Numeric;
+
+            if (!anyValue.HasValue)
                 return null;
 
             return new GroundWaterMeasurementDetails
@@ -553,12 +581,16 @@ namespace FieldVisitHotFolderService
                 unitSystem.AreaUnitId,
                 unitSystem.VelocityUnitId)
             {
-                WidthValue = source.Width.Numeric,
-                AreaValue = source.Area.Numeric,
-                VelocityAverageValue = source.VelocityAverage.Numeric,
-                StartPoint = Map(source.StartPoint),
+                WidthValue = source.Width?.Numeric,
+                AreaValue = source.Area?.Numeric,
+                VelocityAverageValue = source.VelocityAverage?.Numeric,
                 NumberOfVerticals = source.NumberOfPanels,
             };
+
+            if (SupportedStartPointTypes.TryGetValue(source.StartPoint, out var startPointType))
+            {
+                channel.StartPoint = startPointType;
+            }
 
             if (TryParseEnum<FrameworkPointVelocityObservationType>(source.VelocityObservationMethod, out var velocityObservationMethod))
             {
@@ -774,7 +806,7 @@ namespace FieldVisitHotFolderService
                 Depth = source.Depth?.Numeric ?? 0,
                 Velocity = source.Velocity?.Numeric ?? 0,
                 RevolutionCount = source.RevolutionCount,
-                ObservationInterval = source.ObservationIntervalInSeconds.Numeric,
+                ObservationInterval = source.ObservationIntervalInSeconds?.Numeric,
                 IsVelocityEstimated = source.IsVelocityEstimated
             };
         }
@@ -806,12 +838,24 @@ namespace FieldVisitHotFolderService
                 DischargeCoefficientVariation = source.DischargeCoefficientVariation?.Numeric,
                 MagneticVariation = source.MagneticVariation?.Numeric,
                 BottomEstimateExponent = source.BottomEstimateExponent?.Numeric,
-                BottomEstimateMethod = new BottomEstimateMethodPickList(source.BottomEstimateMethod),
                 TopEstimateExponent = source.TopEstimateExponent?.Numeric,
-                TopEstimateMethod = new TopEstimateMethodPickList(source.TopEstimateMethod),
                 MeasurementDevice = Map(source.Manufacturer, source.Model, source.SerialNumber),
-                NavigationMethod = new NavigationMethodPickList(source.NavigationMethod),
             };
+
+            if (!string.IsNullOrEmpty(source.BottomEstimateMethod))
+            {
+                channel.BottomEstimateMethod = new BottomEstimateMethodPickList(source.BottomEstimateMethod);
+            }
+
+            if (!string.IsNullOrEmpty(source.TopEstimateMethod))
+            {
+                channel.TopEstimateMethod = new TopEstimateMethodPickList(source.TopEstimateMethod);
+            }
+
+            if (!string.IsNullOrEmpty(source.NavigationMethod))
+            {
+                channel.NavigationMethod = new NavigationMethodPickList(source.NavigationMethod);
+            }
 
             if (TryParseEnum<DepthReferenceType>(source.DepthReference, out var depthReference))
             {
@@ -925,7 +969,7 @@ namespace FieldVisitHotFolderService
 
         private Measurement Map(string name, QuantityWithDisplay source)
         {
-            if (source == null)
+            if (source == null || string.IsNullOrEmpty(source.Display) && !source.Numeric.HasValue)
                 return null;
 
             if (!source.Numeric.HasValue)
@@ -936,7 +980,7 @@ namespace FieldVisitHotFolderService
 
         private Measurement Map(string name, string unitId, DoubleWithDisplay source)
         {
-            if (source == null)
+            if (source == null || !source.Numeric.HasValue && string.IsNullOrEmpty(source.Display))
                 return null;
 
             if (!source.Numeric.HasValue)
@@ -948,7 +992,7 @@ namespace FieldVisitHotFolderService
         private bool TryParseEnum<TTargetEnum>(string source, out TTargetEnum targetEnum)
             where TTargetEnum : struct
         {
-            if (string.IsNullOrEmpty(source))
+            if (string.IsNullOrEmpty(source) || source == "Unknown")
             {
                 targetEnum = default;
                 return false;

@@ -288,6 +288,32 @@ namespace FieldVisitHotFolderService
                     Getter = () => $"{context.MaximumDuplicateRetry}",
                     Description = "Maximum number of retries for duplicate visits."
                 },
+                new CommandLineOption(), new CommandLineOption{Description = "Export settings"},
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportFolder),
+                    Setter = value => context.ExportFolder = value,
+                    Getter = () => context.ExportFolder,
+                    Description = "Export visits to this root folder."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportLocations),
+                    Setter = value => ParseExportLocations(context, value),
+                    Description = "Export only these locations [default: All locations]"
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportBefore),
+                    Setter = value => context.ExportBefore = ParseDateTimeOffset(value),
+                    Description = "Export existing visits before this time."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportAfter),
+                    Setter = value => context.ExportAfter = ParseDateTimeOffset(value),
+                    Description = "Export existing visits after this time."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
@@ -330,6 +356,22 @@ namespace FieldVisitHotFolderService
             }
 
             return args;
+        }
+
+        private static void ParseExportLocations(Context context, string text)
+        {
+            context.ExportLocations.AddRange(text
+                .Split(ListSeparatorChars)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s)));
+        }
+
+        private static DateTimeOffset? ParseDateTimeOffset(string text)
+        {
+            if (DateTimeOffset.TryParse(text, out var dateTimeOffset))
+                return dateTimeOffset;
+
+            throw new ExpectedException($"'{text}' is not a valid DateTimeOffset");
         }
 
         private static void ParseLocationAliases(Context context, string text)
