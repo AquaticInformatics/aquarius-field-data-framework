@@ -34,5 +34,6 @@ namespace FieldVisitHotFolderService
         public List<string> ExportLocations { get; } = new List<string>();
         public DateTimeOffset? ExportBefore { get; set; }
         public DateTimeOffset? ExportAfter { get; set; }
+        public bool ExportOverwrite { get; set; }
     }
 }

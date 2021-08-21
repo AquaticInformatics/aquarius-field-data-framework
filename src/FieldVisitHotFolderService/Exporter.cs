@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,8 @@ namespace FieldVisitHotFolderService
 
         private ArchivedVisitMapper Mapper { get; set; }
         private int VisitCount { get; set; }
+        private int ErrorCount { get; set; }
+        private int SkipCount { get; set; }
 
         public void Run()
         {
@@ -76,7 +79,7 @@ namespace FieldVisitHotFolderService
                 ExportVisitsFromLocation(locationIdentifier);
             }
 
-            Log.Info($"Exported {"visit".ToQuantity(VisitCount)} in {stopwatch.Elapsed.Humanize(2)}");
+            Log.Info($"Exported {"visit".ToQuantity(VisitCount)}, skipping {"visit".ToQuantity(SkipCount)}, with {"error".ToQuantity(ErrorCount)} detected in {stopwatch.Elapsed.Humanize(2)}");
         }
 
         private void Validate()
@@ -149,11 +152,27 @@ namespace FieldVisitHotFolderService
 
             var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-DD_HH_MM}.json");
 
+            if (File.Exists(visitPath) && !Context.ExportOverwrite)
+            {
+                Log.Info($"Skipping existing '{visitPath}'");
+                ++SkipCount;
+                return;
+            }
+
             Log.Info($"Saving '{visitPath}' ...");
 
-            File.WriteAllText(visitPath, Transform(archivedVisit).ToJson().IndentJson());
+            try
+            {
+                File.WriteAllText(visitPath, Transform(archivedVisit).ToJson().IndentJson());
 
-            ++VisitCount;
+                ++VisitCount;
+            }
+            catch (Exception e)
+            {
+                ++ErrorCount;
+
+                Log.Error($"'{visitPath}': {e.Message}\n{e.StackTrace}");
+            }
         }
 
         private AppendedResults Transform(ArchivedVisit archivedVisit)

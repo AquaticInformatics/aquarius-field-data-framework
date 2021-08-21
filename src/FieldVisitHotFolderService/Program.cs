@@ -314,6 +314,13 @@ namespace FieldVisitHotFolderService
                     Setter = value => context.ExportAfter = ParseDateTimeOffset(value),
                     Description = "Export existing visits after this time."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportOverwrite),
+                    Setter = value => context.ExportOverwrite = bool.Parse(value),
+                    Getter = () => context.ExportOverwrite.ToString(),
+                    Description = $"When true, any already exported visits will be re-exported."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
