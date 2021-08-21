@@ -137,6 +137,15 @@ namespace FieldVisitHotFolderService
 
         private void ExportVisit(string locationPath, FieldVisitDescription fieldVisitDescription)
         {
+            var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-DD_HH_MM}.json");
+
+            if (File.Exists(visitPath) && !Context.ExportOverwrite)
+            {
+                Log.Info($"Skipping existing '{visitPath}'");
+                ++SkipCount;
+                return;
+            }
+
             var archivedVisit = new ArchivedVisit
             {
                 Summary = fieldVisitDescription,
@@ -149,15 +158,6 @@ namespace FieldVisitHotFolderService
                     IncludeVerticals = true
                 })
             };
-
-            var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-DD_HH_MM}.json");
-
-            if (File.Exists(visitPath) && !Context.ExportOverwrite)
-            {
-                Log.Info($"Skipping existing '{visitPath}'");
-                ++SkipCount;
-                return;
-            }
 
             Log.Info($"Saving '{visitPath}' ...");
 
