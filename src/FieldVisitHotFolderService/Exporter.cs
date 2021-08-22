@@ -139,7 +139,7 @@ namespace FieldVisitHotFolderService
 
         private void ExportVisit(string locationPath, FieldVisitDescription fieldVisitDescription)
         {
-            var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-DD_HH_MM}.json");
+            var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-dd_HH_MM}.json");
 
             if (File.Exists(visitPath) && !Context.ExportOverwrite)
             {
