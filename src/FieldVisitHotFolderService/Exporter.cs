@@ -122,7 +122,9 @@ namespace FieldVisitHotFolderService
                     QueryFrom = Context.ExportAfter,
                     QueryTo = Context.ExportBefore
                 })
-                .FieldVisitDescriptions;
+                .FieldVisitDescriptions
+                .OrderBy(v => v.StartTime)
+                .ToList();
 
             Log.Info($"Exporting {"visit".ToQuantity(visitDescriptions.Count)} from '{locationIdentifier}' ...");
 
