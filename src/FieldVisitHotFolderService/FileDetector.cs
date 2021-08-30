@@ -38,8 +38,8 @@ namespace FieldVisitHotFolderService
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
         private ReferencePointCache ReferencePointCache { get; set; }
-        private Dictionary<string, Dictionary<string, string>> MethodLookup { get; set; }
-        private Dictionary<string, string> ParameterIdLookup { get; set; }
+        private MethodLookup MethodLookup { get; set; }
+        private ParameterIdLookup ParameterIdLookup { get; set; }
 
         private int ProcessedFileCount { get; set; }
         public Action CancellationAction { get; set; }
@@ -204,21 +204,9 @@ namespace FieldVisitHotFolderService
 
             ReferencePointCache = new ReferencePointCache(client);
 
-            ParameterIdLookup = client.Provisioning.Get(new GetParameters())
-                .Results
-                .ToDictionary(
-                    p => p.Identifier,
-                    p => p.ParameterId);
+            ParameterIdLookup = new ParameterIdLookup(client.Provisioning.Get(new GetParameters()));
 
-            MethodLookup = client.Provisioning.Get(new GetMonitoringMethods())
-                .Results
-                .GroupBy(m => m.ParameterId)
-                .ToDictionary(
-                    g => g.Key ?? string.Empty,
-                    g => g
-                        .ToDictionary(
-                            m => m.DisplayName,
-                            m => m.MethodCode));
+            MethodLookup = new MethodLookup(client.Provisioning.Get(new GetMonitoringMethods()));
 
             return client;
         }

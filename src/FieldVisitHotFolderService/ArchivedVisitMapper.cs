@@ -62,8 +62,8 @@ namespace FieldVisitHotFolderService
     {
         public FieldDataResultsAppender Appender { get; set; }
         public ReferencePointCache ReferencePointCache { get; set; }
-        public Dictionary<string,string> ParameterIdLookup { get; set; }
-        public Dictionary<string, Dictionary<string, string>> MethodLookup { get; set; }
+        public ParameterIdLookup ParameterIdLookup { get; set; }
+        public MethodLookup MethodLookup { get; set; }
         public List<IFieldDataPlugin> Plugins { get; set; }
 
         private string VisitIdentifier { get; set; }
@@ -311,21 +311,13 @@ namespace FieldVisitHotFolderService
 
         private string LookupParameterMethod(string parameterId, string methodName)
         {
-            if (MethodLookup.TryGetValue(parameterId, out var parameterMethods) &&
-                parameterMethods.TryGetValue(methodName, out var methodCode))
+            if (MethodLookup.TryGetValue(parameterId, methodName, out var methodCode))
                 return methodCode;
 
-            const string defaultMethodName = "None";
-            const string defaultMethodCode = "DefaultNone";
+            if (MethodLookup.IsAmbiguous(parameterId, methodName, out var ambiguousMethodCodes))
+                throw new InvalidOperationException($"{VisitIdentifier}: '{methodName}' is an ambiguous method name for parameter '{parameterId}' using these method codes: {string.Join(", ", ambiguousMethodCodes)}");
 
-            if (methodName.Equals(defaultMethodName))
-                return defaultMethodCode;
-
-            var expectedNames = parameterMethods != null
-                ? parameterMethods.Keys.ToList()
-                : new List<string>();
-
-            throw new InvalidOperationException($"{VisitIdentifier}: '{methodName}' is not a known method name for parameter '{parameterId}'. Should be one of {string.Join(", ", expectedNames)}");
+            throw new InvalidOperationException($"{VisitIdentifier}: '{methodName}' is not a known method name for parameter '{parameterId}'.");
         }
 
         private FrameworkGrade Map(int? gradeCode)
@@ -960,7 +952,7 @@ namespace FieldVisitHotFolderService
                 sourceChannel.Channel,
                 Map(nameof(sourceChannel.Discharge), sourceChannel.Discharge),
                 unitSystem.DistanceUnitId,
-                LookupParameterMethod("QR", sourceChannel.MonitoringMethod));
+                LookupParameterMethod(ParameterIds.Discharge, sourceChannel.MonitoringMethod));
 
             SetCommonChannelProperties(channel, sourceChannel);
 

@@ -42,8 +42,8 @@ namespace FieldVisitHotFolderService
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
         public ReferencePointCache ReferencePointCache { get; set; }
-        public Dictionary<string, Dictionary<string, string>> MethodLookup { get; set; }
-        public Dictionary<string, string> ParameterIdLookup { get; set; }
+        public MethodLookup MethodLookup { get; set; }
+        public ParameterIdLookup ParameterIdLookup { get; set; }
         public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 

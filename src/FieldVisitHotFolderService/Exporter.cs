@@ -29,8 +29,8 @@ namespace FieldVisitHotFolderService
         public IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; } = new List<LocationInfo>();
         public ReferencePointCache ReferencePointCache { get; set; }
-        public Dictionary<string, Dictionary<string, string>> MethodLookup { get; set; }
-        public Dictionary<string, string> ParameterIdLookup { get; set; }
+        public MethodLookup MethodLookup { get; set; }
+        public ParameterIdLookup ParameterIdLookup { get; set; }
 
         private ArchivedVisitMapper Mapper { get; set; }
         private int VisitCount { get; set; }
