@@ -491,7 +491,7 @@ namespace FieldVisitHotFolderService
             return Path.GetFileNameWithoutExtension(uploadContext.Path) + ".zip";
         }
 
-        private static string SanitizeFilename(string filename)
+        public static string SanitizeFilename(string filename)
         {
             return InvalidFileNameCharsRegex.Replace(filename, "_");
         }

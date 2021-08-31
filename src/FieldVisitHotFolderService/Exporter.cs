@@ -120,7 +120,7 @@ namespace FieldVisitHotFolderService
 
             Log.Info($"Exporting {"visit".ToQuantity(visitDescriptions.Count)} from '{locationIdentifier}' ...");
 
-            var locationPath = Path.Combine(Context.ExportFolder, locationIdentifier);
+            var locationPath = Path.Combine(Context.ExportFolder, FileProcessor.SanitizeFilename(locationIdentifier));
             Directory.CreateDirectory(locationPath);
 
             foreach (var visitDescription in visitDescriptions)
@@ -158,7 +158,7 @@ namespace FieldVisitHotFolderService
 
         private void ExportVisit(string locationPath, FieldVisitDescription fieldVisitDescription)
         {
-            var visitPath = Path.Combine(locationPath, $"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-dd_HH_MM}.json");
+            var visitPath = Path.Combine(locationPath, FileProcessor.SanitizeFilename($"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-dd_HH_MM}.json"));
 
             if (File.Exists(visitPath) && !Context.ExportOverwrite)
             {
