@@ -116,15 +116,7 @@ namespace FieldVisitHotFolderService
 
         private void ExportVisitsFromLocation(string locationIdentifier)
         {
-            var visitDescriptions = Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
-                {
-                    LocationIdentifier = locationIdentifier,
-                    QueryFrom = Context.ExportAfter,
-                    QueryTo = Context.ExportBefore
-                })
-                .FieldVisitDescriptions
-                .OrderBy(v => v.StartTime)
-                .ToList();
+            var visitDescriptions = GetVisitsToExport(locationIdentifier);
 
             Log.Info($"Exporting {"visit".ToQuantity(visitDescriptions.Count)} from '{locationIdentifier}' ...");
 
@@ -134,6 +126,33 @@ namespace FieldVisitHotFolderService
             foreach (var visitDescription in visitDescriptions)
             {
                 ExportVisit(locationPath, visitDescription);
+            }
+        }
+
+        private List<FieldVisitDescription> GetVisitsToExport(string locationIdentifier)
+        {
+            try
+            {
+                return Client.Publish.Get(new FieldVisitDescriptionListServiceRequest
+                    {
+                        LocationIdentifier = locationIdentifier,
+                        QueryFrom = Context.ExportAfter,
+                        QueryTo = Context.ExportBefore
+                    })
+                    .FieldVisitDescriptions
+                    .OrderBy(v => v.StartTime)
+                    .ToList();
+            }
+            catch (WebServiceException exception)
+            {
+                if (exception.ErrorCode != "PermissionException")
+                    throw;
+
+                Log.Warn($"Skipping export of location '{locationIdentifier}': {exception.ErrorCode} {exception.ErrorMessage}");
+
+                ++ErrorCount;
+
+                return new List<FieldVisitDescription>();
             }
         }
 
@@ -169,11 +188,17 @@ namespace FieldVisitHotFolderService
 
                 ++VisitCount;
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
                 ++ErrorCount;
 
-                Log.Error($"'{visitPath}': {e.Message}\n{e.StackTrace}");
+                var errorPath = Path.ChangeExtension(visitPath, ".error.json");
+
+                File.WriteAllText(errorPath, archivedVisit.ToJson().IndentJson());
+
+                Log.Error(exception is ExpectedException
+                    ? $"'{visitPath}': {exception.Message}"
+                    : $"'{visitPath}': {exception.Message}\n{exception.StackTrace}");
             }
         }
 

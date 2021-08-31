@@ -57,7 +57,19 @@ namespace FieldVisitHotFolderService
                 .LocationDescriptions;
 
             var locationDescription = locationDescriptions
-                .SingleOrDefault(l => l.Identifier.Equals(locationIdentifier, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(l => l.Identifier == locationIdentifier);
+
+            if (locationDescription == null)
+            {
+                var closeMatches = locationDescriptions
+                    .Where(l => l.Identifier.Equals(locationIdentifier, StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+
+                if (closeMatches.Count == 1)
+                {
+                    locationDescription = closeMatches.Single();
+                }
+            }
 
             if (locationDescription == null)
             {

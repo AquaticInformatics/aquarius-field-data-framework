@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
+using Common;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
@@ -99,7 +100,7 @@ namespace FieldVisitHotFolderService
 
         private FieldVisitDetails Map(FieldVisitDescription visit)
         {
-            return new FieldVisitDetails(new DateTimeInterval(
+            return new FieldVisitDetails(Map(
                 visit.StartTime ?? throw new InvalidOperationException($"{VisitIdentifier}: Unknown visit start"),
                 visit.EndTime ?? throw new InvalidOperationException($"{VisitIdentifier}: Unknown visit end")))
             {
@@ -213,16 +214,20 @@ namespace FieldVisitHotFolderService
         {
             var originReferencePoint = GetReferencePoint(source.OriginReferencePointUniqueId);
 
-            return new LevelSurvey(originReferencePoint.Name)
+            var levelSurvey = new LevelSurvey(originReferencePoint.Name)
             {
                 Party = source.Party,
                 Comments = source.Comments,
-                Method = source.Method,
                 LevelSurveyMeasurements = source
                     .LevelMeasurements
                     .Select(Map)
                     .ToList()
             };
+
+            if (!string.IsNullOrEmpty(source.Method))
+                levelSurvey.Method = source.Method;
+
+            return levelSurvey;
         }
 
         private ReferencePoint GetReferencePoint(Guid uniqueId)
@@ -315,7 +320,7 @@ namespace FieldVisitHotFolderService
                 return methodCode;
 
             if (MethodLookup.IsAmbiguous(parameterId, methodName, out var ambiguousMethodCodes))
-                throw new InvalidOperationException($"{VisitIdentifier}: '{methodName}' is an ambiguous method name for parameter '{parameterId}' using these method codes: {string.Join(", ", ambiguousMethodCodes)}");
+                throw new ExpectedException($"{VisitIdentifier}: '{methodName}' is an ambiguous method name for parameter '{parameterId}' using these method codes: {string.Join(", ", ambiguousMethodCodes)}");
 
             throw new InvalidOperationException($"{VisitIdentifier}: '{methodName}' is not a known method name for parameter '{parameterId}'.");
         }
@@ -351,7 +356,7 @@ namespace FieldVisitHotFolderService
         {
             var parameterId = source.ParameterId ?? LookupParameterId(source.Parameter);
 
-            if (!source.Value.Numeric.HasValue)
+            if (source.Value?.Numeric == null)
                 throw new InvalidOperationException($"{VisitIdentifier}: CalibrationCheck for '{parameterId}' has no value");
 
             var calibration = new FrameworkCalibration(parameterId, source.Unit, source.Value.Numeric.Value)
@@ -385,23 +390,33 @@ namespace FieldVisitHotFolderService
 
         private CrossSectionSurvey Map(CrossSectionSurveyActivity source)
         {
-            return new CrossSectionSurvey(
-                new DateTimeInterval(source.StartTime, source.EndTime),
+            var stageUnit = source.Stage?.Unit
+                            ?? source.CrossSectionPoints.FirstOrDefault()?.Distance?.Unit
+                            ?? "m";
+
+            var crossSectionSurvey = new CrossSectionSurvey(
+                Map(source.StartTime, source.EndTime),
                 source.Channel,
                 source.RelativeLocation,
-                source.Stage.Unit,
+                stageUnit,
                 Map(source.StartingPoint))
             {
                 Comments = source.Comments,
                 Party = source.Party,
                 ChannelName = source.Channel,
                 RelativeLocationName = source.RelativeLocation,
-                StageMeasurement = Map(nameof(source.Stage), source.Stage),
                 CrossSectionPoints = source
                     .CrossSectionPoints
                     .Select(Map)
                     .ToList()
             };
+
+            if (source.Stage != null)
+            {
+                crossSectionSurvey.StageMeasurement = Map(nameof(source.Stage), source.Stage);
+            }
+
+            return crossSectionSurvey;
         }
 
         private FrameworkStartPointType Map(StartPointType source)
@@ -414,17 +429,17 @@ namespace FieldVisitHotFolderService
 
         private FrameworkCrossSectionPoint Map(CrossSectionPoint source)
         {
-            if (!source.Distance.Numeric.HasValue)
+            if (source.Distance?.Numeric == null)
                 throw new InvalidOperationException($"{VisitIdentifier}: Cross-section point {source.PointOrder} has no Distance value");
 
-            if (!source.Elevation.Numeric.HasValue)
+            if (source.Elevation?.Numeric == null)
                 throw new InvalidOperationException($"{VisitIdentifier}: Cross-section point {source.PointOrder} has no Elevation value");
 
             return new FrameworkCrossSectionPoint(source.PointOrder,
                 source.Distance.Numeric.Value, source.Elevation.Numeric.Value)
             {
                 Comments = source.Comments,
-                Depth = source.Depth.Numeric
+                Depth = source.Depth?.Numeric
             };
         }
 
@@ -451,7 +466,7 @@ namespace FieldVisitHotFolderService
             var gageHeightUnit = summary.MeanGageHeight.Unit;
 
             var dischargeActivity = new FrameworkDischargeActivity(
-                new DateTimeInterval(summary.MeasurementStartTime.Value, summary.MeasurementEndTime.Value),
+                Map(summary.MeasurementStartTime.Value, summary.MeasurementEndTime.Value),
                 Map(nameof(summary.Discharge), summary.Discharge))
             {
                 Comments = summary.Comments,
@@ -466,7 +481,7 @@ namespace FieldVisitHotFolderService
                 MeanIndexVelocity = Map(nameof(summary.MeanIndexVelocity), summary.MeanIndexVelocity),
                 AdjustmentAmount = adjustment.AdjustmentAmount,
                 MeanGageHeightDifferenceDuringVisit = Map(nameof(summary.DifferenceDuringVisit), gageHeightUnit, summary.DifferenceDuringVisit),
-                MeanGageHeightDurationHours = summary.DurationInHours.Numeric,
+                MeanGageHeightDurationHours = summary.DurationInHours?.Numeric,
             };
 
             if (TryParseEnum<FrameworkAdjustmentType>($"{adjustment.AdjustmentType}", out var adjustmentType))
@@ -494,7 +509,7 @@ namespace FieldVisitHotFolderService
 
                 case UncertaintyType.Quantitative:
                     dischargeActivity.ActiveUncertaintyType = FrameworkUncertaintyType.Quantitative;
-                    dischargeActivity.QuantitativeUncertainty = dischargeUncertainty.QuantitativeUncertainty.Numeric;
+                    dischargeActivity.QuantitativeUncertainty = dischargeUncertainty.QuantitativeUncertainty?.Numeric;
                     break;
             }
 
@@ -507,7 +522,7 @@ namespace FieldVisitHotFolderService
                 case GageHeightCalculationType.SimpleAverage:
                     foreach (var reading in summary.GageHeightReadings)
                     {
-                        dischargeActivity.GageHeightMeasurements.Add(Map(reading, gageHeightUnit));
+                        dischargeActivity.GageHeightMeasurements.Add(Map(reading, gageHeightUnit, dischargeActivity.MeasurementTime ?? dischargeActivity.MeasurementStartTime));
                     }
                     break;
             }
@@ -522,11 +537,11 @@ namespace FieldVisitHotFolderService
             return dischargeActivity;
         }
 
-        private GageHeightMeasurement Map(GageHeightReading source, string stageUnitId)
+        private GageHeightMeasurement Map(GageHeightReading source, string stageUnitId, DateTimeOffset defaultReadingTime)
         {
             return new GageHeightMeasurement(
                 Map(nameof(source.GageHeight), stageUnitId, source.GageHeight),
-                source.ReadingTime ?? throw new InvalidOperationException($"{VisitIdentifier}: Gage height reading has no time"),
+                source.ReadingTime ?? defaultReadingTime,
                 source.IsUsed);
         }
 
@@ -584,9 +599,23 @@ namespace FieldVisitHotFolderService
                 channel.StartPoint = startPointType;
             }
 
-            if (TryParseEnum<FrameworkPointVelocityObservationType>(source.VelocityObservationMethod, out var velocityObservationMethod))
+            if (!string.IsNullOrEmpty(source.VelocityObservationMethod))
             {
-                channel.VelocityObservationMethod = velocityObservationMethod;
+                // TODO: GAP 1 - Framework.ManualGaugingDischargeSection.VelocityObservationMethod should be a VelocityObservationPicklist
+                if (Enum.TryParse<FrameworkPointVelocityObservationType>(source.VelocityObservationMethod, out var velocityObservation))
+                {
+                    channel.VelocityObservationMethod = velocityObservation;
+                }
+                else
+                {
+                    if (source.VelocityObservationMethod != "Unspecified")
+                    {
+                        var extraComment = $"Unsupported channel velocity observation method '{source.VelocityObservationMethod}'";
+                        channel.Comments = string.IsNullOrEmpty(channel.Comments)
+                            ? extraComment
+                            : $"{extraComment}\n{channel.Comments}";
+                    }
+                }
             }
 
             if (TryParseEnum<FrameworkDischargeMethodType>($"{source.DischargeMethod}", out var dischargeMethod))
@@ -611,10 +640,7 @@ namespace FieldVisitHotFolderService
                 channel.Verticals.Add(Map(vertical, sourceChannel));
             }
 
-            channel.MeterCalibration = channel
-                .Verticals
-                .Select(v => v.VelocityObservation.MeterCalibration)
-                .FirstOrDefault(); // TODO: Find most common meter
+            channel.MeterCalibration = FindMostCommonMeter(channel);
 
             return channel;
         }
@@ -642,7 +668,7 @@ namespace FieldVisitHotFolderService
 
         private DateTimeInterval GetMeasurementPeriod(DischargeChannelMeasurement source)
         {
-            return new DateTimeInterval(
+            return Map(
                 source.StartTime ?? DischargeActivity.MeasurementStartTime,
                 source.EndTime ?? DischargeActivity.MeasurementEndTime);
         }
@@ -651,6 +677,25 @@ namespace FieldVisitHotFolderService
         {
             channel.Party = source.Party;
             channel.Comments = source.Comments;
+        }
+
+        private MeterCalibration FindMostCommonMeter(ManualGaugingDischargeSection section)
+        {
+            var meters = section
+                .Verticals
+                .Select(v => v.VelocityObservation.MeterCalibration)
+                .GroupBy(m => $"{m.MeterType}/{m.Manufacturer}/{m.Model}/{m.SerialNumber}")
+                .Select( g => (g.Key, Items: g.ToList()))
+                .OrderByDescending(x => x.Items.Count)
+                .ToList();
+
+            if (!meters.Any())
+                return null;
+
+            return meters
+                .First()
+                .Items
+                .First();
         }
 
         private FrameworkVertical Map(Vertical source, DischargeChannelMeasurement sourceChannel)
@@ -762,9 +807,9 @@ namespace FieldVisitHotFolderService
 
             var meterCalibration = new MeterCalibration
             {
-                Manufacturer = source.CurrentMeter.Manufacturer,
-                Model = source.CurrentMeter.Model,
-                SerialNumber = source.CurrentMeter.SerialNumber,
+                Manufacturer = source.CurrentMeter?.Manufacturer,
+                Model = source.CurrentMeter?.Model,
+                SerialNumber = source.CurrentMeter?.SerialNumber,
                 // TODO: No Publish API property SoftwareVersion = ,
                 // TODO: No Publish API property FirmwareVersion = ,
                 // TODO: No Publish API property Configuration = ,
@@ -981,6 +1026,23 @@ namespace FieldVisitHotFolderService
             return new Measurement(source.Numeric.Value, unitId);
         }
 
+        private DateTimeInterval Map(DateTimeOffset startTime, DateTimeOffset endTime)
+        {
+            if (endTime >= startTime)
+                return new DateTimeInterval(startTime, endTime);
+
+            var duration = startTime - endTime;
+
+            if (duration.TotalDays < 1)
+            {
+                Appender.Log.Info($"{VisitIdentifier}: Swapping {startTime:O} with {endTime:O} to ensure valid DateTimeInterval");
+
+                return new DateTimeInterval(endTime, startTime);
+            }
+
+            throw new ExpectedException($"{VisitIdentifier}: StartTime={startTime:O} is later than EndTime={endTime:O}");
+        }
+
         private bool TryParseEnum<TTargetEnum>(string source, out TTargetEnum targetEnum)
             where TTargetEnum : struct
         {
@@ -993,7 +1055,7 @@ namespace FieldVisitHotFolderService
             if (Enum.TryParse(source, true, out targetEnum))
                 return true;
 
-            throw new ArgumentOutOfRangeException(nameof(source), $"{VisitIdentifier}: '{source}' is an invalid {typeof(TTargetEnum).Name} value. Must be one of {string.Join(", ", Enum.GetNames(typeof(TTargetEnum)))}");
+            throw new ExpectedException($"{VisitIdentifier}: '{source}' is an invalid {typeof(TTargetEnum).Name} value. Must be one of {string.Join(", ", Enum.GetNames(typeof(TTargetEnum)))}");
         }
     }
 }
