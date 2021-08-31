@@ -175,12 +175,12 @@ namespace FieldVisitHotFolderService
                 DistanceToGage = Map(nameof(source.DistanceToGage), source.DistanceToGage),
             };
 
-            if (!string.IsNullOrEmpty(source.ControlCondition))
+            if (!string.IsNullOrWhiteSpace(source.ControlCondition))
             {
                 controlCondition.ConditionType = new ControlConditionPickList(source.ControlCondition);
             }
 
-            if (!string.IsNullOrEmpty(source.ControlCode))
+            if (!string.IsNullOrWhiteSpace(source.ControlCode))
             {
                 controlCondition.ControlCode = new ControlCodePickList(source.ControlCode);
             }
@@ -224,7 +224,7 @@ namespace FieldVisitHotFolderService
                     .ToList()
             };
 
-            if (!string.IsNullOrEmpty(source.Method))
+            if (!string.IsNullOrWhiteSpace(source.Method))
                 levelSurvey.Method = source.Method;
 
             return levelSurvey;
@@ -599,7 +599,7 @@ namespace FieldVisitHotFolderService
                 channel.StartPoint = startPointType;
             }
 
-            if (!string.IsNullOrEmpty(source.VelocityObservationMethod))
+            if (!string.IsNullOrWhiteSpace(source.VelocityObservationMethod))
             {
                 // TODO: GAP 1 - Framework.ManualGaugingDischargeSection.VelocityObservationMethod should be a VelocityObservationPicklist
                 if (Enum.TryParse<FrameworkPointVelocityObservationType>(source.VelocityObservationMethod, out var velocityObservation))
@@ -611,7 +611,7 @@ namespace FieldVisitHotFolderService
                     if (source.VelocityObservationMethod != "Unspecified")
                     {
                         var extraComment = $"Unsupported channel velocity observation method '{source.VelocityObservationMethod}'";
-                        channel.Comments = string.IsNullOrEmpty(channel.Comments)
+                        channel.Comments = string.IsNullOrWhiteSpace(channel.Comments)
                             ? extraComment
                             : $"{extraComment}\n{channel.Comments}";
                     }
@@ -855,11 +855,16 @@ namespace FieldVisitHotFolderService
 
             var unitSystem = CreateUnitSystem(sourceChannel, () => source.Area?.Unit, () => source.VelocityAverage?.Unit);
 
+            var adcpDeviceType = source.AdcpDeviceType;
+
+            if (string.IsNullOrWhiteSpace(adcpDeviceType))
+                adcpDeviceType = "Unknown";
+
             var channel = new AdcpDischargeSection(
                 measurementPeriod,
                 sourceChannel.Channel,
                 Map(nameof(sourceChannel.Discharge), sourceChannel.Discharge),
-                source.AdcpDeviceType,
+                adcpDeviceType,
                 unitSystem.DistanceUnitId,
                 unitSystem.AreaUnitId,
                 unitSystem.VelocityUnitId)
@@ -879,17 +884,17 @@ namespace FieldVisitHotFolderService
                 MeasurementDevice = Map(source.Manufacturer, source.Model, source.SerialNumber),
             };
 
-            if (!string.IsNullOrEmpty(source.BottomEstimateMethod))
+            if (!string.IsNullOrWhiteSpace(source.BottomEstimateMethod))
             {
                 channel.BottomEstimateMethod = new BottomEstimateMethodPickList(source.BottomEstimateMethod);
             }
 
-            if (!string.IsNullOrEmpty(source.TopEstimateMethod))
+            if (!string.IsNullOrWhiteSpace(source.TopEstimateMethod))
             {
                 channel.TopEstimateMethod = new TopEstimateMethodPickList(source.TopEstimateMethod);
             }
 
-            if (!string.IsNullOrEmpty(source.NavigationMethod))
+            if (!string.IsNullOrWhiteSpace(source.NavigationMethod))
             {
                 channel.NavigationMethod = new NavigationMethodPickList(source.NavigationMethod);
             }
@@ -1046,7 +1051,7 @@ namespace FieldVisitHotFolderService
         private bool TryParseEnum<TTargetEnum>(string source, out TTargetEnum targetEnum)
             where TTargetEnum : struct
         {
-            if (string.IsNullOrEmpty(source) || source == "Unknown")
+            if (string.IsNullOrWhiteSpace(source) || source == "Unknown")
             {
                 targetEnum = default;
                 return false;
