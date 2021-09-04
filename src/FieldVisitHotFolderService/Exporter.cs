@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using Aquarius.TimeSeries.Client;
@@ -15,6 +17,7 @@ using Humanizer;
 using log4net;
 using ServiceStack;
 using ServiceStack.Text;
+using Attachment = Aquarius.TimeSeries.Client.ServiceModels.Publish.Attachment;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -159,10 +162,15 @@ namespace FieldVisitHotFolderService
         private void ExportVisit(string locationPath, FieldVisitDescription fieldVisitDescription)
         {
             var visitPath = Path.Combine(locationPath, FileProcessor.SanitizeFilename($"{fieldVisitDescription.LocationIdentifier}@{fieldVisitDescription.StartTime:yyyy-MM-dd_HH_MM}.json"));
+            var zipPath = Path.ChangeExtension(visitPath, ".zip");
 
-            if (File.Exists(visitPath) && !Context.ExportOverwrite)
+            var targetPath = File.Exists(zipPath)
+                ? zipPath
+                : visitPath;
+
+            if (!Context.ExportOverwrite && File.Exists(targetPath))
             {
-                Log.Info($"Skipping existing '{visitPath}'");
+                Log.Info($"Skipping existing '{targetPath}'");
                 ++SkipCount;
                 return;
             }
@@ -180,11 +188,9 @@ namespace FieldVisitHotFolderService
                 })
             };
 
-            Log.Info($"Saving '{visitPath}' ...");
-
             try
             {
-                File.WriteAllText(visitPath, Transform(archivedVisit).ToJson().IndentJson());
+                ExportVisit(visitPath, zipPath, archivedVisit);
 
                 ++VisitCount;
             }
@@ -199,6 +205,58 @@ namespace FieldVisitHotFolderService
                 Log.Error(exception is ExpectedException
                     ? $"'{visitPath}': {exception.Message}"
                     : $"'{visitPath}': {exception.Message}\n{exception.StackTrace}");
+            }
+        }
+
+        private void ExportVisit(string visitPath, string zipPath, ArchivedVisit archivedVisit)
+        {
+            File.Delete(visitPath);
+            File.Delete(zipPath);
+
+            if (!archivedVisit.Activities.Attachments.Any())
+            {
+                Log.Info($"Saving '{visitPath}' ...");
+
+                File.WriteAllText(visitPath, Transform(archivedVisit).ToJson().IndentJson());
+                return;
+            }
+
+            using (var stream = File.OpenWrite(zipPath))
+            using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create))
+            {
+                var rootJsonEntry = zipArchive.CreateEntry(Path.GetFileName(visitPath), CompressionLevel.Fastest);
+
+                using (var writer = new StreamWriter(rootJsonEntry.Open()))
+                {
+                    writer.Write(Transform(archivedVisit).ToJson().IndentJson());
+                }
+
+                var attachmentCount = 0;
+                foreach (var attachment in archivedVisit.Activities.Attachments)
+                {
+                    ++attachmentCount;
+                    var attachmentEntry = zipArchive.CreateEntry($"Attachment{attachmentCount}/{Path.GetFileName(attachment.FileName)}");
+
+                    var contentBytes = DownloadAttachmentContent(attachmentEntry.FullName, attachment);
+
+                    using (var writer = new BinaryWriter(attachmentEntry.Open()))
+                    {
+                        writer.Write(contentBytes);
+                    }
+                }
+            }
+        }
+
+        private byte[] DownloadAttachmentContent(string downloadPath, Attachment attachment)
+        {
+            Log.Info($"Downloading {downloadPath} ...");
+
+            using (var httpResponse = Client.Publish.Get<HttpWebResponse>(attachment.Url))
+            {
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                    throw new ExpectedException($"{httpResponse.StatusCode}: {httpResponse.StatusDescription}: Can't download {attachment.Url}");
+
+                return httpResponse.GetResponseStream().ReadFully();
             }
         }
 
