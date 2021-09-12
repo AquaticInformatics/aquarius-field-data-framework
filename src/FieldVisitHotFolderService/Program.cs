@@ -321,6 +321,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => context.ExportOverwrite.ToString(),
                     Description = $"When true, any already exported visits will be re-exported."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportUtcOverride),
+                    Setter = value => context.ExportUtcOverride = ParseUtcOffset(value),
+                    Getter = () => context.ExportUtcOverride.ToString(),
+                    Description = $"When set, change all timestamps in exported visits to the specific UTC offset. Supported formats: ±HH, ±HHmm, ±HH:mm."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
@@ -380,6 +387,38 @@ namespace FieldVisitHotFolderService
 
             throw new ExpectedException($"'{text}' is not a valid DateTimeOffset");
         }
+
+        private static TimeSpan ParseUtcOffset(string text)
+        {
+            var parseText = text;
+            var isNegative = false;
+
+            switch (parseText[0])
+            {
+                case '+':
+                    parseText = parseText.Substring(1);
+                    break;
+                case '-':
+                    isNegative = true;
+                    parseText = parseText.Substring(1);
+                    break;
+            }
+
+            if (TimeSpan.TryParseExact(parseText, UtcOffsetFormats, null, out var timeSpan))
+                return isNegative ? timeSpan.Negate() : timeSpan;
+
+            throw new ExpectedException($"'{text}' is not a supported UTC offset format. Try one of ±HH, ±HHmm, ±HH:mm");
+        }
+
+        private static readonly string[] UtcOffsetFormats =
+        {
+            "h",
+            "hh",
+            "hmm",
+            "hhmm",
+            "h\\:mm",
+            "hh\\:mm",
+        };
 
         private static void ParseLocationAliases(Context context, string text)
         {

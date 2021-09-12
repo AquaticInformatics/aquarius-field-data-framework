@@ -8,6 +8,7 @@ The `FieldVisitHotFolderService.exe` tool is a .NET console tool which can:
 - Try to parse the files using a set of plugins running locally on the client
 - Upload any created visits to AQTS using the [JSON plugin](../JsonFieldData/Readme.md)
 - Supports a `/DryRun=true` option to see what would be done, without actually making any changes.
+- Can export field visits and their attachments, for easy import into another AQTS system.
 
 The service can be run on any Windows system with the .NET 4.7.2 runtime. This includes every Windows 10 desktop and Windows 2016 Server, and any Windows 7 desktop and Windows 2008 R2 Server with the most recent Windows Update patches.
 
@@ -306,6 +307,97 @@ The service creates a `FieldVisitHotFolderService.log` file in the same director
 
 In addition, each processed file will have a `{filename}.log` file in the appropriate `/UploadedFolder`, `/PartialFolder`, or `/FailedFolder`, for debugging purposes.
 
+# Exporting existing field visits
+
+The service can also be used to export existing field visit as [JSON field data](../JsonFieldData/Readme.md) files, allowing them to be easily imported into other AQTS systems.
+
+Export mode is enabled when the `/ExportFolder=path` option is specified. The service will connect to the AQTS system, export the selected visits into the folder, and exit.
+
+By default, all the visits from all the locations will be exported, but you can specify optional filters to restrict which visits are exported.
+
+- `/ExportBefore=dateTime` will export visits with an end time before the specified time. `dateTime` can be just a date, or can be a date and a time.
+- `/ExportAfter=dateTime` will export visits with a start time after the specified time.
+- `/ExportLocations=locationIdentifier` will only export visits from the specified location. This option can be specified multiple times to export visits from only the specified locations.
+
+This example exports visits from 2019 until late January 2021, in three different locations.
+```sh
+FieldVisitHotFolderService.exe -server=https://myinstance.aquaticinformatics.net -ExportFolder=Exported -ExportAfter=2019-01-01 -ExportBefore="January 25 2021 7:35 PM" -ExportLocations="KWS-MacDonald,AQI~Vancouver" -ExportLocations="BI RECON"
+
+14:32:07.298 INFO  - Press Ctrl-C to terminate...
+14:32:07.311 INFO  - Starting FieldVisitHotFolderService (v20.3.9.0).
+14:32:09.346 INFO  - FieldVisitHotFolderService (v20.3.9.0) connecting to https://myinstance.aquaticinformatics.net as 'admin' ...
+14:32:09.644 INFO  - Connected to https://myinstance.aquaticinformatics.net (v2021.1.221.0)
+14:32:09.853 INFO  - Exporting before 2021-01-25T19:35:00.0000000-08:00 and after 2019-01-01T00:00:00.0000000-08:00
+14:32:10.192 INFO  - Exporting 2 visits from 'AQI~Vancouver' ...
+14:32:10.492 INFO  - Saving 'Exported\AQI~Vancouver\AQI~Vancouver@2020-10-01_08_10.json' ...
+14:32:11.024 INFO  - Saving 'Exported\AQI~Vancouver\AQI~Vancouver@2020-10-21_00_10.json' ...
+14:32:11.182 INFO  - Exporting 7 visits from 'BI RECON' ...
+14:32:11.329 INFO  - Saving 'Exported\BI RECON\BI RECON@2019-04-23_11_04.zip' ...
+14:32:11.549 INFO  - Downloading Attachment1/BI RECON-20190423.xml ...
+14:32:11.833 INFO  - Saving 'Exported\BI RECON\BI RECON@2019-07-16_13_07.zip' ...
+14:32:11.834 INFO  - Downloading Attachment1/BI RECON-20190716.xml ...
+14:32:12.082 INFO  - Saving 'Exported\BI RECON\BI RECON@2019-10-09_10_10.zip' ...
+14:32:12.086 INFO  - Downloading Attachment1/BI RECON-20191009.xml ...
+14:32:12.334 INFO  - Saving 'Exported\BI RECON\BI RECON@2019-10-30_11_10.zip' ...
+14:32:12.336 INFO  - Downloading Attachment1/BI RECON-20191030.xml ...
+14:32:12.581 INFO  - Saving 'Exported\BI RECON\BI RECON@2020-04-23_10_04.zip' ...
+14:32:12.583 INFO  - Downloading Attachment1/SCCF_RECON_fieldvisit_18MAR2021.csv ...
+14:32:12.825 INFO  - Saving 'Exported\BI RECON\BI RECON@2020-06-24_23_06.zip' ...
+14:32:12.827 INFO  - Downloading Attachment1/SCCF_RECON_fieldvisit_18MAR2021.csv ...
+14:32:13.073 INFO  - Saving 'Exported\BI RECON\BI RECON@2020-12-10_11_12.zip' ...
+14:32:13.075 INFO  - Downloading Attachment1/SCCF_RECON_fieldvisit_18MAR2021.csv ...
+14:32:13.341 INFO  - Exporting 6 visits from 'KWS-MacDonald' ...
+14:32:13.482 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2019-03-20_13_03.zip' ...
+14:32:13.691 INFO  - Downloading Attachment1/MigratedFieldVisits.json.Macdonald-2019-03-20.json ...
+14:32:13.944 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2019-06-25_20_06.zip' ...
+14:32:13.946 INFO  - Downloading Attachment1/MigratedFieldVisits.json.Macdonald-2019-06-25.json ...
+14:32:14.198 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2019-10-10_11_10.zip' ...
+14:32:14.202 INFO  - Downloading Attachment1/MigratedFieldVisits.json.Macdonald-2019-10-10.json ...
+14:32:14.452 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2020-04-16_16_04.zip' ...
+14:32:14.454 INFO  - Downloading Attachment1/MigratedFieldVisits.json.Macdonald-2020-04-16.json ...
+14:32:14.697 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2020-05-07_16_05.zip' ...
+14:32:14.698 INFO  - Downloading Attachment1/MigratedFieldVisits.json.Macdonald-2020-05-07.json ...
+14:32:14.940 INFO  - Saving 'Exported\KWS-MacDonald\KWS-MacDonald@2020-10-15_13_10.json' ...
+14:32:14.953 INFO  - Exported 15 visits, skipping 0 visits, with 0 errors detected in 5 seconds, 90 milliseconds
+14:32:15.052 INFO  - Successful exit.
+```
+
+## Exported visit data format
+
+- Visits are always exported in JSON format, even if the original data came from another plugin or was manually entered.
+- Exported visits have a `{locationIdentifier}@{yyyy-MM-dd_HH_MM}.json` filename.
+
+## Field visit attachments will be exported too
+
+If an exported field visit has any associated attachments (most do), a ZIP file will be created instead of the JSON file. The ZIP archive will contain the exported JSON field visit, plus all of the attachments.
+
+When the exported ZIP file is imported into another system, the visit will be recreated with all of the original files attached to the visit.
+
+## Changing the UTC offset of exported visits
+
+The UTC offset of an AQTS location is immutable and can only be set when it is created.
+The default UTC offset in Springboard is UTC+0, so it easy to not notice that a location has an incorrect timezone.
+Often, a misconfigured location is only detected when some other data is added to the location (maybe a time-series, or rating model, or some field visits).
+
+The `/ExportUtcOverride=` option can be used to adjust the timezone of all exported visits, if you need to retain existing field work, but move everything to a new UTC offset.
+
+Consider this example:
+- Your organization's default time-zone is UTC+12:00 (Hello New Zealand!)
+- NEWLOCA and NEWLOCB are two new locations that were accidentally created in UTC+0 instead of UTC+12.
+- Both locations had 20 years of historical data imported, using a plugin which which assumed the UTC offset from the receiving location (this is a common assumption in many field data parsers).
+- When a technician glances at an imported Tuesday visit, they see "Yup, I measured the discharge at 11:30 AM" and can easily overlook the "UTC+0" instead of the expected "UTC+12".
+
+In the above example, 11:30 AM UTC is 23:30 in New Zealand. All timestamps in all the field visit data need to have 12 hours subtracted in order to appear in the correct time, in the correct time-zone.
+
+This workflow could be used to achieve the repair operation:
+- Make sure you have a DB backup.
+- Run `FieldVisitHotFolderService.exe /ExportFolder=C:\Temp\MyFolder /ExportUtcOverride=+12:00 /ExportLocations=NEWLOCA,NEWLOBC` to export all the field visits from both locations, and to force their timestamps into the NZST timezone.
+- Use Springboard to change the existing location identifiers from NEWLOCA and NEWLOCB to WRONGLOCA and WRONGLOCB
+- Use Springboard to recreate locations NEWLOCA and NEWLOCB using the UTC+12:00.
+- Copy all the exported files from the `C:\Temp\MyFolder\NEWLOCA` and `C:\Temp\MyFolder\NEWLOCB` sub-folders to a single new folder `C:\Temp\MyImportFolder`
+- Run `FieldVisitHotFolderService /HotFolderPath=C:\Temp\MyImportFolder` to import all the adjusted visits into the newly recreated locations.
+- Once you have confirmed that the new locations have correct visits, you can use the [LocationDeleter tool](https://github.com/AquaticInformatics/examples/tree/master/TimeSeries/PublicApis/SdkExamples/LocationDeleter#locationdeleter) to delete WRONGLOCA and WRONGLOCB.
+
 # /Help screen
 
 ```
@@ -349,6 +441,14 @@ Supported -option=value settings (/option=value works too):
   -MaximumFileCount           Maximum number of files to process before exiting. [default: Keep running forever]
   -MaximumFileWaitInterval    Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]
   -MaximumDuplicateRetry      Maximum number of retries for duplicate visits. [default: 3]
+
+  =========================== Export settings
+  -ExportFolder               Export visits to this root folder.
+  -ExportLocations            Export only these locations [default: All locations]
+  -ExportBefore               Export existing visits before this time.
+  -ExportAfter                Export existing visits after this time.
+  -ExportOverwrite            When true, any already exported visits will be re-exported. [default: False]
+  -ExportUtcOverride          When set, change all timestamps in exported visits to the specific UTC offset. Supported formats: ±HH, ±HHmm, ±HH:mm.
 
 Use the @optionsFile syntax to read more options from a file.
 

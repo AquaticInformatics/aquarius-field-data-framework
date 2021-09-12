@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using Common;
@@ -217,9 +218,11 @@ namespace FieldVisitHotFolderService
             {
                 Log.Info($"Saving '{visitPath}' ...");
 
-                File.WriteAllText(visitPath, Transform(archivedVisit).ToJson().IndentJson());
+                File.WriteAllText(visitPath, TransformToJson(archivedVisit));
                 return;
             }
+
+            Log.Info($"Saving '{zipPath}' ...");
 
             using (var stream = File.OpenWrite(zipPath))
             using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create))
@@ -228,7 +231,7 @@ namespace FieldVisitHotFolderService
 
                 using (var writer = new StreamWriter(rootJsonEntry.Open()))
                 {
-                    writer.Write(Transform(archivedVisit).ToJson().IndentJson());
+                    writer.Write(TransformToJson(archivedVisit));
                 }
 
                 var attachmentCount = 0;
@@ -259,6 +262,30 @@ namespace FieldVisitHotFolderService
                 return httpResponse.GetResponseStream().ReadFully();
             }
         }
+
+        private string TransformToJson(ArchivedVisit archivedVisit)
+        {
+            var json = Transform(archivedVisit).ToJson();
+
+            if (Context.ExportUtcOverride.HasValue)
+            {
+                var adjustedUtcOffset = FormatUtcOffset(Context.ExportUtcOverride.Value);
+
+                json = DateTimeOffsetRegex.Replace(json, match => $"\"{match.Groups["datetime"].Value}{adjustedUtcOffset}\"");
+            }
+
+            return json.IndentJson();
+        }
+
+        private static string FormatUtcOffset(TimeSpan timeSpan)
+        {
+            return timeSpan >= TimeSpan.Zero
+                ? $"+{timeSpan:hh\\:mm}"
+                : $"-{timeSpan:hh\\:mm}";
+        }
+
+        // "2016-02-05T10:30:00.0000000-08:00"
+        private static Regex DateTimeOffsetRegex = new Regex(@"""(?<datetime>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,7})?)(?<utcOffset>[-+]\d{2}:\d{2})""");
 
         private AppendedResults Transform(ArchivedVisit archivedVisit)
         {
