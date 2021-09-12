@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 20.3.9
+- FieldVisitHotFolderService - Added [visit export](tree/master/src/FieldVisitHotFolderService#exporting-existing-field-visits) functionality
+
 ### 20.3.8
 - FieldVisitHotFolderService - Added -PluginPriority configuration options
 - FieldVisitHotFolderService - Bugfix: Ensure JSON serialization is initialized before uploading any visit data

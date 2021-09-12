@@ -288,6 +288,46 @@ namespace FieldVisitHotFolderService
                     Getter = () => $"{context.MaximumDuplicateRetry}",
                     Description = "Maximum number of retries for duplicate visits."
                 },
+                new CommandLineOption(), new CommandLineOption{Description = "Export settings"},
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportFolder),
+                    Setter = value => context.ExportFolder = value,
+                    Getter = () => context.ExportFolder,
+                    Description = "Export visits to this root folder."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportLocations),
+                    Setter = value => ParseExportLocations(context, value),
+                    Description = "Export only these locations [default: All locations]"
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportBefore),
+                    Setter = value => context.ExportBefore = ParseDateTimeOffset(value),
+                    Description = "Export existing visits before this time."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportAfter),
+                    Setter = value => context.ExportAfter = ParseDateTimeOffset(value),
+                    Description = "Export existing visits after this time."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportOverwrite),
+                    Setter = value => context.ExportOverwrite = bool.Parse(value),
+                    Getter = () => context.ExportOverwrite.ToString(),
+                    Description = $"When true, any already exported visits will be re-exported."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ExportUtcOverride),
+                    Setter = value => context.ExportUtcOverride = ParseUtcOffset(value),
+                    Getter = () => context.ExportUtcOverride.ToString(),
+                    Description = $"When set, change all timestamps in exported visits to the specific UTC offset. Supported formats: ±HH, ±HHmm, ±HH:mm."
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
@@ -331,6 +371,54 @@ namespace FieldVisitHotFolderService
 
             return args;
         }
+
+        private static void ParseExportLocations(Context context, string text)
+        {
+            context.ExportLocations.AddRange(text
+                .Split(ListSeparatorChars)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s)));
+        }
+
+        private static DateTimeOffset? ParseDateTimeOffset(string text)
+        {
+            if (DateTimeOffset.TryParse(text, out var dateTimeOffset))
+                return dateTimeOffset;
+
+            throw new ExpectedException($"'{text}' is not a valid DateTimeOffset");
+        }
+
+        private static TimeSpan ParseUtcOffset(string text)
+        {
+            var parseText = text;
+            var isNegative = false;
+
+            switch (parseText[0])
+            {
+                case '+':
+                    parseText = parseText.Substring(1);
+                    break;
+                case '-':
+                    isNegative = true;
+                    parseText = parseText.Substring(1);
+                    break;
+            }
+
+            if (TimeSpan.TryParseExact(parseText, UtcOffsetFormats, null, out var timeSpan))
+                return isNegative ? timeSpan.Negate() : timeSpan;
+
+            throw new ExpectedException($"'{text}' is not a supported UTC offset format. Try one of ±HH, ±HHmm, ±HH:mm");
+        }
+
+        private static readonly string[] UtcOffsetFormats =
+        {
+            "h",
+            "hh",
+            "hmm",
+            "hhmm",
+            "h\\:mm",
+            "hh\\:mm",
+        };
 
         private static void ParseLocationAliases(Context context, string text)
         {

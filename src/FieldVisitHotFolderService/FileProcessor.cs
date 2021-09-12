@@ -41,6 +41,9 @@ namespace FieldVisitHotFolderService
         public List<IFieldDataPlugin> Plugins { get; set; }
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
+        public ReferencePointCache ReferencePointCache { get; set; }
+        public MethodLookup MethodLookup { get; set; }
+        public ParameterIdLookup ParameterIdLookup { get; set; }
         public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
@@ -488,7 +491,7 @@ namespace FieldVisitHotFolderService
             return Path.GetFileNameWithoutExtension(uploadContext.Path) + ".zip";
         }
 
-        private static string SanitizeFilename(string filename)
+        public static string SanitizeFilename(string filename)
         {
             return InvalidFileNameCharsRegex.Replace(filename, "_");
         }
@@ -656,7 +659,7 @@ namespace FieldVisitHotFolderService
             var archiveFilenameBase = Path.Combine(ArchivedFolder, $"{visit.Identifier}_{visit.StartTime?.Date:yyyy-MM-dd}_{visit.LocationIdentifier}");
             
             Log.Info($"Archiving existing visit '{archiveFilenameBase}'.json");
-            File.WriteAllText(archiveFilenameBase+".json", archivedVisit.ToJson().IndentJson());
+            File.WriteAllText(archiveFilenameBase+".json", Transform(archivedVisit).ToJson().IndentJson());
 
             var publishClient = Client.Publish as ServiceClientBase;
 
@@ -672,6 +675,37 @@ namespace FieldVisitHotFolderService
                     attachmentFilename,
                     attachmentUrl.GetBytesFromUrl(requestFilter: SetAuthenticationHeaders));
             }
+        }
+
+        private AppendedResults Transform(ArchivedVisit archivedVisit)
+        {
+            var appender = new FieldDataResultsAppender
+            {
+                Client = Client,
+                LocationCache = LocationCache,
+                LocationAliases = Context.LocationAliases,
+                Log = Log
+            };
+
+            var mapper = new ArchivedVisitMapper
+            {
+                Appender = appender,
+                ReferencePointCache = ReferencePointCache,
+                ParameterIdLookup = ParameterIdLookup,
+                MethodLookup = MethodLookup
+            };
+
+            var visit = mapper.Map(archivedVisit);
+
+            return new AppendedResults
+            {
+                FrameworkAssemblyQualifiedName = typeof(IFieldDataPlugin).AssemblyQualifiedName,
+                PluginAssemblyQualifiedTypeName = mapper.GetJsonPluginAQFN(),
+                AppendedVisits = new List<FieldVisitInfo>
+                {
+                    visit
+                }
+            };
         }
 
         private void SetAuthenticationHeaders(HttpWebRequest request)

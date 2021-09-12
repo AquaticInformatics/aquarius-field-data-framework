@@ -37,6 +37,10 @@ namespace FieldVisitHotFolderService
         private AquariusServerVersion JsonPluginVersion { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
+        private ReferencePointCache ReferencePointCache { get; set; }
+        private MethodLookup MethodLookup { get; set; }
+        private ParameterIdLookup ParameterIdLookup { get; set; }
+
         private int ProcessedFileCount { get; set; }
         public Action CancellationAction { get; set; }
         public string[] StartArgs { get; set; }
@@ -47,11 +51,39 @@ namespace FieldVisitHotFolderService
 
             ConnectAndThrowIfJsonPluginNotInstalled();
 
+            if (IsExporting())
+            {
+                ExportExistingVisits();
+                return;
+            }
+
             while (!CancellationToken.IsCancellationRequested)
             {
                 Validate();
                 ProcessNewFiles();
                 WaitForNewFiles();
+            }
+        }
+
+        private bool IsExporting()
+        {
+            return !string.IsNullOrEmpty(Context.ExportFolder);
+        }
+
+        private void ExportExistingVisits()
+        {
+            using (Client = CreateConnectedClient())
+            {
+                new Exporter
+                    {
+                        Context = Context,
+                        Client = Client,
+                        ReferencePointCache = ReferencePointCache,
+                        ParameterIdLookup = ParameterIdLookup,
+                        MethodLookup = MethodLookup,
+                        Plugins = Plugins,
+                    }
+                    .Run();
             }
         }
 
@@ -169,6 +201,12 @@ namespace FieldVisitHotFolderService
             var client = AquariusClient.CreateConnectedClient(Context.Server, Context.Username, Context.Password);
 
             Log.Info($"Connected to {Context.Server} (v{client.ServerVersion})");
+
+            ReferencePointCache = new ReferencePointCache(client);
+
+            ParameterIdLookup = new ParameterIdLookup(client.Provisioning.Get(new GetParameters()));
+
+            MethodLookup = new MethodLookup(client.Provisioning.Get(new GetMonitoringMethods()));
 
             return client;
         }
@@ -360,6 +398,9 @@ namespace FieldVisitHotFolderService
                     Context = Context,
                     Client = Client,
                     LocationCache = LocationCache,
+                    ReferencePointCache = ReferencePointCache,
+                    ParameterIdLookup = ParameterIdLookup,
+                    MethodLookup = MethodLookup,
                     Plugins = Plugins,
                     ProcessingFolder = ProcessingFolder,
                     PartialFolder = PartialFolder,
