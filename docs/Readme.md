@@ -16,7 +16,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ### AQTS 2021.3 - Framework version 2.11
 - Added `GageHeightReferencePointId` to `DischargeActivity` to record an optional reference point for Mean Gage Height. This will allow Discharge readings to be calculated from a datum other than the local assumed datum. 
-- Added `GageHeightAdjustmentAmount` to `DischargeActivity` to record an optional adjustment amount for Mean Gage Height. `MeanGageHeight` and `GageHeightAdjustmentAmount` values are combined by the framework and should not be pre-calculated by the plugin.
+- Added `GageHeightAdjustmentAmount` and `GageHeightComments` to `DischargeActivity` to record an optional adjustment amount (and reason for the adjustment) for Mean Gage Height. `MeanGageHeight` and `GageHeightAdjustmentAmount` values are combined by the framework and should not be pre-calculated by the plugin.
 - Added `AdjustmentAmount` to `Reading` to record an optional adjustment amount. Adjusted `Reading` and `AdjustmentAmount` values are combined by the framework and should not be pre-calculated by the plugin.
 
 ### AQTS 2020.3 - Framework version 2.10
