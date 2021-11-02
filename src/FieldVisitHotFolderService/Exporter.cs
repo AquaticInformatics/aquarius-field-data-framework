@@ -39,6 +39,7 @@ namespace FieldVisitHotFolderService
         private ArchivedVisitMapper Mapper { get; set; }
         private int VisitCount { get; set; }
         private int ErrorCount { get; set; }
+        private int MissingAttachmentCount { get; set; }
         private int SkipCount { get; set; }
 
         public void Run()
@@ -82,6 +83,9 @@ namespace FieldVisitHotFolderService
             {
                 ExportVisitsFromLocation(locationIdentifier);
             }
+
+            if (MissingAttachmentCount > 0)
+                Log.Warn($"{"missing attachments".ToQuantity(MissingAttachmentCount)} were detected. Check your app server's BLOB storage configuration.");
 
             Log.Info($"Exported {"visit".ToQuantity(VisitCount)}, skipping {"visit".ToQuantity(SkipCount)}, with {"error".ToQuantity(ErrorCount)} detected in {stopwatch.Elapsed.Humanize(2)}");
         }
@@ -224,6 +228,23 @@ namespace FieldVisitHotFolderService
 
             Log.Info($"Saving '{zipPath}' ...");
 
+            var deleteZipOnCleanup = true;
+
+            try
+            {
+                ExportVisitAndAttachments(visitPath, zipPath, archivedVisit);
+
+                deleteZipOnCleanup = false;
+            }
+            finally
+            {
+                if (deleteZipOnCleanup)
+                    File.Delete(zipPath);
+            }
+        }
+
+        private void ExportVisitAndAttachments(string visitPath, string zipPath, ArchivedVisit archivedVisit)
+        {
             using (var stream = File.OpenWrite(zipPath))
             using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create))
             {
@@ -238,7 +259,8 @@ namespace FieldVisitHotFolderService
                 foreach (var attachment in archivedVisit.Activities.Attachments)
                 {
                     ++attachmentCount;
-                    var attachmentEntry = zipArchive.CreateEntry($"Attachment{attachmentCount}/{Path.GetFileName(attachment.FileName)}");
+                    var attachmentEntry =
+                        zipArchive.CreateEntry($"Attachment{attachmentCount}/{Path.GetFileName(attachment.FileName)}");
 
                     var contentBytes = DownloadAttachmentContent(attachmentEntry.FullName, attachment);
 
@@ -254,12 +276,21 @@ namespace FieldVisitHotFolderService
         {
             Log.Info($"Downloading {downloadPath} ...");
 
-            using (var httpResponse = Client.Publish.Get<HttpWebResponse>(attachment.Url))
+            try
             {
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
-                    throw new ExpectedException($"{httpResponse.StatusCode}: {httpResponse.StatusDescription}: Can't download {attachment.Url}");
+                using (var httpResponse = Client.Publish.Get<HttpWebResponse>(attachment.Url))
+                {
+                    return httpResponse.GetResponseStream().ReadFully();
+                }
+            }
+            catch (WebServiceException exception)
+            {
+                if (!exception.IsNotFound())
+                    throw;
 
-                return httpResponse.GetResponseStream().ReadFully();
+                ++MissingAttachmentCount;
+
+                throw new ExpectedException($"{exception.StatusCode}: {exception.StatusDescription}: {exception.ErrorMessage}");
             }
         }
 
