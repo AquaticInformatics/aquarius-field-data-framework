@@ -75,6 +75,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>$(SolutionDir)PluginPackager\bin\$(Configuration)\PluginPackager.exe $(TargetPath) /OutputPath=$(ProjectDir)deploy\$(Configuration)\$(TargetName).plugin
-$(SolutionDir)PluginTester\bin\$(Configuration)\PluginTester.exe /Plugin=$(TargetPath) /Data=$(ProjectDir)data\AppendedResults.2018.4.json  /Data=$(ProjectDir)data\AppendedResults.2017.4.json</PostBuildEvent>
+$(SolutionDir)PluginTester\bin\$(Configuration)\PluginTester.exe /Plugin=$(TargetPath) /Data=$(ProjectDir)data\AppendedResults.2020.3.json /Data=$(ProjectDir)data\AppendedResults.2018.4.json  /Data=$(ProjectDir)data\AppendedResults.2017.4.json</PostBuildEvent>
   </PropertyGroup>
 </Project>
