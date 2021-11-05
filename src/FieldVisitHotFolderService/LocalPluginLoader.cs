@@ -22,6 +22,7 @@ namespace FieldVisitHotFolderService
 
         private DirectoryInfo Root { get; } = new DirectoryInfo(Path.Combine(FileHelper.ExeDirectory, "LocalPlugins"));
 
+        public bool Verbose { get; set; }
         public string JsonPluginPath { get; set; }
         public AquariusServerVersion JsonPluginVersion { get; set; }
 
@@ -30,194 +31,32 @@ namespace FieldVisitHotFolderService
             return plugin.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin");
         }
 
-        public List<IFieldDataPlugin> LoadPlugins()
+        public List<PluginLoader.LoadedPlugin> LoadPlugins()
         {
-            var pluginBundles = Root
-                .GetFiles("*.plugin");
+            RemoveExtractedPluginFolders();
 
-            var installedPluginFolders = pluginBundles
-                .Select(InstallPlugin)
+            var pluginFiles = Root
+                .GetFiles("*.plugin")
+                .Select(fi => fi.FullName)
                 .ToList();
 
-            if (!installedPluginFolders.Any())
+            if (!pluginFiles.Any())
                 throw new ExpectedException($"You need to have at least one local *.plugin file at '{Root.FullName}'");
-
-            var stalePluginFolders = Root
-                .GetDirectories()
-                .Where(d => !installedPluginFolders.Contains(d.FullName))
-                .ToList();
-
-            foreach (var stalePluginFolder in stalePluginFolders)
-            {
-                Log.Info($"Deleting stale local plugin folder '{stalePluginFolder.FullName}'");
-                SafelyDeleteDirectory(stalePluginFolder.FullName);
-            }
 
             return new PluginLoader
                 {
-                    Log = Log4NetLogger.Create(Log)
+                    Log = Log4NetLogger.Create(Log),
+                    Verbose = Verbose
                 }
-                .LoadPlugins(installedPluginFolders);
+                .LoadPlugins(pluginFiles);
         }
 
-        private const string ManifestFile = "manifest.json";
-        private const string FrameworkAssemblyFilename = "FieldDataPluginFramework.dll";
-
-        private string InstallPlugin(FileInfo archiveInfo)
+        private void RemoveExtractedPluginFolders()
         {
-            using (var archive = LoadPluginArchive(archiveInfo.FullName))
+            foreach (var subFolder in Root.GetDirectories())
             {
-                var manifestEntry = archive.Entries.FirstOrDefault(e =>
-                    e.FullName.Equals(ManifestFile, StringComparison.InvariantCultureIgnoreCase));
-
-                if (manifestEntry == null)
-                    throw new Exception($"Invalid plugin bundle. No manifest found.");
-
-                var plugin = LoadPluginFromManifest(manifestEntry);
-
-                var otherEntries = archive
-                    .Entries
-                    .Where(e => !ExcludedFromExtraction.Contains(e.FullName))
-                    .ToList();
-
-                if (!otherEntries.Any())
-                    throw new Exception($"Invalid plugin bundle. No file entries found to install.");
-
-                if (IsJsonPlugin(plugin))
-                {
-                    JsonPluginPath = archiveInfo.FullName;
-                    JsonPluginVersion = AquariusServerVersion.Create(PluginLoader.GetPluginVersion(plugin.AssemblyQualifiedTypeName));
-                }
-
-                var pluginFolder = new DirectoryInfo(Path.Combine(Root.FullName, plugin.PluginFolderName));
-
-                if (ShouldExtractLocalPlugin(plugin, pluginFolder, archiveInfo))
-                {
-                    ExtractLocalPlugin(pluginFolder, otherEntries);
-                }
-
-                return pluginFolder.FullName;
-            }
-        }
-
-        private static readonly HashSet<string> ExcludedFromExtraction = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
-        {
-            ManifestFile,
-            FrameworkAssemblyFilename,
-        };
-
-        private bool ShouldExtractLocalPlugin(FieldDataPlugin plugin, DirectoryInfo pluginFolder, FileInfo archiveInfo)
-        {
-            if (!pluginFolder.Exists)
-                return true;
-
-            var match = AssemblyQualifiedTypeNameRegex.Match(plugin.AssemblyQualifiedTypeName);
-
-            if (!match.Success)
-            {
-                Log.Warn($"Re-extracting {plugin.PluginFolderName} since unable to extract version from '{plugin.AssemblyQualifiedTypeName}'.");
-                return true;
-            }
-
-            var pluginVersion = AquariusServerVersion.Create(match.Groups["version"].Value.Trim());
-
-            var expectedAssemblyName = $"{match.Groups["assemblyName"].Value.Trim()}.dll";
-
-            var assemblyFileInfo = pluginFolder
-                .GetFiles()
-                .FirstOrDefault(f => f.Name.Equals(expectedAssemblyName, StringComparison.InvariantCultureIgnoreCase));
-
-            if (assemblyFileInfo == null)
-            {
-                Log.Warn($"Re-extracting {plugin.PluginFolderName} since '{expectedAssemblyName}' not found in folder.");
-                return true;
-            }
-
-            var currentAssemblyVersion = GetFileVersion(assemblyFileInfo);
-
-            if (currentAssemblyVersion.IsLessThan(pluginVersion))
-            {
-                Log.Info($"Re-extracting {plugin.PluginFolderName} since current version {currentAssemblyVersion} is older than {pluginVersion}");
-                return true;
-            }
-
-            return false;
-        }
-
-        AquariusServerVersion GetFileVersion(FileInfo fileInfo)
-        {
-            var fileVersion = FileVersionInfo.GetVersionInfo(fileInfo.FullName).FileVersion;
-
-            var parts = fileVersion.Split('.');
-
-            if (parts.Length < 4)
-                fileVersion = $"{fileVersion}.0";
-
-            return AquariusServerVersion.Create(fileVersion);
-        }
-
-        private static readonly Regex AssemblyQualifiedTypeNameRegex = new Regex(@"^(?<typeName>.+),\s+(?<assemblyName>\w+),\s*Version=(?<version>[^,]+)(\s*,\s*(?<propertyName>\w+)=(?<propertyValue>[^,]+))*$");
-
-        private ZipArchive LoadPluginArchive(string path)
-        {
-            try
-            {
-                return ZipFile.OpenRead(path);
-            }
-            catch (Exception)
-            {
-                throw new ExpectedException($"'{path}' is not a valid *.plugin bundle.");
-            }
-        }
-
-        private FieldDataPlugin LoadPluginFromManifest(ZipArchiveEntry manifestEntry)
-        {
-            using (var stream = manifestEntry.Open())
-            using (var reader = new StreamReader(stream))
-            {
-                var jsonText = reader.ReadToEnd();
-                var plugin = jsonText.FromJson<FieldDataPlugin>();
-
-                if (string.IsNullOrWhiteSpace(plugin.PluginFolderName))
-                    throw new Exception($"Invalid plugin manifest. {nameof(plugin.PluginFolderName)} must be set.");
-
-                if (string.IsNullOrWhiteSpace(plugin.AssemblyQualifiedTypeName))
-                    throw new Exception($"Invalid plugin manifest. {nameof(plugin.AssemblyQualifiedTypeName)} must be set.");
-
-                return plugin;
-            }
-        }
-
-        private void ExtractLocalPlugin(DirectoryInfo pluginFolder, List<ZipArchiveEntry> entriesToExtract)
-        {
-            Log.Info($"Extracting local plugin '{pluginFolder.FullName}'");
-
-            if (pluginFolder.Exists)
-            {
-                Log.Info($"Deleting existing '{pluginFolder.FullName}'");
-
-                SafelyDeleteDirectory(pluginFolder.FullName);
-            }
-
-            pluginFolder.Create();
-
-            foreach (var entry in entriesToExtract)
-            {
-                var extractedPath = Path.Combine(pluginFolder.FullName, entry.FullName);
-                var extractedDir = Path.GetDirectoryName(extractedPath);
-
-                if (!Directory.Exists(extractedDir))
-                {
-                    // ReSharper disable once AssignNullToNotNullAttribute
-                    Directory.CreateDirectory(extractedDir);
-                }
-
-                Log.Info($"Extracting {entry.FullName} ...");
-                using (var inStream = entry.Open())
-                using (var outStream = File.Create(extractedPath))
-                {
-                    inStream.CopyTo(outStream);
-                }
+                Log.Info($"Removing stale subfolder '{subFolder.FullName}' ...");
+                SafelyDeleteDirectory(subFolder.FullName);
             }
         }
 

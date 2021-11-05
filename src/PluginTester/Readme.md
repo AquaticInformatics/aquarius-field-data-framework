@@ -19,15 +19,26 @@ Usage: PluginTester [-option=value] [@optionsFile] ...
 
 Supported -option=value settings (/option=value works too):
 
-  -Plugin           Path to the plugin assembly to debug
-  -Data             Path to the data file to be parsed. Can be set more than once.
-  -RecursiveSearch  Search /Data directories recursively. -R shortcut is also supported. [default: False]
-  -Location         Optional location identifier context
-  -UtcOffset        UTC offset in .NET TimeSpan format. [default: -08:00:00]
-  -Json             Optional path to write the appended results as JSON
-  -Setting          Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values.
-  -ExpectedError    Expected error message
-  -ExpectedStatus   Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
+  ======================= Specify the plugin to be tested
+  -Plugin                 Path to the plugin assembly. Can be a folder, a DLL, or a packaged *.plugin file.
+  -Verbose                Enables verbose logging of assembly loading logic. [default: False]
+  -FrameworkAssemblyPath  Optional path to the FieldDataPluginFramework.dll assembly. [default: Test using the latest framework version]
+
+  ======================= Test data settings
+  -Data                   Path to the data file to be parsed. Can be set more than once.
+  -RecursiveSearch        Search /Data directories recursively. -R shortcut is also supported. [default: False]
+  -Setting                Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values.
+
+  ======================= Plugin context settings
+  -Location               Optional location identifier context
+  -UtcOffset              UTC offset in .NET TimeSpan format. [default: -08:00:00]
+
+  ======================= Output settings
+  -Json                   Optional path (file or folder) to write the appended results as JSON.
+
+  ======================= Expected response settings
+  -ExpectedError          Expected error message
+  -ExpectedStatus         Expected parse status. One of SuccessfullyParsedButDataInvalid, SuccessfullyParsedAndDataValid, CannotParse [default: SuccessfullyParsedAndDataValid]
 
 Use the @optionsFile syntax to read more options from a file.
 

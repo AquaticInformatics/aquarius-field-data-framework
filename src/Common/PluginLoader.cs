@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Security;
-using System.Text.RegularExpressions;
 using FieldDataPluginFramework;
+using ServiceStack;
 
 namespace Common
 {
@@ -14,9 +15,39 @@ namespace Common
     {
         public ILog Log { get; set; }
 
+        public bool Verbose { get; set; }
+
         private List<string> PluginFolders { get; } = new List<string>();
 
-        public List<IFieldDataPlugin> LoadPlugins(List<string> paths)
+        public class ArchiveContext
+        {
+            public ArchiveContext(string path, ZipArchive archive, Assembly assembly)
+            {
+                Path = path;
+                Archive = archive;
+                LoadedAssemblies.Add(assembly);
+            }
+
+            public string Path { get; }
+            public ZipArchive Archive { get; }
+            public HashSet<Assembly> LoadedAssemblies { get; } = new HashSet<Assembly>();
+        }
+
+        private List<ArchiveContext> PluginArchives { get; } = new List<ArchiveContext>();
+
+        public class LoadedPlugin
+        {
+            public LoadedPlugin(IFieldDataPlugin plugin, PluginManifest manifest)
+            {
+                Plugin = plugin;
+                Manifest = manifest;
+            }
+
+            public IFieldDataPlugin Plugin { get; }
+            public PluginManifest Manifest { get; }
+        }
+
+        public List<LoadedPlugin> LoadPlugins(List<string> paths)
         {
             AppDomain.CurrentDomain.AssemblyResolve += ResolvePluginAssembliesFromSameFolder;
 
@@ -25,10 +56,23 @@ namespace Common
                 .ToList();
         }
 
+        private void LogVerbose(string message)
+        {
+            if (Verbose)
+                Log.Info(message);
+            else
+                Log.Debug(message);
+        }
+
         private Assembly ResolvePluginAssembliesFromSameFolder(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
-            var requestingAssemblyName = args.RequestingAssembly.Location;
+            var requestingAssembly = args.RequestingAssembly;
+
+            if (TryResolveAssemblyFromArchive(requestingAssembly, assemblyName, out var resolvedAssembly))
+                return resolvedAssembly;
+
+            var requestingAssemblyName = requestingAssembly.Location;
 
             var pluginFolder = PluginFolders
                 .FirstOrDefault(p => requestingAssemblyName.StartsWith(p, StringComparison.InvariantCultureIgnoreCase));
@@ -47,7 +91,7 @@ namespace Common
                 return null;
             }
 
-            var loadedAssembly = LoadAssembly(assemblyPath, message => Log.Error($"Can't load plugin dependency from '{assemblyPath}' for '{requestingAssemblyName}': {message}"));
+            var loadedAssembly = LoadAssemblyFromFile(assemblyPath, message => Log.Error($"Can't load plugin dependency from '{assemblyPath}' for '{requestingAssemblyName}': {message}"));
 
             if (loadedAssembly == null)
             {
@@ -55,25 +99,71 @@ namespace Common
             }
             else
             {
-                Log.Debug($"Loaded '{assemblyPath}' for '{requestingAssemblyName}'");
+                LogVerbose($"Loaded '{assemblyPath}' for '{requestingAssemblyName}'");
             }
 
             return loadedAssembly;
         }
 
-        private IFieldDataPlugin LoadPlugin(string path)
+        private bool TryResolveAssemblyFromArchive(Assembly requestingAssembly, string assemblyName, out Assembly assembly)
         {
-            if (File.Exists(path))
-                return LoadPluginFromFile(path);
+            assembly = default;
 
-            return LoadPluginFromFolder(path);
+            var archiveContext = PluginArchives
+                .FirstOrDefault(context => context.LoadedAssemblies.Contains(requestingAssembly));
+
+            if (archiveContext == null)
+                return false;
+
+            var targetAssemblyEntry = archiveContext
+                    .Archive
+                    .Entries
+                    .FirstOrDefault(e => e.FullName.Equals(assemblyName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (targetAssemblyEntry == null)
+                return false;
+
+            var targetAssemblyBytes = LoadAssemblyBytes(targetAssemblyEntry);
+
+            assembly = LoadAssemblyFromBytes(
+                targetAssemblyBytes,
+                message => Log.Error($"Can't load assembly '{assemblyName}' from '{archiveContext.Path}': {message}"));
+
+            if (assembly == null)
+                return true;
+
+            LogVerbose($"Loaded '{assemblyName}' for '{requestingAssembly.FullName}' from {archiveContext.Path}");
+
+            archiveContext.LoadedAssemblies.Add(assembly);
+
+            return true;
+        }
+
+        private LoadedPlugin LoadPlugin(string path)
+        {
+            if (IsZipPlugin(path))
+                return LoadPluginFromZip(path);
+
+            var plugin = File.Exists(path)
+                ? LoadPluginFromFile(path)
+                : LoadPluginFromFolder(path);
+
+            var manifest = new PluginManifest
+            {
+                AssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName,
+                PluginFolderName = File.Exists(path)
+                    ? new FileInfo(path).Directory?.Name
+                    : new DirectoryInfo(path).Name
+            };
+
+            return new LoadedPlugin(plugin, manifest);
         }
 
         private IFieldDataPlugin LoadPluginFromFile(string path)
         {
             AddPluginFolderPath(Path.GetDirectoryName(path));
 
-            var assembly = LoadAssembly(path, message => Log.Error($"Can't load '{path}': {message}"));
+            var assembly = LoadAssemblyFromFile(path, message => Log.Error($"Can't load '{path}': {message}"));
 
             if (assembly == null)
                 throw new ExpectedException($"Can't load plugin assembly.");
@@ -81,6 +171,91 @@ namespace Common
             var plugins = FindAllPluginImplementations(assembly).ToList();
 
             return GetSinglePluginOrThrow(path, plugins);
+        }
+
+        private LoadedPlugin LoadPluginFromZip(string path)
+        {
+            var archive = LoadPluginArchive(path);
+
+            var manifestEntry = archive.GetEntry(PluginManifest.EntryName);
+
+            if (manifestEntry == null)
+                throw new ExpectedException($"'{path}' is not valid *.plugin bundle. No {PluginManifest.EntryName} found.");
+
+            var manifest = LoadManifest(manifestEntry);
+
+            var assemblyName = $"{AssemblyQualifiedNameParser.Parse(manifest.AssemblyQualifiedTypeName).AssemblyName}.dll";
+
+            var mainAssemblyEntry = archive
+                .Entries
+                .FirstOrDefault(e => e.Name.Equals(assemblyName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (mainAssemblyEntry == null)
+                throw new ExpectedException($"Can't find '{assemblyName}' inside '{path}'");
+
+            var assemblyBytes = LoadAssemblyBytes(mainAssemblyEntry);
+
+            var assembly = LoadAssemblyFromBytes(assemblyBytes, message => Log.Error($"Can't load '{assemblyName}' from '{path}': {message}"));
+
+            if (assembly == null)
+                throw new ExpectedException($"Can't load plugin assembly from '{path}'.");
+
+            LogVerbose($"Loaded '{assemblyName}' from '{path}'");
+
+            var archiveContext = new ArchiveContext(path, archive, assembly);
+
+            try
+            {
+                PluginArchives.Add(archiveContext);
+
+                var plugins = FindAllPluginImplementations(assembly).ToList();
+
+                return new LoadedPlugin(GetSinglePluginOrThrow(path, plugins), manifest);
+            }
+            catch (Exception)
+            {
+                PluginArchives.Remove(archiveContext);
+                throw;
+            }
+        }
+
+        private ZipArchive LoadPluginArchive(string path)
+        {
+            try
+            {
+                return ZipFile.OpenRead(path);
+            }
+            catch (Exception)
+            {
+                throw new ExpectedException($"'{path}' is not a valid *.plugin bundle.");
+            }
+        }
+
+        private PluginManifest LoadManifest(ZipArchiveEntry manifestEntry)
+        {
+            using (var stream = manifestEntry.Open())
+            using (var reader = new StreamReader(stream))
+            {
+                var jsonText = reader.ReadToEnd();
+                var manifest = jsonText.FromJson<PluginManifest>();
+
+                if (string.IsNullOrWhiteSpace(manifest.PluginFolderName))
+                    throw new ExpectedException($"Invalid plugin manifest. {nameof(manifest.PluginFolderName)} must be set.");
+
+                if (string.IsNullOrWhiteSpace(manifest.AssemblyQualifiedTypeName))
+                    throw new ExpectedException($"Invalid plugin manifest. {nameof(manifest.AssemblyQualifiedTypeName)} must be set.");
+
+                return manifest;
+            }
+        }
+
+        private byte[] LoadAssemblyBytes(ZipArchiveEntry entry)
+        {
+            using (var stream = entry.Open())
+            using(var reader = new BinaryReader(stream))
+            {
+                return reader.ReadBytes((int)entry.Length);
+            }
         }
 
         private void AddPluginFolderPath(string path)
@@ -114,7 +289,7 @@ namespace Common
 
             foreach (var file in directory.GetFiles("*.dll"))
             {
-                var assembly = LoadAssembly(file.FullName, message => Log.Info($"Skipping '{file.FullName}': {message}"));
+                var assembly = LoadAssemblyFromFile(file.FullName, message => Log.Info($"Skipping '{file.FullName}': {message}"));
 
                 if (assembly == null)
                     continue;
@@ -125,15 +300,29 @@ namespace Common
             return GetSinglePluginOrThrow(path, plugins);
         }
 
-        private Assembly LoadAssembly(string path, Action<string> exceptionAction)
+        private Assembly LoadAssemblyFromBytes(byte[] assemblyBytes, Action<string> exceptionAction)
         {
-            try
+            return LoadAssembly(() => Assembly.Load(assemblyBytes), exceptionAction);
+        }
+
+        private Assembly LoadAssemblyFromFile(string path, Action<string> exceptionAction)
+        {
+            return LoadAssembly(() =>
             {
                 var assembly = Assembly.LoadFile(path);
 
-                Log.Debug($"Loaded '{path}'");
+                LogVerbose($"Loaded '{path}'");
 
                 return assembly;
+
+            }, exceptionAction);
+        }
+
+        private Assembly LoadAssembly(Func<Assembly> loadFunc, Action<string> exceptionAction)
+        {
+            try
+            {
+                return loadFunc();
             }
             catch (Exception exception)
             {
@@ -190,34 +379,47 @@ namespace Common
             return GetAssemblyVersion(assemblyQualifiedName);
         }
 
-        public static string GetPluginFolderName(IFieldDataPlugin plugin)
-        {
-            var folder = Path.GetDirectoryName(plugin.GetType().Assembly.Location);
-
-            // ReSharper disable once AssignNullToNotNullAttribute
-            return new DirectoryInfo(folder)
-                .Name;
-        }
         private static string GetTypeVersion(Type type)
         {
             var version = GetAssemblyVersion(type.AssemblyQualifiedName);
 
-            return version != DefaultAssemblyVersion
-                ? version
-                : FileVersionInfo.GetVersionInfo(type.Assembly.Location).FileVersion;
+            if (version != DefaultAssemblyVersion)
+                return version;
+
+            var assemblyPath = type.Assembly.Location;
+
+            return File.Exists(assemblyPath)
+                ? FileVersionInfo.GetVersionInfo(assemblyPath).FileVersion
+                : version;
         }
 
         private const string DefaultAssemblyVersion = "1.0.0.0";
 
         private static string GetAssemblyVersion(string assemblyQualifiedName)
         {
-            var match = AssemblyVersionRegex.Match(assemblyQualifiedName ?? string.Empty);
-
-            return match.Success
-                ? match.Groups["Version"].Value
+            return AssemblyQualifiedNameParser.TryParse(assemblyQualifiedName, out var result)
+                ? result.Version
                 : DefaultAssemblyVersion;
         }
 
-        private static readonly Regex AssemblyVersionRegex = new Regex(@"\bVersion=(?<Version>\d+(\.\d+)*)");
+        private static bool IsZipPlugin(string path)
+        {
+            if (!File.Exists(path) || !PluginExtensions.Contains(Path.GetExtension(path)))
+                return false;
+
+            var bytes = File.ReadAllBytes(path);
+
+            return bytes.Length > 3
+                   && bytes[0] == 0x50
+                   && bytes[1] == 0x4b
+                   && bytes[2] == 0x03
+                   && bytes[3] == 0x04;
+        }
+
+        private static readonly HashSet<string> PluginExtensions =
+            new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                ".plugin"
+            };
     }
 }

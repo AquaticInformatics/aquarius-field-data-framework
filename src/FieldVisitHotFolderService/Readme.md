@@ -22,7 +22,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2020.3+ | [v20.3.9](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.9/FieldVisitHotFolderService.zip) |
+| AQTS 2020.3+ | [v20.3.10](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.10/FieldVisitHotFolderService.zip) |
 | AQTS 2020.2 | [v20.2.5](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.2.5/FieldVisitHotFolderService.zip) |
 | AQTS 2020.1<br/>AQTS 2019.4 Update 1 | [v19.4.14](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.14/FieldVisitHotFolderService.zip) |
 | AQTS 2019.4 | [v19.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.4.0/FieldVisitHotFolderService.zip) |
@@ -427,6 +427,7 @@ Supported -option=value settings (/option=value works too):
   =========================== Plugin configuration settings
   -PluginSettings             Configure plugin settings as 'pluginFolderName=key=text' or 'pluginFolderName=key=@pathToTextFile' values.
   -PluginPriority             Configure plugin priority as 'pluginFolderName=integerPriority' [defaults to the AQTS plugin priority]
+  -Verbose                    Enables verbose logging of plugin assembly loading logic. [default: False]
 
   =========================== File monitoring settings
   -HotFolderPath              The root path to monitor for field visit files.

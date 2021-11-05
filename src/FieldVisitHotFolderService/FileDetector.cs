@@ -32,7 +32,7 @@ namespace FieldVisitHotFolderService
         private string ArchivedFolder { get; set; }
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
-        private List<IFieldDataPlugin> Plugins { get; set; }
+        private List<PluginLoader.LoadedPlugin> LoadedPlugins { get; set; }
         private string JsonPluginPath { get; set; }
         private AquariusServerVersion JsonPluginVersion { get; set; }
         private IAquariusClient Client { get; set; }
@@ -81,7 +81,9 @@ namespace FieldVisitHotFolderService
                         ReferencePointCache = ReferencePointCache,
                         ParameterIdLookup = ParameterIdLookup,
                         MethodLookup = MethodLookup,
-                        Plugins = Plugins,
+                        Plugins = LoadedPlugins
+                            .Select(lp => lp.Plugin)
+                            .ToList(),
                     }
                     .Run();
             }
@@ -119,11 +121,11 @@ namespace FieldVisitHotFolderService
 
             LoadLocalPlugins();
 
-            Log.Info($"{Plugins.Count} local plugins ready for parsing field data files.");
+            Log.Info($"{LoadedPlugins.Count} local plugins ready for parsing field data files.");
 
-            foreach (var plugin in Plugins)
+            foreach (var loadedPlugin in LoadedPlugins)
             {
-                Log.Info($"{PluginLoader.GetPluginNameAndVersion(plugin)}");
+                Log.Info($"{PluginLoader.GetPluginNameAndVersion(loadedPlugin.Plugin)}");
             }
         }
 
@@ -158,9 +160,12 @@ namespace FieldVisitHotFolderService
         {
             FieldDataPluginFramework.Serialization.JsonConfig.Configure();
 
-            var localPluginLoader = new LocalPluginLoader();
+            var localPluginLoader = new LocalPluginLoader
+            {
+                Verbose = Context.Verbose
+            };
 
-            Plugins = localPluginLoader
+            LoadedPlugins = localPluginLoader
                 .LoadPlugins();
 
             SortPluginsByPriority();
@@ -176,10 +181,10 @@ namespace FieldVisitHotFolderService
 
             var serverPlugins = Client.Provisioning.Get(new GetFieldDataPlugins()).Results;
 
-            Plugins = Plugins
-                .OrderBy(plugin =>
+            LoadedPlugins = LoadedPlugins
+                .OrderBy(loadedPlugin =>
                 {
-                    var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
+                    var pluginFolderName = loadedPlugin.Manifest.PluginFolderName;
 
                     if (Context.PluginPriority.TryGetValue(pluginFolderName, out var priority))
                         return priority;
@@ -190,7 +195,7 @@ namespace FieldVisitHotFolderService
 
                     return serverPlugin?.PluginPriority ?? int.MaxValue;
                 })
-                .ThenBy(PluginLoader.GetPluginFolderName)
+                .ThenBy(loadedPlugin => loadedPlugin.Manifest.PluginFolderName)
                 .ToList();
         }
 
@@ -401,7 +406,7 @@ namespace FieldVisitHotFolderService
                     ReferencePointCache = ReferencePointCache,
                     ParameterIdLookup = ParameterIdLookup,
                     MethodLookup = MethodLookup,
-                    Plugins = Plugins,
+                    LoadedPlugins = LoadedPlugins,
                     ProcessingFolder = ProcessingFolder,
                     PartialFolder = PartialFolder,
                     ArchivedFolder = ArchivedFolder,
