@@ -98,7 +98,8 @@ namespace MultiFile
                     {
                         Log = Log
                     }
-                    .LoadPlugins(pluginPaths));
+                    .LoadPlugins(pluginPaths)
+                    .Select(lp => lp.Plugin));
 
                 return CachedPlugins;
             }

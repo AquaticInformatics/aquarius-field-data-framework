@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Common;
-using FieldDataPluginFramework.Results;
-using FieldDataPluginFramework.Serialization;
 using log4net;
 using ServiceStack;
 
@@ -24,8 +23,6 @@ namespace PluginTester
             try
             {
                 ConfigureLogging();
-
-                ConfigureJson();
 
                 var program = new Program();
                 program.ParseArgs(args);
@@ -71,26 +68,94 @@ namespace PluginTester
             }
         }
 
-        private static void ConfigureJson()
-        {
-            JsonConfig.Configure();
-        }
-
         private Context Context { get; } = new Context();
 
         private void ParseArgs(string[] args)
         {
             var options = new[]
             {
-                new CommandLineOption {Key = "Plugin", Setter = value => Context.PluginPath = value, Getter = () => Context.PluginPath, Description = "Path to the plugin assembly to debug"},
-                new CommandLineOption {Key = "Data", Setter = value => AddDataPath(Context, value), Getter = () => string.Empty, Description = "Path to the data file to be parsed. Can be set more than once."},
-                new CommandLineOption {Key = nameof(Context.RecursiveSearch), Setter = value => Context.RecursiveSearch = bool.Parse(value), Getter = () => $"{Context.RecursiveSearch}", Description = "Search /Data directories recursively. -R shortcut is also supported."},
-                new CommandLineOption {Key = "Location", Setter = value => Context.LocationIdentifier = value, Getter = () => Context.LocationIdentifier, Description = "Optional location identifier context"},
-                new CommandLineOption {Key = "UtcOffset", Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value), Getter = () => Context.LocationUtcOffset.ToString(), Description = "UTC offset in .NET TimeSpan format."},
-                new CommandLineOption {Key = "Json", Setter = value => Context.JsonPath = value, Getter = () => Context.JsonPath, Description = "Optional path to write the appended results as JSON"},
-                new CommandLineOption {Key = "Setting", Setter = value => AddSetting(Context, value), Getter = () => string.Empty, Description = "Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values."},
-                new CommandLineOption {Key = "ExpectedError", Setter = value => Context.ExpectedError = value, Getter = () => Context.ExpectedError, Description = "Expected error message"},
-                new CommandLineOption {Key = "ExpectedStatus", Setter = value => Context.ExpectedStatus = (ParseFileStatus)Enum.Parse(typeof(ParseFileStatus), value, true), Getter = () => Context.ExpectedStatus.ToString(), Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(ParseFileStatus)))}"},
+                new CommandLineOption { Description = "Specify the plugin to be tested" },
+                new CommandLineOption
+                {
+                    Key = "Plugin",
+                    Setter = value => Context.PluginPath = value,
+                    Getter = () => Context.PluginPath,
+                    Description = "Path to the plugin assembly. Can be a folder, a DLL, or a packaged *.plugin file."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(Context.Verbose),
+                    Setter = value => Context.Verbose = bool.Parse(value),
+                    Getter = () => $"{Context.Verbose}",
+                    Description = "Enables verbose logging of assembly loading logic."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(Context.FrameworkAssemblyPath),
+                    Setter = value => Context.FrameworkAssemblyPath = value,
+                    Getter = () => Context.FrameworkAssemblyPath,
+                    Description = "Optional path to the FieldDataPluginFramework.dll assembly. [default: Test using the latest framework version]"
+                },
+                new CommandLineOption(), new CommandLineOption { Description = "Test data settings" },
+                new CommandLineOption
+                {
+                    Key = "Data",
+                    Setter = value => AddDataPath(Context, value),
+                    Getter = () => string.Empty,
+                    Description = "Path to the data file to be parsed. Can be set more than once."
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(Context.RecursiveSearch),
+                    Setter = value => Context.RecursiveSearch = bool.Parse(value),
+                    Getter = () => $"{Context.RecursiveSearch}",
+                    Description = "Search /Data directories recursively. -R shortcut is also supported."
+                },
+                new CommandLineOption
+                {
+                    Key = "Setting",
+                    Setter = value => AddSetting(Context, value),
+                    Getter = () => string.Empty,
+                    Description = "Supply plugin settings as 'key=text' or 'key=@pathToTextFile' values."
+                },
+                new CommandLineOption(), new CommandLineOption { Description = "Plugin context settings" },
+                new CommandLineOption
+                {
+                    Key = "Location",
+                    Setter = value => Context.LocationIdentifier = value,
+                    Getter = () => Context.LocationIdentifier,
+                    Description = "Optional location identifier context"
+                },
+                new CommandLineOption
+                {
+                    Key = "UtcOffset",
+                    Setter = value => Context.LocationUtcOffset = TimeSpan.Parse(value),
+                    Getter = () => Context.LocationUtcOffset.ToString(),
+                    Description = "UTC offset in .NET TimeSpan format."
+                },
+                new CommandLineOption(), new CommandLineOption { Description = "Output settings" },
+                new CommandLineOption
+                {
+                    Key = "Json",
+                    Setter = value => Context.JsonPath = value,
+                    Getter = () => Context.JsonPath,
+                    Description = "Optional path (file or folder) to write the appended results as JSON."
+                },
+                new CommandLineOption(), new CommandLineOption { Description = "Expected response settings" },
+                new CommandLineOption
+                {
+                    Key = nameof(Context.ExpectedError),
+                    Setter = value => Context.ExpectedError = value,
+                    Getter = () => Context.ExpectedError,
+                    Description = "Expected error message"
+                },
+                new CommandLineOption
+                {
+                    Key = nameof(Context.ExpectedStatus),
+                    Setter = value => Context.ExpectedStatus = (StatusType)Enum.Parse(typeof(StatusType), value, true),
+                    Getter = () => Context.ExpectedStatus.ToString(),
+                    Description = $"Expected parse status. One of {string.Join(", ", Enum.GetNames(typeof(StatusType)))}"
+                },
             };
 
             var usageMessage = CommandLineUsage.ComposeUsageText(
@@ -106,7 +171,6 @@ namespace PluginTester
             if (!Context.DataPaths.Any())
                 throw new ExpectedException("No data file specified.");
         }
-
 
         private bool PositionalArgumentResolver(Context context, string arg)
         {
@@ -184,8 +248,64 @@ namespace PluginTester
 
         private void Run()
         {
+            LoadFrameworkAssembly();
+
             new Tester {Context = Context}
                 .Run();
+        }
+
+        private void LoadFrameworkAssembly()
+        {
+            if (string.IsNullOrWhiteSpace(Context.FrameworkAssemblyPath))
+                return;
+
+            if (!File.Exists(Context.FrameworkAssemblyPath))
+                throw new ExpectedException($"Can't find framework assembly at '{Context.FrameworkAssemblyPath}'.");
+
+            var assembly = LoadFrameworkAssembly(Context.FrameworkAssemblyPath);
+
+            const string targetName = "FieldDataPluginFramework.IFieldDataPlugin";
+
+            var interfaceDefinitionType = assembly.GetTypes()
+                .FirstOrDefault(type => type.FullName == targetName);
+
+            if (interfaceDefinitionType != null)
+                return;
+
+            throw new ExpectedException($"Can't find {targetName} in '{Context.FrameworkAssemblyPath}'");
+        }
+
+        private Assembly LoadFrameworkAssembly(string path)
+        {
+            try
+            {
+                return Assembly.LoadFile(path);
+            }
+            catch (Exception exception)
+            {
+                switch (exception)
+                {
+                    case ReflectionTypeLoadException loadException:
+                        throw new ExpectedException($"Can't load '{path}': {SummarizeLoaderExceptions(loadException)}");
+
+                    case BadImageFormatException _:
+                    case FileLoadException _:
+                    case SecurityException _:
+                        throw new ExpectedException($"Can't load '{path}': {exception.Message}");
+
+                    default:
+                        _log.Error($"Unexpected Assembly.LoadFile('{path}') exception: {exception.GetType().Name}: {exception.Message}");
+                        throw;
+                }
+            }
+        }
+
+        private static string SummarizeLoaderExceptions(ReflectionTypeLoadException exception)
+        {
+            if (exception.LoaderExceptions == null)
+                return string.Empty;
+
+            return string.Join("\n", exception.LoaderExceptions.Select(e => e.Message));
         }
     }
 }

@@ -38,7 +38,7 @@ namespace FieldVisitHotFolderService
         public string UploadedFolder { get; set; }
         public string ArchivedFolder { get; set; }
         public string FailedFolder { get; set; }
-        public List<IFieldDataPlugin> Plugins { get; set; }
+        public List<PluginLoader.LoadedPlugin> LoadedPlugins { get; set; }
         public IAquariusClient Client { get; set; }
         public List<LocationInfo> LocationCache { get; set; }
         public ReferencePointCache ReferencePointCache { get; set; }
@@ -161,17 +161,17 @@ namespace FieldVisitHotFolderService
                 Log = Log
             };
 
-            foreach (var plugin in Plugins)
+            foreach (var loadedPlugin in LoadedPlugins)
             {
-                appender.SettingsFunc = () => GetPluginSettings(plugin);
+                appender.SettingsFunc = () => GetPluginSettings(loadedPlugin);
 
-                var pluginName = PluginLoader.GetPluginNameAndVersion(plugin);
+                var pluginName = PluginLoader.GetPluginNameAndVersion(loadedPlugin.Plugin);
 
                 try
                 {
                     var resultWithAttachments = new ZipLoader
                         {
-                            Plugin = plugin,
+                            Plugin = loadedPlugin.Plugin,
                             Appender = appender,
                             Logger = Log,
                             LocationInfo = null
@@ -196,7 +196,7 @@ namespace FieldVisitHotFolderService
                     Log.Info(
                         $"{pluginName} parsed '{path}' with {appender.AppendedResults.AppendedVisits.Count} visits: {string.Join(", ", appender.AppendedResults.AppendedVisits.Take(10).Select(v => v.FieldVisitIdentifier))}");
 
-                    appender.AppendedResults.PluginAssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName;
+                    appender.AppendedResults.PluginAssemblyQualifiedTypeName = loadedPlugin.GetType().AssemblyQualifiedName;
 
                     return new UploadContext
                     {
@@ -224,9 +224,9 @@ namespace FieldVisitHotFolderService
             return File.ReadAllBytes(path);
         }
 
-        private Dictionary<string, string> GetPluginSettings(IFieldDataPlugin plugin)
+        private Dictionary<string, string> GetPluginSettings(PluginLoader.LoadedPlugin loadedPlugin)
         {
-            var pluginFolderName = PluginLoader.GetPluginFolderName(plugin);
+            var pluginFolderName = loadedPlugin.Manifest.PluginFolderName;
 
             if (Context.PluginSettings.TryGetValue(pluginFolderName, out var settings))
                 return settings;

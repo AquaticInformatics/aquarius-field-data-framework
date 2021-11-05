@@ -202,6 +202,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => string.Empty,
                     Description = $"Configure plugin priority as 'pluginFolderName=integerPriority' [defaults to the AQTS plugin priority]"
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.Verbose),
+                    Setter = value => context.Verbose = bool.Parse(value),
+                    Getter = () => $"{context.Verbose}",
+                    Description = "Enables verbose logging of plugin assembly loading logic."
+                },
 
                 new CommandLineOption(), new CommandLineOption{Description = "File monitoring settings"}, 
                 new CommandLineOption

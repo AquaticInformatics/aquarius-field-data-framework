@@ -28,8 +28,10 @@ namespace PluginTester
 
         public void Run()
         {
-            Plugin = LoadPlugin();
+            ConfigureJson();
+
             Logger = CreateLogger();
+            Plugin = LoadPlugin();
 
             foreach (var path in Context.DataPaths)
             {
@@ -45,6 +47,11 @@ namespace PluginTester
             {
                 Log.Info($"{Context.DataPaths.Count} files parsed as expected.");
             }
+        }
+
+        private void ConfigureJson()
+        {
+            JsonConfig.Configure();
         }
 
         private void ParseOneFile(string path)
@@ -109,7 +116,8 @@ namespace PluginTester
         {
             try
             {
-                if (resultWithAttachments.Result?.Status == Context.ExpectedStatus)
+                // Use a string comparison of the enum status, since they are not the same enum (which allows different frameworks to be used)
+                if ($"{resultWithAttachments.Result?.Status}" == $"{Context.ExpectedStatus}")
                 {
                     SummarizeExpectedResults(path, resultWithAttachments, appendedResults);
                 }
@@ -213,35 +221,20 @@ namespace PluginTester
             if (!File.Exists(pluginPath))
                 throw new ExpectedException($"Plugin file '{pluginPath}' does not exist.");
 
-            // ReSharper disable once PossibleNullReferenceException
-            var assembliesInPluginFolder = new FileInfo(pluginPath).Directory.GetFiles("*.dll");
+            var plugins = new PluginLoader
+                {
+                    Log = Logger,
+                    Verbose = Context.Verbose
+                }
+                .LoadPlugins(new List<string> { pluginPath });
 
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                var dll = assembliesInPluginFolder.FirstOrDefault(fi =>
-                    args.Name.StartsWith(Path.GetFileNameWithoutExtension(fi.Name) + ", ",
-                        StringComparison.InvariantCultureIgnoreCase));
+            if (!plugins.Any())
+                throw new ExpectedException($"No {nameof(IFieldDataPlugin)} plugin implementations found in '{pluginPath}'.");
 
-                return dll == null ? null : Assembly.LoadFrom(dll.FullName);
-            };
+            if (plugins.Count > 1)
+                throw new ExpectedException($"{plugins.Count} {nameof(IFieldDataPlugin)} plugin implementations found in '{pluginPath}'.");
 
-            var assembly = Assembly.LoadFile(pluginPath);
-
-            var pluginTypes = (
-                    from type in assembly.GetTypes()
-                    where typeof(IFieldDataPlugin).IsAssignableFrom(type)
-                    select type
-                ).ToList();
-
-            if (pluginTypes.Count == 0)
-                throw new ExpectedException($"No IFieldDataPlugin plugin implementations found in '{pluginPath}'.");
-
-            if (pluginTypes.Count > 1)
-                throw new ExpectedException($"{pluginTypes.Count} IFieldDataPlugin plugin implementations found in '{pluginPath}'.");
-
-            var pluginType = pluginTypes.Single();
-
-            return Activator.CreateInstance(pluginType) as IFieldDataPlugin;
+            return plugins.Single().Plugin;
         }
 
         private IFrameworkLogger CreateLogger()

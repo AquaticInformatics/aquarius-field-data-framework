@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text.RegularExpressions;
-using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
 using FieldDataPluginFramework;
 using log4net;
@@ -198,8 +197,8 @@ namespace PluginPackager
 
             using (var zipArchive = ZipFile.Open(Context.OutputPath, ZipArchiveMode.Create))
             {
-                Log.Info("Adding manifest.json ...");
-                var manifestEntry = zipArchive.CreateEntry("manifest.json");
+                Log.Info($"Adding {PluginManifest.EntryName} ...");
+                var manifestEntry = zipArchive.CreateEntry(PluginManifest.EntryName);
                 using (var writer = new StreamWriter(manifestEntry.Open()))
                 {
                     var manifest = CreateManifest();
@@ -236,9 +235,9 @@ namespace PluginPackager
             Log.Info($"Successfully created '{Context.OutputPath}'.");
         }
 
-        private FieldDataPlugin CreateManifest()
+        private PluginManifest CreateManifest()
         {
-            return new FieldDataPlugin
+            return new PluginManifest
             {
                 AssemblyQualifiedTypeName = Context.AssemblyQualifiedTypeName,
                 Description = Context.Description,
