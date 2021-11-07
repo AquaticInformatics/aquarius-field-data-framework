@@ -33,6 +33,8 @@ namespace PluginTester
             Logger = CreateLogger();
             Plugin = LoadPlugin();
 
+            Log.Info($"'{FileHelper.ExeNameAndVersion}' loaded '{Plugin.GetType().AssemblyQualifiedName}' from '{Context.PluginPath}'.");
+
             foreach (var path in Context.DataPaths)
             {
                 ParseOneFile(path);
