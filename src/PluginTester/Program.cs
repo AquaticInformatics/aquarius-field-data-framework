@@ -269,10 +269,10 @@ namespace PluginTester
             var interfaceDefinitionType = assembly.GetTypes()
                 .FirstOrDefault(type => type.FullName == targetName);
 
-            if (interfaceDefinitionType != null)
-                return;
+            if (interfaceDefinitionType == null)
+                throw new ExpectedException($"Can't find {targetName} in '{Context.FrameworkAssemblyPath}'");
 
-            throw new ExpectedException($"Can't find {targetName} in '{Context.FrameworkAssemblyPath}'");
+            _log.Info($"Loaded external framework assembly '{assembly.FullName}' from '{Context.FrameworkAssemblyPath}'.");
         }
 
         private Assembly LoadFrameworkAssembly(string path)
