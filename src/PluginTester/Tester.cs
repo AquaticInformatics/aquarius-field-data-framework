@@ -33,7 +33,13 @@ namespace PluginTester
             Logger = CreateLogger();
             Plugin = LoadPlugin();
 
-            Log.Info($"'{FileHelper.ExeNameAndVersion}' loaded '{Plugin.GetType().AssemblyQualifiedName}' from '{Context.PluginPath}'.");
+            var frameworkInterfaceType = typeof(IFieldDataPlugin);
+
+            var frameworkContext = File.Exists(frameworkInterfaceType.Assembly.Location)
+                ? frameworkInterfaceType.Assembly.Location
+                : $"embedded resource";
+
+            Log.Info($"'{FileHelper.ExeNameAndVersion}' loaded '{Plugin.GetType().AssemblyQualifiedName}' from '{Context.PluginPath}' via '{frameworkInterfaceType.AssemblyQualifiedName}' from '{frameworkContext}'.");
 
             foreach (var path in Context.DataPaths)
             {
