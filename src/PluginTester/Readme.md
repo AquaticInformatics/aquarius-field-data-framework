@@ -13,8 +13,6 @@ The `PluginTester.exe` console app allows you to run your field data plugin outs
 ## Usage
 
 ```
-Parse a file using a field data plugin, logging the results.
-
 Usage: PluginTester [-option=value] [@optionsFile] ...
 
 Supported -option=value settings (/option=value works too):

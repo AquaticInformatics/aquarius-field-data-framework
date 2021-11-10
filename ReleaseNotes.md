@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 21.3.0
+- Added support for AQTS 2021.3 Update 1 plugins.
+- See [2021.3 Update 1 release notes](docs#aqts-20213-update-1---framework-version-212) for details of new features.
+
 ### 20.3.11
 - PluginTester & FieldVisitHotFolderService - Improved loading of plugins from *.plugin packages. -Verbose=true enables detailed assembly resolution tracing logic.
 
