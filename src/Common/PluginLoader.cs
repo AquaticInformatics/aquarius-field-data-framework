@@ -69,6 +69,9 @@ namespace Common
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
             var requestingAssembly = args.RequestingAssembly;
 
+            if (requestingAssembly == null)
+                return null;
+
             if (TryResolveAssemblyFromArchive(requestingAssembly, assemblyName, out var resolvedAssembly))
                 return resolvedAssembly;
 
