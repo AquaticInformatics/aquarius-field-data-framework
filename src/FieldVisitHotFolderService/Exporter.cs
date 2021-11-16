@@ -285,13 +285,21 @@ namespace FieldVisitHotFolderService
             }
             catch (WebServiceException exception)
             {
-                if (!exception.IsNotFound())
+                if (!IsAttachmentNotFound(exception))
                     throw;
 
                 ++MissingAttachmentCount;
 
                 throw new ExpectedException($"{exception.StatusCode}: {exception.StatusDescription}: {exception.ErrorMessage}");
             }
+        }
+
+        private static bool IsAttachmentNotFound(WebServiceException exception)
+        {
+            const string amazonS3NotFound = "AmazonS3Exception";
+
+            return exception.IsNotFound()
+                   || (exception.ErrorCode == amazonS3NotFound && exception.StatusCode == 500);
         }
 
         private string TransformToJson(ArchivedVisit archivedVisit)
