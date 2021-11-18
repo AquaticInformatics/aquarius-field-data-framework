@@ -805,6 +805,9 @@ namespace FieldVisitHotFolderService
         {
             TryParseEnum<FrameworkMeterType>($"{sourceChannel.CurrentMeter}", out var meterType);
 
+            if (meterType == FrameworkMeterType.Unknown)
+                meterType = FrameworkMeterType.Unspecified;
+
             var meterCalibration = new MeterCalibration
             {
                 Manufacturer = source.CurrentMeter?.Manufacturer,
