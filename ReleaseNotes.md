@@ -4,6 +4,9 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 21.3.2
+- FieldVisitHotFolderService - Improved export of new 2021.3 field visit properties
+
 ### 21.3.1
 - FieldVisitHotFolderService - Improved visit export logic when visit attachments aren't found in S3 storage buckets
 - JsonFieldData - Improved plugin bundling
