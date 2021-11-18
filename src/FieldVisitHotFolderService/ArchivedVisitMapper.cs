@@ -282,6 +282,7 @@ namespace FieldVisitHotFolderService
             var reading = new FrameworkReading(parameterId, source.Unit, source.Value?.Numeric)
             {
                 Comments = source.Comments,
+                AdjustmentAmount = source.AdjustmentAmount?.Numeric,
                 DateTimeOffset = source.Time,
                 Grade = Map(source.GradeCode),
                 Publish = source.Publish,
@@ -482,6 +483,8 @@ namespace FieldVisitHotFolderService
                 AdjustmentAmount = adjustment.AdjustmentAmount,
                 MeanGageHeightDifferenceDuringVisit = Map(nameof(summary.DifferenceDuringVisit), gageHeightUnit, summary.DifferenceDuringVisit),
                 MeanGageHeightDurationHours = summary.DurationInHours?.Numeric,
+                GageHeightAdjustmentAmount = summary.GageHeightAdjustmentAmount?.Numeric,
+                GageHeightComments = summary.GageHeightComments,
             };
 
             if (TryParseEnum<FrameworkAdjustmentType>($"{adjustment.AdjustmentType}", out var adjustmentType))
