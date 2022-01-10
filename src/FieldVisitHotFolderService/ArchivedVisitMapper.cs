@@ -117,7 +117,8 @@ namespace FieldVisitHotFolderService
                     RecorderDataCollected = visit.CompletedWork.RecorderDataCollected,
                     SafetyInspectionPerformed = visit.CompletedWork.SafetyInspectionPerformed,
                     SedimentSample = visit.CompletedWork.SedimentSampleTaken,
-                    WaterQualitySample = visit.CompletedWork.WaterQualitySampleTaken
+                    WaterQualitySample = visit.CompletedWork.WaterQualitySampleTaken,
+                    WaterQualityCrossSection = visit.CompletedWork.WaterQualityCrossSectionPerformed,
                 }
             };
         }

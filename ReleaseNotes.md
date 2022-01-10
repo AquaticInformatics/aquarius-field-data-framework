@@ -4,6 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
+### 21.4.0
+- Added support for AQTS 2021.4 plugins.
+- See [2021.4 release notes](docs#aqts-20214---framework-version-213) for details of new features.
+
 ### 21.3.2
 - FieldVisitHotFolderService - Improved export of new 2021.3 field visit properties
 

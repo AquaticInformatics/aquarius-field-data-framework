@@ -14,6 +14,9 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2021.4 - Framework version 2.13
+- Added `WaterQualityCrossSection` flag to `CompletedVisitActivities` to indicate if a WaterQualityCrossSection activity was performed during the field visit.
+
 ### AQTS 2021.3 Update 1 - Framework version 2.12
 - Added `GageHeightAdjustmentAmount` and `GageHeightComments` to `DischargeActivity` to record an optional adjustment amount (and reason for the adjustment) for Mean Gage Height. `MeanGageHeight` and `GageHeightAdjustmentAmount` values are combined by the framework and should not be pre-calculated by the plugin.
 - Added `AdjustmentAmount` to `Reading` to record an optional adjustment amount. Adjusted `Reading` and `AdjustmentAmount` values are combined by the framework and should not be pre-calculated by the plugin.
