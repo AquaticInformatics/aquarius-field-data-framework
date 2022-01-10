@@ -588,7 +588,7 @@ namespace FieldVisitHotFolderService
 
             if (Environment.UserInteractive)
             {
-                Log.Info("Press Ctrl-C to terminate...");
+                Log.Info("Press Ctrl-C to terminate ...");
 
                 Console.CancelKeyPress += (s, e) =>
                 {
@@ -600,6 +600,8 @@ namespace FieldVisitHotFolderService
             }
             else
             {
+                Log.Info($"Starting service as user {System.Security.Principal.WindowsIdentity.GetCurrent().Name} ...");
+
                 ServiceBase.Run(service);
             }
         }
