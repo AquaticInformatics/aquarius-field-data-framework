@@ -100,13 +100,29 @@ namespace MultiFile
                     DoPeriodsOverlap(visit.FieldVisitDetails.FieldVisitPeriod, fieldVisitDetails.FieldVisitPeriod));
 
             if (existingVisit != null)
+            {
+                MergeCompletedActivities(existingVisit.FieldVisitDetails.CompletedVisitActivities, fieldVisitDetails.CompletedVisitActivities);
+
                 return existingVisit;
+            }
 
             var fieldVisitInfo = InternalConstructor<FieldVisitInfo>.Invoke(location, fieldVisitDetails);
 
             DelayedFieldVisits.Add(fieldVisitInfo);
 
             return fieldVisitInfo;
+        }
+
+        private void MergeCompletedActivities(CompletedVisitActivities existing, CompletedVisitActivities contributing)
+        {
+            existing.GroundWaterLevels |= contributing.GroundWaterLevels;
+            existing.ConductedLevelSurvey |= contributing.ConductedLevelSurvey;
+            existing.RecorderDataCollected |= contributing.RecorderDataCollected;
+            existing.SafetyInspectionPerformed |= contributing.SafetyInspectionPerformed;
+            existing.OtherSample |= contributing.OtherSample;
+            existing.SedimentSample |= contributing.SedimentSample;
+            existing.WaterQualitySample |= contributing.WaterQualitySample;
+            existing.WaterQualityCrossSection |= contributing.WaterQualityCrossSection;
         }
 
         private static bool DoPeriodsOverlap(DateTimeInterval earlierPeriod, DateTimeInterval laterPeriod)
