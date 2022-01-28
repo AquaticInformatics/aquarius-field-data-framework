@@ -14,6 +14,9 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2021.4 Update 1 - Framework version 2.14
+- Added `GageHeightReferencePointName` to `DischargeActivity` to set a Reference Point for the Mean Gage Height of a Discharge Activity.
+
 ### AQTS 2021.4 - Framework version 2.13
 - Added `WaterQualityCrossSection` flag to `CompletedVisitActivities` to indicate if a WaterQualityCrossSection activity was performed during the field visit.
 
