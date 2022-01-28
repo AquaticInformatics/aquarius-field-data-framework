@@ -486,6 +486,9 @@ namespace FieldVisitHotFolderService
                 MeanGageHeightDurationHours = summary.DurationInHours?.Numeric,
                 GageHeightAdjustmentAmount = summary.GageHeightAdjustmentAmount?.Numeric,
                 GageHeightComments = summary.GageHeightComments,
+                GageHeightReferencePointName = summary.GageHeightReferencePointUniqueId.HasValue
+                    ? GetReferencePoint(summary.GageHeightReferencePointUniqueId.Value).Name
+                    : null
             };
 
             if (TryParseEnum<FrameworkAdjustmentType>($"{adjustment.AdjustmentType}", out var adjustmentType))
