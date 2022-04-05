@@ -19,6 +19,7 @@ using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
+using Humanizer;
 using log4net;
 using NodaTime;
 using ServiceStack;
@@ -30,6 +31,7 @@ namespace FieldVisitHotFolderService
 {
     public class FileProcessor
     {
+        // ReSharper disable once PossibleNullReferenceException
         private static readonly ILog Log4NetLog = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public Context Context { get; set; }
@@ -47,6 +49,22 @@ namespace FieldVisitHotFolderService
         public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
+        public void ProcessZipEntry(ZipArchiveEntry entry)
+        {
+            try
+            {
+                var locationIdentifier = MigrationProjectHelper.GetLocationIdentifier(entry);
+
+                var fileBytes = LoadFileBytes(entry);
+                var uploadContext = ParseLocalFile(entry.FullName, fileBytes, locationIdentifier);
+                UploadResultsConcurrently(uploadContext);
+            }
+            catch (Exception exception)
+            {
+                LogProcessingException(exception);
+            }
+        }
+
         public void ProcessFile(string sourcePath)
         {
             string processingPath;
@@ -63,7 +81,8 @@ namespace FieldVisitHotFolderService
 
             try
             {
-                var uploadContext = ParseLocalFile(processingPath);
+                var fileBytes = LoadFileBytes(processingPath);
+                var uploadContext = ParseLocalFile(processingPath, fileBytes);
                 var results = UploadResultsConcurrently(uploadContext);
 
                 if (results.IsFailure)
@@ -75,16 +94,7 @@ namespace FieldVisitHotFolderService
             }
             catch (Exception exception)
             {
-                var message = exception.Message;
-
-                if (exception is AggregateException aggregateException)
-                {
-                    message = aggregateException.InnerExceptions.Count == 1
-                        ? aggregateException.InnerExceptions.First().Message
-                        : $"{aggregateException.InnerExceptions.Count} concurrent errors: {string.Join("\n", aggregateException.InnerExceptions.Take(5).Select(e => e.Message))}";
-                }
-
-                Log.Error(message);
+                LogProcessingException(exception);
 
                 try
                 {
@@ -95,6 +105,20 @@ namespace FieldVisitHotFolderService
                     Log.Warn($"Can't move '{processingPath}' to '{FailedFolder}'", moveException);
                 }
             }
+        }
+
+        private void LogProcessingException(Exception exception)
+        {
+            var message = exception.Message;
+
+            if (exception is AggregateException aggregateException)
+            {
+                message = aggregateException.InnerExceptions.Count == 1
+                    ? aggregateException.InnerExceptions.First().Message
+                    : $"{aggregateException.InnerExceptions.Count} concurrent errors: {string.Join("\n", aggregateException.InnerExceptions.Take(5).Select(e => e.Message))}";
+            }
+
+            Log.Error(message);
         }
 
         private void MoveFiles(string targetFolder, List<string> paths)
@@ -149,10 +173,8 @@ namespace FieldVisitHotFolderService
             }
         }
 
-        private UploadContext ParseLocalFile(string path)
+        private UploadContext ParseLocalFile(string path, byte[] fileBytes, string locationIdentifier = null)
         {
-            var fileBytes = LoadFileBytes(path);
-
             var appender = new FieldDataResultsAppender
             {
                 Client = Client,
@@ -174,7 +196,9 @@ namespace FieldVisitHotFolderService
                             Plugin = loadedPlugin.Plugin,
                             Appender = appender,
                             Logger = Log,
-                            LocationInfo = null
+                            LocationInfo = string.IsNullOrEmpty(locationIdentifier)
+                                ? null
+                                : appender.GetLocationByIdentifier(locationIdentifier)
                         }
                         .ParseFile(fileBytes);
 
@@ -222,6 +246,20 @@ namespace FieldVisitHotFolderService
             Log.Info($"Loading data file '{path}'");
 
             return File.ReadAllBytes(path);
+        }
+
+        private byte[] LoadFileBytes(ZipArchiveEntry entry)
+        {
+            if (entry.Length > int.MaxValue)
+                throw new ExpectedException($"Zip entry '{entry.FullName}' is too big ({entry.Length.Bytes().Humanize("#.#")}) to uncompress.");
+
+            using (var stream = entry.Open())
+            using (var reader = new BinaryReader(stream))
+            {
+                Log.Info($"Loading zip entry '{entry.FullName}'");
+
+                return reader.ReadBytes((int)entry.Length);
+            }
         }
 
         private Dictionary<string, string> GetPluginSettings(PluginLoader.LoadedPlugin loadedPlugin)
@@ -384,17 +422,21 @@ namespace FieldVisitHotFolderService
             var localIsPartial = false;
             var localIsFailure = false;
 
-            Task.WhenAll(visitsToAppend.Select(async visit =>
+            Task.WhenAll(visitsToAppend.GroupBy(v => v.LocationInfo.LocationIdentifier).Select(async grouping =>
             {
                 using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
                 {
                     await Task.Run(() =>
-                            UploadVisit(
-                                visit,
+                            UploadLocationVisits(
+                                grouping
+                                    .OrderBy(v => v.StartDate)
+                                    .ThenBy(v => v.EndDate)
+                                    .ToList(),
+                                grouping.Key,
                                 uploadContext,
                                 () => localIsPartial = true,
                                 () => localIsFailure = true,
-                                () => duplicateVisits.Add(visit))
+                                duplicateVisits.Add)
                         , CancellationToken);
                 }
             })).Wait(CancellationToken);
@@ -413,11 +455,33 @@ namespace FieldVisitHotFolderService
             return visit.EndDate - visit.StartDate > Context.MaximumVisitDuration;
         }
 
+        private void UploadLocationVisits(
+            List<FieldVisitInfo> visits,
+            string locationIdentifier,
+            UploadContext uploadContext,
+            Action partialAction,
+            Action failureAction,
+            Action<FieldVisitInfo> duplicateAction)
+        {
+            if (visits.Count > 1)
+                Log.Info($"Uploading {"visit".ToQuantity(visits.Count)} to location '{locationIdentifier}' from {visits.First().StartDate:O} to {visits.Last().EndDate:O}");
+
+            foreach (var visit in visits)
+            {
+                UploadVisit(
+                    visit,
+                    uploadContext,
+                    partialAction,
+                    failureAction,
+                    duplicateAction);
+            }
+        }
+
         private void UploadVisit(FieldVisitInfo visit,
             UploadContext uploadContext,
             Action partialAction,
             Action failureAction,
-            Action duplicateAction = null)
+            Action<FieldVisitInfo> duplicateAction)
         {
             if (ShouldSkipConflictingVisits(visit))
             {
@@ -465,7 +529,7 @@ namespace FieldVisitHotFolderService
                 {
                     Log.Warn($"{uploadContext.UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
 
-                    duplicateAction();
+                    duplicateAction(visit);
                     return;
                 }
 

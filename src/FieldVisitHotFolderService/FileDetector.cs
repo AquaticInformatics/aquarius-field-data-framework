@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
-using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using log4net;
 using ILog = log4net.ILog;
@@ -19,6 +19,7 @@ namespace FieldVisitHotFolderService
 {
     public class FileDetector
     {
+        // ReSharper disable once PossibleNullReferenceException
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public Context Context { get; set; }
@@ -382,23 +383,57 @@ namespace FieldVisitHotFolderService
 
                 Client = null;
             }
+
+            CancelIfImportZipComplete();
         }
 
         private List<string> GetNewFiles()
         {
+            if (IsProjectImportEnabled())
+                return GetFilesFromImportProject();
+
             return Directory.GetFiles(SourceFolder)
                 .Where(f => FileMasks.Any(m => m.IsMatch(f)) && !StatusIndicator.FilesToIgnore.Contains(Path.GetFileName(f)))
                 .ToList();
         }
 
+        private bool IsProjectImportEnabled()
+        {
+            return !string.IsNullOrWhiteSpace(Context.ImportZip);
+        }
+
+        private void CancelIfImportZipComplete()
+        {
+            if (!IsProjectImportEnabled() || CancellationToken.IsCancellationRequested)
+                return;
+
+            Log.Info($"Stopping processing after importing all files from '{Context.ImportZip}'");
+            CancellationAction();
+        }
+
+        private ZipArchive ZipArchive { get; set; }
+
+        private List<string> GetFilesFromImportProject()
+        {
+            if (ZipArchive != null)
+                return new List<string>();
+
+            if (!File.Exists(Context.ImportZip))
+                throw new ExpectedException($"File '{Context.ImportZip}' does not exist.");
+
+            ZipArchive = new ZipArchive(File.Open(Context.ImportZip, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+            return ZipArchive
+                .Entries
+                .OrderBy(e => e.FullName)
+                .Where(MigrationProjectHelper.IsFieldVisitEntry)
+                .Select(e => e.FullName)
+                .ToList();
+        }
+
         public void ProcessFile(string filename)
         {
-            var sourcePath = Path.Combine(SourceFolder, filename);
-
-            if (!File.Exists(sourcePath))
-                throw new ExpectedException($"'{sourcePath}' no longer exists");
-
-            new FileProcessor
+            var processor = new FileProcessor
                 {
                     Context = Context,
                     Client = Client,
@@ -413,12 +448,29 @@ namespace FieldVisitHotFolderService
                     UploadedFolder = UploadedFolder,
                     FailedFolder = FailedFolder,
                     CancellationToken = CancellationToken
-                }
-                .ProcessFile(sourcePath);
+                };
+
+            var zipEntry = ZipArchive?.GetEntry(filename);
+
+            if (zipEntry != null)
+            {
+                processor.ProcessZipEntry(zipEntry);
+                return;
+            }
+
+            var sourcePath = Path.Combine(SourceFolder, filename);
+
+            if (!File.Exists(sourcePath))
+                throw new ExpectedException($"'{sourcePath}' no longer exists");
+
+            processor.ProcessFile(sourcePath);
         }
 
         private void WaitForNewFiles()
         {
+            if (CancellationToken.IsCancellationRequested)
+                return;
+
             var remainingFileStatus = Context.MaximumFileCount.HasValue
                 ? $"{Context.MaximumFileCount - ProcessedFileCount} of {Context.MaximumFileCount} "
                 : string.Empty;

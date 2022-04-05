@@ -124,6 +124,7 @@
     <Compile Include="LocalPluginLoader.cs" />
     <Compile Include="MergeMode.cs" />
     <Compile Include="MethodLookup.cs" />
+    <Compile Include="MigrationProjectHelper.cs" />
     <Compile Include="ParameterIdLookup.cs" />
     <Compile Include="ParameterIds.cs" />
     <Compile Include="PrivateApis.cs" />

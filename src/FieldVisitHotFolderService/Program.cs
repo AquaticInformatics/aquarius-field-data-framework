@@ -295,6 +295,13 @@ namespace FieldVisitHotFolderService
                     Getter = () => $"{context.MaximumDuplicateRetry}",
                     Description = "Maximum number of retries for duplicate visits."
                 },
+                new CommandLineOption
+                {
+                    Key = nameof(context.ImportZip),
+                    Setter = value => context.ImportZip = value,
+                    Getter = () => context.ImportZip,
+                    Description = "Import files from this MigrationProject ZIP, instead of from a monitored hot-folder."
+                },
                 new CommandLineOption(), new CommandLineOption{Description = "Export settings"},
                 new CommandLineOption
                 {
