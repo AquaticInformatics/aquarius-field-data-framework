@@ -24,7 +24,17 @@ namespace FieldVisitHotFolderService
 
         public static bool IsJsonPlugin(FieldDataPlugin plugin)
         {
-            return plugin.AssemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin");
+            return IsJsonPlugin(plugin.AssemblyQualifiedTypeName);
+        }
+
+        private static bool IsJsonPlugin(PluginManifest manifest)
+        {
+            return IsJsonPlugin(manifest.AssemblyQualifiedTypeName);
+        }
+
+        private static bool IsJsonPlugin(string assemblyQualifiedTypeName)
+        {
+            return assemblyQualifiedTypeName.StartsWith("JsonFieldData.Plugin");
         }
 
         public List<PluginLoader.LoadedPlugin> LoadPlugins()
@@ -39,12 +49,25 @@ namespace FieldVisitHotFolderService
             if (!pluginFiles.Any())
                 throw new ExpectedException($"You need to have at least one local *.plugin file at '{Root.FullName}'");
 
-            return new PluginLoader
+            var loadedPlugins = new PluginLoader
                 {
                     Log = Log4NetLogger.Create(Log),
                     Verbose = Verbose
                 }
                 .LoadPlugins(pluginFiles);
+
+            var jsonPlugin = loadedPlugins
+                .FirstOrDefault(lp => IsJsonPlugin(lp.Manifest));
+
+            if (jsonPlugin != null)
+            {
+                var result = AssemblyQualifiedNameParser.Parse(jsonPlugin.Manifest.AssemblyQualifiedTypeName);
+
+                JsonPluginVersion = AquariusServerVersion.Create(result.Version);
+                JsonPluginPath = jsonPlugin.Path;
+            }
+
+            return loadedPlugins;
         }
 
         private void RemoveExtractedPluginFolders()

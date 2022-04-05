@@ -409,6 +409,7 @@ namespace FieldVisitHotFolderService
 
             Log.Info($"Stopping processing after importing all files from '{Context.ImportZip}'");
             CancellationAction();
+            ZipArchive?.Dispose();
         }
 
         private ZipArchive ZipArchive { get; set; }

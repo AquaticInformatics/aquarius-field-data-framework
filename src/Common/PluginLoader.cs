@@ -37,14 +37,16 @@ namespace Common
 
         public class LoadedPlugin
         {
-            public LoadedPlugin(IFieldDataPlugin plugin, PluginManifest manifest)
+            public LoadedPlugin(IFieldDataPlugin plugin, PluginManifest manifest, string path)
             {
                 Plugin = plugin;
                 Manifest = manifest;
+                Path = path;
             }
 
             public IFieldDataPlugin Plugin { get; }
             public PluginManifest Manifest { get; }
+            public string Path { get; }
         }
 
         public List<LoadedPlugin> LoadPlugins(List<string> paths)
@@ -159,7 +161,7 @@ namespace Common
                     : new DirectoryInfo(path).Name
             };
 
-            return new LoadedPlugin(plugin, manifest);
+            return new LoadedPlugin(plugin, manifest, path);
         }
 
         private IFieldDataPlugin LoadPluginFromFile(string path)
@@ -213,7 +215,7 @@ namespace Common
 
                 var plugins = FindAllPluginImplementations(assembly).ToList();
 
-                return new LoadedPlugin(GetSinglePluginOrThrow(path, plugins), manifest);
+                return new LoadedPlugin(GetSinglePluginOrThrow(path, plugins), manifest, path);
             }
             catch (Exception)
             {
