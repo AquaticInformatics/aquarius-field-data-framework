@@ -22,7 +22,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2021.4 Update 1+ | [v21.4.3](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.3/FieldVisitHotFolderService.zip) |
+| AQTS 2021.4 Update 1+ | [v21.4.4](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.4/FieldVisitHotFolderService.zip) |
 | AQTS 2021.4 | [v21.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.0/FieldVisitHotFolderService.zip) |
 | AQTS 2021.3 Update 1+ | [v21.3.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.3.2/FieldVisitHotFolderService.zip) |
 | AQTS 2021.3 GA<br/>AQTS 2021.2<br/>AQTS 2021.1 | [v20.3.11](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.11/FieldVisitHotFolderService.zip) |
@@ -446,6 +446,7 @@ Supported -option=value settings (/option=value works too):
   -MaximumFileCount           Maximum number of files to process before exiting. [default: Keep running forever]
   -MaximumFileWaitInterval    Maximum TimeSpan to wait for new files before exiting. [default: Keep running forever]
   -MaximumDuplicateRetry      Maximum number of retries for duplicate visits. [default: 3]
+  -ImportZip                  Import files from this MigrationProject ZIP, instead of from a monitored hot-folder.
 
   =========================== Export settings
   -ExportFolder               Export visits to this root folder.

@@ -37,5 +37,6 @@ namespace FieldVisitHotFolderService
         public DateTimeOffset? ExportAfter { get; set; }
         public bool ExportOverwrite { get; set; }
         public TimeSpan? ExportUtcOverride { get; set; }
+        public string ImportZip { get; set; }
     }
 }
