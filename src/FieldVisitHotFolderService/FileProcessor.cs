@@ -422,17 +422,21 @@ namespace FieldVisitHotFolderService
             var localIsPartial = false;
             var localIsFailure = false;
 
-            Task.WhenAll(visitsToAppend.Select(async visit =>
+            Task.WhenAll(visitsToAppend.GroupBy(v => v.LocationInfo.LocationIdentifier).Select(async grouping =>
             {
                 using (await LimitedConcurrencyContext.EnterContextAsync(semaphore))
                 {
                     await Task.Run(() =>
-                            UploadVisit(
-                                visit,
+                            UploadLocationVisits(
+                                grouping
+                                    .OrderBy(v => v.StartDate)
+                                    .ThenBy(v => v.EndDate)
+                                    .ToList(),
+                                grouping.Key,
                                 uploadContext,
                                 () => localIsPartial = true,
                                 () => localIsFailure = true,
-                                () => duplicateVisits.Add(visit))
+                                duplicateVisits.Add)
                         , CancellationToken);
                 }
             })).Wait(CancellationToken);
@@ -451,11 +455,33 @@ namespace FieldVisitHotFolderService
             return visit.EndDate - visit.StartDate > Context.MaximumVisitDuration;
         }
 
+        private void UploadLocationVisits(
+            List<FieldVisitInfo> visits,
+            string locationIdentifier,
+            UploadContext uploadContext,
+            Action partialAction,
+            Action failureAction,
+            Action<FieldVisitInfo> duplicateAction)
+        {
+            if (visits.Count > 1)
+                Log.Info($"Uploading {"visit".ToQuantity(visits.Count)} to location '{locationIdentifier}' from {visits.First().StartDate:O} to {visits.Last().EndDate:O}");
+
+            foreach (var visit in visits)
+            {
+                UploadVisit(
+                    visit,
+                    uploadContext,
+                    partialAction,
+                    failureAction,
+                    duplicateAction);
+            }
+        }
+
         private void UploadVisit(FieldVisitInfo visit,
             UploadContext uploadContext,
             Action partialAction,
             Action failureAction,
-            Action duplicateAction = null)
+            Action<FieldVisitInfo> duplicateAction)
         {
             if (ShouldSkipConflictingVisits(visit))
             {
@@ -503,7 +529,7 @@ namespace FieldVisitHotFolderService
                 {
                     Log.Warn($"{uploadContext.UploadedFilename}: Saving {visit.FieldVisitIdentifier} for later retry: {exception.ErrorCode} {exception.ErrorMessage}");
 
-                    duplicateAction();
+                    duplicateAction(visit);
                     return;
                 }
 
