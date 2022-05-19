@@ -13,6 +13,7 @@ using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Common;
 using FieldDataPluginFramework.Context;
 using log4net;
+using MigrationProject;
 using ILog = log4net.ILog;
 
 namespace FieldVisitHotFolderService
@@ -409,26 +410,32 @@ namespace FieldVisitHotFolderService
 
             Log.Info($"Stopping processing after importing all files from '{Context.ImportZip}'");
             CancellationAction();
-            ZipArchive?.Dispose();
+            Archive?.Dispose();
         }
 
-        private ZipArchive ZipArchive { get; set; }
+        private Archive Archive { get; set; }
+        private ZipEntryParser ZipEntryParser { get; set; }
+
+        private Dictionary<string, ZipArchiveEntry> ImportZipEntries { get; set; } =
+            new Dictionary<string, ZipArchiveEntry>();
 
         private List<string> GetFilesFromImportProject()
         {
-            if (ZipArchive != null)
+            if (Archive != null)
                 return new List<string>();
 
             if (!File.Exists(Context.ImportZip))
                 throw new ExpectedException($"File '{Context.ImportZip}' does not exist.");
 
-            ZipArchive = new ZipArchive(File.Open(Context.ImportZip, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            Archive = Archive.OpenForRead(Context.ImportZip);
+            ZipEntryParser = new ZipEntryParser(Archive.Project);
+            ImportZipEntries = Archive
+                .FieldVisitEntries
+                .ToDictionary(e => e.FullName, e => e);
 
-            return ZipArchive
-                .Entries
-                .OrderBy(e => e.FullName)
-                .Where(MigrationProjectHelper.IsFieldVisitEntry)
-                .Select(e => e.FullName)
+            return ImportZipEntries
+                .Keys
+                .OrderBy(name => name)
                 .ToList();
         }
 
@@ -451,11 +458,9 @@ namespace FieldVisitHotFolderService
                     CancellationToken = CancellationToken
                 };
 
-            var zipEntry = ZipArchive?.GetEntry(filename);
-
-            if (zipEntry != null)
+            if (ImportZipEntries.TryGetValue(filename, out var zipEntry) && ZipEntryParser.IsFieldVisit(filename, out var locationIdentifier))
             {
-                processor.ProcessZipEntry(zipEntry);
+                processor.ProcessZipEntry(zipEntry, locationIdentifier);
                 return;
             }
 

@@ -49,12 +49,10 @@ namespace FieldVisitHotFolderService
         public CancellationToken CancellationToken { get; set; }
         private FileLogger Log { get; } = new FileLogger(Log4NetLog);
 
-        public void ProcessZipEntry(ZipArchiveEntry entry)
+        public void ProcessZipEntry(ZipArchiveEntry entry, string locationIdentifier)
         {
             try
             {
-                var locationIdentifier = MigrationProjectHelper.GetLocationIdentifier(entry);
-
                 var fileBytes = LoadFileBytes(entry);
                 var uploadContext = ParseLocalFile(entry.FullName, fileBytes, locationIdentifier);
                 UploadResultsConcurrently(uploadContext);
