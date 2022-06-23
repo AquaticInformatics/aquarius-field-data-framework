@@ -427,7 +427,11 @@ namespace FieldVisitHotFolderService
             if (!File.Exists(Context.ImportZip))
                 throw new ExpectedException($"File '{Context.ImportZip}' does not exist.");
 
-            Archive = Archive.OpenForRead(Context.ImportZip);
+            Archive = Archive.OpenForRead(Context.ImportZip, options =>
+            {
+                options.ValidateOnlyFieldVisitFiles = true;
+            });
+
             ZipEntryParser = new ZipEntryParser(Archive.Project);
             ImportZipEntries = Archive
                 .FieldVisitEntries
