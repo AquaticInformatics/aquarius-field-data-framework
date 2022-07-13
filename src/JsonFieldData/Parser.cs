@@ -143,6 +143,11 @@ namespace JsonFieldData
             {
                 ResultsAppender.AddCalibration(visit, calibration);
             }
+
+            foreach (var gageZeroFlowActivity in importedVisit.GageZeroFlowActivities)
+            {
+                ResultsAppender.AddGageZeroFlowActivity(visit, gageZeroFlowActivity);
+            }
         }
 
         private static void UpgradeCrossSectionSurvey(CrossSectionSurvey survey)

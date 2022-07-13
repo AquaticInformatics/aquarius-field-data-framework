@@ -74,6 +74,11 @@ namespace MultiFile
             {
                 ActualAppender.AddControlCondition(visit, controlCondition);
             }
+
+            foreach (var gageZeroFlowActivity in delayedVisit.GageZeroFlowActivities)
+            {
+                ActualAppender.AddGageZeroFlowActivity(visit, gageZeroFlowActivity);
+            }
         }
 
         public LocationInfo GetLocationByIdentifier(string locationIdentifier)
