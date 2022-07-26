@@ -107,7 +107,13 @@ namespace MultiFile
 
         private List<string> GetAllOtherPluginFolders()
         {
-            var pluginFolder = new DirectoryInfo(GetPluginDirectory());
+            var pluginDirectory = GetPluginDirectory();
+
+            if (!Directory.Exists(pluginDirectory))
+                return GetAdjacentPluginPaths()
+                    .ToList();
+
+            var pluginFolder = new DirectoryInfo(pluginDirectory);
             var parentFolder = pluginFolder.Parent;
 
             // ReSharper disable once PossibleNullReferenceException
@@ -242,6 +248,23 @@ namespace MultiFile
             }
         }
 
+        private IEnumerable<string> GetAdjacentPluginPaths()
+        {
+            if (!File.Exists(PluginLoader.MainPluginPath))
+                yield break;
+
+            var mainPluginInfo = new FileInfo(PluginLoader.MainPluginPath);
+
+            // ReSharper disable once PossibleNullReferenceException
+            foreach (var otherPluginInfo in mainPluginInfo.Directory.GetFiles("*.plugin"))
+            {
+                if (otherPluginInfo.FullName == mainPluginInfo.FullName)
+                    continue;
+
+                yield return otherPluginInfo.FullName;
+            }
+        }
+
         private static readonly object SyncObject = new object();
 
         private static readonly List<IFieldDataPlugin> CachedPlugins = new List<IFieldDataPlugin>();
@@ -250,19 +273,23 @@ namespace MultiFile
         {
             JsonConfig.Configure();
 
-            var configPath = Path.Combine(
-                GetPluginDirectory(),
-                $"{nameof(Config)}.json");
-
-            if (!File.Exists(configPath))
+            if (!ResultsAppender.GetFullPluginConfigurations().TryGetValue(nameof(Config), out var configJsonText) || string.IsNullOrWhiteSpace(configJsonText))
                 return new Config();
 
-            return File.ReadAllText(configPath).FromJson<Config>();
+            return configJsonText.FromJson<Config>();
         }
 
         private string GetPluginDirectory()
         {
-            return Path.GetDirectoryName(GetType().Assembly.Location);
+            var assembly = GetType().Assembly;
+
+            // assembly.Location works when the plugin is running on an app server (fully extracted to its own folder)
+            // What about when run from a .plugin file (in-memory ZIP?) (For PluginTester.exe: assembly.CodeBase = FULLPATH(PluginTester.exe) && assembly.Location = ""
+            var location = assembly.Location;
+
+            return string.IsNullOrWhiteSpace(location)
+                ? null
+                : Path.GetDirectoryName(location);
         }
 
         private ParseFileResult ParseArchive(ZipArchive zipArchive, LocationInfo locationInfo, List<IFieldDataPlugin> plugins)
@@ -298,6 +325,8 @@ namespace MultiFile
 
         private ParseFileResult ParseEntry(ZipArchiveEntry entry, IFieldDataPlugin plugin, LocationInfo locationInfo)
         {
+            ResultsAppender.FilterConfigurationSettings(plugin);
+
             using (var entryStream = entry.Open())
             using (var reader = new BinaryReader(entryStream))
             using (var memoryStream = new MemoryStream(reader.ReadBytes((int)entry.Length)))
