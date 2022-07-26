@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
@@ -93,7 +94,40 @@ namespace MultiFile
 
         public Dictionary<string, string> GetPluginConfigurations()
         {
+            return FilteredConfigurations ?? GetFullPluginConfigurations();
+        }
+
+        public Dictionary<string, string> GetFullPluginConfigurations()
+        {
             return ActualAppender.GetPluginConfigurations();
+        }
+
+        private Dictionary<string,string> FilteredConfigurations { get; set; }
+
+        public void FilterConfigurationSettings(IFieldDataPlugin plugin)
+        {
+            var pluginType = plugin.GetType();
+            var pluginFolderName = pluginType.FullName;
+
+            if (string.IsNullOrEmpty(pluginFolderName))
+            {
+                FilteredConfigurations = null;
+                return;
+            }
+
+            string FormatPrefix(string prefix) => $"{prefix}-";
+            string StripPrefix(string text) => text.Split(new[] { '-' }, 2)[1];
+
+            var prefixes = new List<string> { FormatPrefix(pluginFolderName) };
+
+            var suffixToTrim = ".plugin";
+
+            if (pluginFolderName.EndsWith(suffixToTrim, StringComparison.InvariantCultureIgnoreCase))
+                prefixes.Add(FormatPrefix(pluginFolderName.Substring(0, pluginFolderName.Length - suffixToTrim.Length)));
+
+            FilteredConfigurations = GetFullPluginConfigurations()
+                .Where(kvp => prefixes.Any(p => kvp.Key.StartsWith(p, StringComparison.InvariantCultureIgnoreCase)))
+                .ToDictionary(kvp => StripPrefix(kvp.Key), kvp => kvp.Value);
         }
 
         private List<FieldVisitInfo> DelayedFieldVisits { get; } = new List<FieldVisitInfo>();
@@ -106,7 +140,7 @@ namespace MultiFile
 
             if (existingVisit != null)
             {
-                MergeCompletedActivities(existingVisit.FieldVisitDetails.CompletedVisitActivities, fieldVisitDetails.CompletedVisitActivities);
+                MergeCompletedActivities(existingVisit.FieldVisitDetails, fieldVisitDetails);
 
                 return existingVisit;
             }
@@ -118,8 +152,20 @@ namespace MultiFile
             return fieldVisitInfo;
         }
 
-        private void MergeCompletedActivities(CompletedVisitActivities existing, CompletedVisitActivities contributing)
+        private void MergeCompletedActivities(FieldVisitDetails existingDetails, FieldVisitDetails contributingDetails)
         {
+            if (existingDetails.CompletedVisitActivities == null && contributingDetails.CompletedVisitActivities != null)
+            {
+                existingDetails.CompletedVisitActivities = contributingDetails.CompletedVisitActivities;
+                return;
+            }
+
+            var existing = existingDetails.CompletedVisitActivities;
+            var contributing = contributingDetails.CompletedVisitActivities;
+
+            if (existing == null || contributing == null)
+                return;
+
             existing.GroundWaterLevels |= contributing.GroundWaterLevels;
             existing.ConductedLevelSurvey |= contributing.ConductedLevelSurvey;
             existing.RecorderDataCollected |= contributing.RecorderDataCollected;

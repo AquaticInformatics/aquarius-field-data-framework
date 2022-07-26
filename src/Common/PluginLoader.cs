@@ -13,6 +13,15 @@ namespace Common
 {
     public class PluginLoader
     {
+        public static void SetMainPlugin(IFieldDataPlugin mainPlugin, string mainPluginPath)
+        {
+            MainPlugin = mainPlugin;
+            MainPluginPath = mainPluginPath;
+        }
+
+        public static IFieldDataPlugin MainPlugin { get; private set; }
+        public static string MainPluginPath { get; private set; }
+
         public ILog Log { get; set; }
 
         public bool Verbose { get; set; }

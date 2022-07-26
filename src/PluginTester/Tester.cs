@@ -18,6 +18,7 @@ namespace PluginTester
 {
     public class Tester
     {
+        // ReSharper disable once PossibleNullReferenceException
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public Context Context { get; set; }
@@ -226,7 +227,7 @@ namespace PluginTester
         {
             var pluginPath = Path.GetFullPath(Context.PluginPath);
 
-            if (!File.Exists(pluginPath))
+            if (!File.Exists(pluginPath) && !Directory.Exists(pluginPath))
                 throw new ExpectedException($"Plugin file '{pluginPath}' does not exist.");
 
             var plugins = new PluginLoader
@@ -242,7 +243,11 @@ namespace PluginTester
             if (plugins.Count > 1)
                 throw new ExpectedException($"{plugins.Count} {nameof(IFieldDataPlugin)} plugin implementations found in '{pluginPath}'.");
 
-            return plugins.Single().Plugin;
+            var plugin = plugins.Single().Plugin;
+
+            PluginLoader.SetMainPlugin(plugin, pluginPath);
+
+            return plugin;
         }
 
         private IFrameworkLogger CreateLogger()

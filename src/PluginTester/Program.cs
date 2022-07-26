@@ -214,7 +214,7 @@ namespace PluginTester
                 : text;
         }
 
-        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<key>\w+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
+        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<key>[^=]+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
 
         private static void AddDataPath(Context context, string dataPath)
         {

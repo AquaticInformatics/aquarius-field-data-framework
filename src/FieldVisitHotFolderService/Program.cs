@@ -542,7 +542,7 @@ namespace FieldVisitHotFolderService
                 : text;
         }
 
-        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<pluginFolder>\w+)\s*=\s*(?<key>\w+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
+        private static readonly Regex SettingRegex = new Regex(@"^\s*(?<pluginFolder>\w+)\s*=\s*(?<key>[^=]+)\s*=\s*(@(?<pathToTextFile>.+)|(?<text>.+))$");
 
         private static void AddPluginPriority(Context context, string value)
         {
