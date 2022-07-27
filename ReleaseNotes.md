@@ -4,7 +4,7 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
-### 21.4.9
+### 21.4.10
 - MultiFile - Bugfix - Allow delegate plugin settings to be configured.
 
 ### 21.4.8
