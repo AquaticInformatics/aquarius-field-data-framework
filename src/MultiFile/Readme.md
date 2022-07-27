@@ -4,7 +4,7 @@ The MultiFile field data plugin is a plugin for AQTS 2018.4-or-newer which can c
 
 Download the latest version of the MultiFile plugin [from the releases page](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/latest).
 
-If all the data files are combined into a single ZIP archive, this plugin will try parsing the files using all the other plugins installed on the AQTS server.
+If all the data files are combined into a single ZIP archive, this plugin will try parsing the files using all the other plugins installed and enabled on the AQTS server.
 
 If each the files within the ZIP archive can be parsed by one the other plugins, then the import will succeed.
 
@@ -15,6 +15,8 @@ This plugin allows you to:
 - Combine both files into `Wednesday.zip`
 - Upload `Wednesday.zip` to AQTS, and see the Wednesday visit with both the discharge measurement and the on-site readings.
 
+See [the wiki page](https://github.com/AquaticInformatics/aquarius-field-data-framework/wiki/MultiFile-plugin) for more details on the types problems the MultiFile plugin tries to solve.
+
 ## Plugin Compatibility Matrix
 
 The MultiFile field data plugin is tightly coupled to the specific framework version used to build it.
@@ -23,7 +25,7 @@ When you install the MultiFile plugin on your AQTS app server, it is recommended
 
 | AQTS Version | Latest compatible plugin Version |
 | --- | --- |
-| AQTS 2021.4 Update 1+ | [v21.4.9](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.9/MultiFile.plugin) |
+| AQTS 2021.4 Update 1+ | [v21.4.10](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.10/MultiFile.plugin) |
 | AQTS 2021.4 | [v21.4.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.2/MultiFile.plugin) |
 | AQTS 2021.3 Update 1+ | [v21.3.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.3.2/MultiFile.plugin) |
 | AQTS 2021.3 GA<br/>AQTS 2021.2<br/>AQTS 2021.1 | [v20.3.11](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.11/MultiFile.plugin) |
@@ -35,6 +37,16 @@ When you install the MultiFile plugin on your AQTS app server, it is recommended
 | AQTS 2019.2 | [v19.2.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.2.2/MultiFile.plugin) |
 | AQTS 2019.1 | [v19.1.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v19.1.0/MultiFile.plugin) |
 | AQTS 2018.4 | [v18.4.21](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v18.4.21/MultiFile.plugin) |
+
+## Configure the MultiFile plugin if the delegate plugins require configuration
+
+In many scenarios, the MultiFile plugin can work out of the box, trying all the other installed and enabled plugins with no extra configuration steps.
+
+The other plugins launched by MultiFile are known as the "delegate" plugins.
+
+If any of the delegate plugins require a special configuration settings, then a duplicate setting value will also need to be exposed to the MultiFile plugin, so that it can launch the delegate plugin in the exact way that the app server does.
+
+The [MultiFile.Configurator.exe tool](../MultiFile.Configurator) was created so quickly generate a configuration for the MultiFile plugin which duplicates all the settings of the delegate plugins.
 
 ## Install the MultiFile plugin with the highest PluginPriority
 

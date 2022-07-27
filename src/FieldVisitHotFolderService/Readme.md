@@ -22,7 +22,7 @@ When you upgrade your AQTS app server, it is recommended that you use the most r
 
 | AQTS Version | Latest compatible service version |
 | --- | --- |
-| AQTS 2021.4 Update 1+ | [v21.4.9](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.9/FieldVisitHotFolderService.zip) |
+| AQTS 2021.4 Update 1+ | [v21.4.10](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.10/FieldVisitHotFolderService.zip) |
 | AQTS 2021.4 | [v21.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.0/FieldVisitHotFolderService.zip) |
 | AQTS 2021.3 Update 1+ | [v21.3.2](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.3.2/FieldVisitHotFolderService.zip) |
 | AQTS 2021.3 GA<br/>AQTS 2021.2<br/>AQTS 2021.1 | [v20.3.11](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v20.3.11/FieldVisitHotFolderService.zip) |
@@ -290,7 +290,7 @@ By default, any plugin settings already configured on your AQTS app server will 
 
 But if your AQTS app server is lacking the configuration settings for your plugin (maybe because your plugin is only installed locally for the hot folder service?) you can use the `/PluginSettings=` option to make specific setting values available to specific plugins, 
 
-The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderName=key=text` or `/PluginSettings=pluginFolderName=key=@pathToTextFile` format. (Yup! That is four equal signs in a single option!)
+The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderName=key=text` or `/PluginSettings=pluginFolderName=key=@pathToTextFile` format. (Yup! That is three equal signs in a single option!)
 
 - The `/PluginSettings=AquaCalc5000=AssumeUsgsSiteIdentifiers=false` option would configure the [AquaCalc5000 plugin](https://github.com/AquaticInformatics/aquacalc-5000-field-data-plugin#configuring-the-plugin) to disable its default behaviour of adding leading zeros to numeric location identifiers, to match the 8-digit USGS site identifier pattern.
 - The `/PluginSettings=TabularCsv=AirTempReadings=@C:\MyConfigs\AirTemperature.toml` option would configure the [Tabular plugin](https://github.com/AquaticInformatics/tabular-field-data-plugin#where-is-each-configuration-file-stored) to load the entire `C:\MyConfigs\AirTemperature.toml` TOML configuration file into the setting named `AirTempReadings`.

@@ -77,7 +77,7 @@ namespace MultiFile
             }
         }
 
-        private List<IFieldDataPlugin> LoadPlugins()
+        private List<PluginLoader.LoadedPlugin> LoadPlugins()
         {
             lock (SyncObject)
             {
@@ -86,23 +86,84 @@ namespace MultiFile
 
                 var config = LoadConfig();
 
-                var pluginPaths = config.Plugins ?? new List<string>();
+                var pluginPaths = config
+                    .Plugins
+                    .Where(p => !string.IsNullOrWhiteSpace(p.Path))
+                    .Select(p => p.Path)
+                    .ToList();
 
-                if (!pluginPaths.Any())
+                var allPrefixedSettings = config
+                    .Plugins
+                    .Where(p => string.IsNullOrWhiteSpace(p.Path))
+                    .Select(p => p.Settings)
+                    .ToList();
+
+                if (pluginPaths.All(string.IsNullOrWhiteSpace))
                 {
+                    // There are no paths to other plugins explicitly configured, but there may be some plugin settings
                     pluginPaths = GetAllOtherPluginFolders();
                 }
 
-                CachedPlugins.Clear();
-                CachedPlugins.AddRange(new PluginLoader
+                var loadedPlugins = new PluginLoader
                     {
-                        Log = Log
+                        Log = Log,
+                        Verbose = config.Verbose,
                     }
-                    .LoadPlugins(pluginPaths)
-                    .Select(lp => lp.Plugin));
+                    .LoadPlugins(pluginPaths);
+
+                foreach (var loadedPlugin in loadedPlugins)
+                {
+                    var pluginConfig = config
+                        .Plugins
+                        .FirstOrDefault(p =>
+                            loadedPlugin.Path.Equals(p.Path, StringComparison.InvariantCultureIgnoreCase)
+                            || Path.GetFileName(loadedPlugin.Path).Equals(p.Path, StringComparison.InvariantCultureIgnoreCase));
+
+                    loadedPlugin.PluginPriority = pluginConfig?.PluginPriority ?? int.MaxValue;
+
+                    if (pluginConfig != null && pluginConfig.Settings.Any())
+                    {
+                        // This plugin has some specific settings, which we should us as-is
+                        loadedPlugin.Settings = pluginConfig.Settings;
+                        continue;
+                    }
+
+                    var keyPrefix = GetPluginFolderName(loadedPlugin) + "-";
+
+                    var prefixedSettings = allPrefixedSettings
+                        .FirstOrDefault(s => s.Keys.All(k => k.StartsWith(keyPrefix, StringComparison.InvariantCultureIgnoreCase)));
+
+                    // Strip the prefix from the settings
+                    loadedPlugin.Settings = prefixedSettings?.ToDictionary(
+                                                kvp => kvp.Key.Substring(keyPrefix.Length),
+                                                kvp => kvp.Value)
+                                            ?? new Dictionary<string, string>();
+                }
+
+                CachedPlugins.Clear();
+                CachedPlugins.AddRange(loadedPlugins);
 
                 return CachedPlugins;
             }
+        }
+
+        private string GetPluginFolderName(PluginLoader.LoadedPlugin loadedPlugin)
+        {
+            if (File.Exists(loadedPlugin.Path))
+                return Path.GetFileNameWithoutExtension(loadedPlugin.Path);
+
+            var pluginType = loadedPlugin.Plugin.GetType();
+            var pluginFolderName = pluginType.FullName;
+
+            if (string.IsNullOrEmpty(pluginFolderName))
+                return pluginType.FullName;
+
+            var suffixToStrip = ".plugin";
+
+            if (!pluginFolderName.EndsWith(suffixToStrip, StringComparison.InvariantCultureIgnoreCase))
+                return pluginFolderName;
+
+            return pluginFolderName.Substring(0, pluginFolderName.Length - suffixToStrip.Length);
         }
 
         private List<string> GetAllOtherPluginFolders()
@@ -267,16 +328,30 @@ namespace MultiFile
 
         private static readonly object SyncObject = new object();
 
-        private static readonly List<IFieldDataPlugin> CachedPlugins = new List<IFieldDataPlugin>();
+        private static readonly List<PluginLoader.LoadedPlugin> CachedPlugins = new List<PluginLoader.LoadedPlugin>();
 
         private Config LoadConfig()
         {
             JsonConfig.Configure();
 
             if (!ResultsAppender.GetFullPluginConfigurations().TryGetValue(nameof(Config), out var configJsonText) || string.IsNullOrWhiteSpace(configJsonText))
-                return new Config();
+                return GetDefaultConfig();
 
-            return configJsonText.FromJson<Config>();
+            try
+            {
+                return configJsonText.FromJson<Config>();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Can't load configuration: {e.Message}: JSON={configJsonText}");
+
+                return GetDefaultConfig();
+            }
+        }
+
+        private static Config GetDefaultConfig()
+        {
+            return new Config();
         }
 
         private string GetPluginDirectory()
@@ -292,13 +367,13 @@ namespace MultiFile
                 : Path.GetDirectoryName(location);
         }
 
-        private ParseFileResult ParseArchive(ZipArchive zipArchive, LocationInfo locationInfo, List<IFieldDataPlugin> plugins)
+        private ParseFileResult ParseArchive(ZipArchive zipArchive, LocationInfo locationInfo, List<PluginLoader.LoadedPlugin> plugins)
         {
             foreach (var entry in zipArchive.Entries)
             {
                 var isParsed = false;
 
-                foreach (var plugin in plugins)
+                foreach (var plugin in plugins.OrderBy(p => p.PluginPriority))
                 {
                     var result = ParseEntry(entry, plugin, locationInfo);
 
@@ -307,7 +382,7 @@ namespace MultiFile
 
                     if (result.Status != ParseFileStatus.SuccessfullyParsedAndDataValid)
                     {
-                        Log.Error($"Plugin {PluginLoader.GetPluginNameAndVersion(plugin)} failed to parse '{entry.FullName}' with {result.Status}('{result.ErrorMessage}')");
+                        Log.Error($"Plugin {PluginLoader.GetPluginNameAndVersion(plugin.Plugin)} failed to parse '{entry.FullName}' with {result.Status}('{result.ErrorMessage}')");
                         return result;
                     }
 
@@ -323,19 +398,19 @@ namespace MultiFile
             return ParseFileResult.SuccessfullyParsedAndDataValid();
         }
 
-        private ParseFileResult ParseEntry(ZipArchiveEntry entry, IFieldDataPlugin plugin, LocationInfo locationInfo)
+        private ParseFileResult ParseEntry(ZipArchiveEntry entry, PluginLoader.LoadedPlugin loadedPlugin, LocationInfo locationInfo)
         {
-            ResultsAppender.FilterConfigurationSettings(plugin);
+            ResultsAppender.FilterConfigurationSettings(loadedPlugin);
 
             using (var entryStream = entry.Open())
             using (var reader = new BinaryReader(entryStream))
             using (var memoryStream = new MemoryStream(reader.ReadBytes((int)entry.Length)))
             {
-                var proxyLog = ProxyLog.Create(Log, plugin, entry);
+                var proxyLog = ProxyLog.Create(Log, loadedPlugin.Plugin, entry);
 
                 var result = locationInfo == null
-                    ? plugin.ParseFile(memoryStream, ResultsAppender, proxyLog)
-                    : plugin.ParseFile(memoryStream, locationInfo, ResultsAppender, proxyLog);
+                    ? loadedPlugin.Plugin.ParseFile(memoryStream, ResultsAppender, proxyLog)
+                    : loadedPlugin.Plugin.ParseFile(memoryStream, locationInfo, ResultsAppender, proxyLog);
 
                 switch (result.Status)
                 {
