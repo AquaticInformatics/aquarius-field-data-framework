@@ -56,6 +56,8 @@ namespace Common
             public IFieldDataPlugin Plugin { get; }
             public PluginManifest Manifest { get; }
             public string Path { get; }
+            public int PluginPriority { get; set; }
+            public Dictionary<string,string> Settings { get; set; }
         }
 
         public List<LoadedPlugin> LoadPlugins(List<string> paths)

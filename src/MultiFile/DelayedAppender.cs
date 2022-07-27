@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Common;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
@@ -104,30 +105,9 @@ namespace MultiFile
 
         private Dictionary<string,string> FilteredConfigurations { get; set; }
 
-        public void FilterConfigurationSettings(IFieldDataPlugin plugin)
+        public void FilterConfigurationSettings(PluginLoader.LoadedPlugin plugin)
         {
-            var pluginType = plugin.GetType();
-            var pluginFolderName = pluginType.FullName;
-
-            if (string.IsNullOrEmpty(pluginFolderName))
-            {
-                FilteredConfigurations = null;
-                return;
-            }
-
-            string FormatPrefix(string prefix) => $"{prefix}-";
-            string StripPrefix(string text) => text.Split(new[] { '-' }, 2)[1];
-
-            var prefixes = new List<string> { FormatPrefix(pluginFolderName) };
-
-            var suffixToTrim = ".plugin";
-
-            if (pluginFolderName.EndsWith(suffixToTrim, StringComparison.InvariantCultureIgnoreCase))
-                prefixes.Add(FormatPrefix(pluginFolderName.Substring(0, pluginFolderName.Length - suffixToTrim.Length)));
-
-            FilteredConfigurations = GetFullPluginConfigurations()
-                .Where(kvp => prefixes.Any(p => kvp.Key.StartsWith(p, StringComparison.InvariantCultureIgnoreCase)))
-                .ToDictionary(kvp => StripPrefix(kvp.Key), kvp => kvp.Value);
+            FilteredConfigurations = plugin.Settings;
         }
 
         private List<FieldVisitInfo> DelayedFieldVisits { get; } = new List<FieldVisitInfo>();
