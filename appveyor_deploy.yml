@@ -68,6 +68,10 @@ artifacts:
     name: MultiFilePlugin
     type: file
 
+  - path: src\MultiFile.Configurator\bin\Release\MultiFile.Configurator.exe
+    name: MultiFile.Configurator
+    type: file
+
   - path: src\FieldVisitHotFolderService\bin\Release
     name: FieldVisitHotFolderService
     type: zip
@@ -81,7 +85,7 @@ deploy:
     tag: v$(APPVEYOR_BUILD_VERSION)
     release: AQUARIUS Field Data Framework $(APPVEYOR_BUILD_VERSION)
     description: ''
-    artifact: FieldDataPluginFramework,PluginPackager,PluginTester,JsonPlugin,FieldVisitHotFolderService,MultiFilePlugin
+    artifact: FieldDataPluginFramework,PluginPackager,PluginTester,JsonPlugin,FieldVisitHotFolderService,MultiFilePlugin,MultiFile.Configurator
     auth_token: $(GITHUB_AUTH_TOKEN)
     on:
       is_not_pr: true

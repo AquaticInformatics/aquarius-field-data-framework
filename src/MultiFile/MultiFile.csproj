@@ -70,7 +70,6 @@
     <Compile Include="ProxyLog.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Config.json" />
     <None Include="packages.config" />
     <None Include="Readme.md" />
   </ItemGroup>

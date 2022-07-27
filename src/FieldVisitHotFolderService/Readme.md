@@ -290,7 +290,7 @@ By default, any plugin settings already configured on your AQTS app server will 
 
 But if your AQTS app server is lacking the configuration settings for your plugin (maybe because your plugin is only installed locally for the hot folder service?) you can use the `/PluginSettings=` option to make specific setting values available to specific plugins, 
 
-The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderName=key=text` or `/PluginSettings=pluginFolderName=key=@pathToTextFile` format. (Yup! That is four equal signs in a single option!)
+The `/PluginSettings=` option supports either a `/PluginSettings=pluginFolderName=key=text` or `/PluginSettings=pluginFolderName=key=@pathToTextFile` format. (Yup! That is three equal signs in a single option!)
 
 - The `/PluginSettings=AquaCalc5000=AssumeUsgsSiteIdentifiers=false` option would configure the [AquaCalc5000 plugin](https://github.com/AquaticInformatics/aquacalc-5000-field-data-plugin#configuring-the-plugin) to disable its default behaviour of adding leading zeros to numeric location identifiers, to match the 8-digit USGS site identifier pattern.
 - The `/PluginSettings=TabularCsv=AirTempReadings=@C:\MyConfigs\AirTemperature.toml` option would configure the [Tabular plugin](https://github.com/AquaticInformatics/tabular-field-data-plugin#where-is-each-configuration-file-stored) to load the entire `C:\MyConfigs\AirTemperature.toml` TOML configuration file into the setting named `AirTempReadings`.
