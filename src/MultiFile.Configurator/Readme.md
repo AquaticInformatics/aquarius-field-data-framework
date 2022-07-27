@@ -44,7 +44,7 @@ MultiFile.Configurator.exe -server=doug-vm2019
 
 # Use case 2 - MultiFile running externally
 
-This use case is typical for the [FieldVisitHotFolderService](../FieldVisitHotFolderService), where the FVHFS is running some plugins locally, outside of the app server.
+This use case is typical for the [FieldVisitHotFolderService](../FieldVisitHotFolderService#field-visit-hot-folder-service), where the FVHFS is running some plugins locally, outside of the app server.
 
 The `-GenerateForExternalUse=true` and `-JsonPath=`*somePath* options are used to generate a JSON file that can be fed into the FVHFS for its local copy of MultiFile. The JSON will contain the plugin priorities and settings from all enabled plugins on the AQTS app server.
 
@@ -59,7 +59,7 @@ MultiFile.Configurator.exe -server=doug-vm2019 -GenerateForExternalUse=true -Jso
 
 To use this JSON file in the `/PluginSettings=MultiFile=Config=@somepath\MySettings.json` option to given that configuration to the MultiFile plugin running within the FVHFS.
 
-See the [Configuring your plugin settings](./FieldVisitHotFolderService#configuring-your-plugin-settings) topic for more details.
+See the [Configuring your plugin settings](../FieldVisitHotFolderService#configuring-your-plugin-settings) topic for more details.
 
 ## Usage
 
