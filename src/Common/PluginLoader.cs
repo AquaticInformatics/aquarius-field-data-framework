@@ -80,6 +80,13 @@ namespace Common
         private Assembly ResolvePluginAssembliesFromSameFolder(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
+            
+            //A known issue where Humanizer is loading resources dll but actually we only need English which is embedded.
+            if (assemblyName.Equals("Humanizer.resources.dll", StringComparison.OrdinalIgnoreCase))
+            {
+	            return null;
+            }
+
             var requestingAssembly = args.RequestingAssembly;
 
             if (requestingAssembly == null)
