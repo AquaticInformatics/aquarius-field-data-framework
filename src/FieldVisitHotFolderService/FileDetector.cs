@@ -35,7 +35,6 @@ namespace FieldVisitHotFolderService
         private string UploadedFolder { get; set; }
         private string FailedFolder { get; set; }
         private List<PluginLoader.LoadedPlugin> LoadedPlugins { get; set; }
-        private string JsonPluginPath { get; set; }
         private AquariusServerVersion JsonPluginVersion { get; set; }
         private IAquariusClient Client { get; set; }
         private List<LocationInfo> LocationCache { get; set; }
@@ -172,7 +171,6 @@ namespace FieldVisitHotFolderService
 
             SortPluginsByPriority();
 
-            JsonPluginPath = localPluginLoader.JsonPluginPath;
             JsonPluginVersion = localPluginLoader.JsonPluginVersion;
         }
 
@@ -265,13 +263,13 @@ namespace FieldVisitHotFolderService
             using (Client = CreateConnectedClient())
             {
                 LoadLocalPlugins();
-                ThrowIfJsonPluginNotInstalled();
+                ThrowIfJsonPluginNotInstalledOrOlder();
             }
 
             Client = null;
         }
 
-        private void ThrowIfJsonPluginNotInstalled()
+        private void ThrowIfJsonPluginNotInstalledOrOlder()
         {
             var serverPlugin = GetServerPlugin(LocalPluginLoader.IsJsonPlugin);
 
@@ -285,8 +283,7 @@ namespace FieldVisitHotFolderService
 
             if (serverPlugin == null)
             {
-                InstallJsonPlugin();
-                return;
+	            ThrowJsonPluginNotInstalledMessage();
             }
 
             if (!serverPluginVersion?.IsLessThan(JsonPluginVersion) ?? false)
@@ -296,10 +293,17 @@ namespace FieldVisitHotFolderService
                 return;
             }
 
-            ReplaceJsonPlugin(serverPlugin);
+            throw new ExpectedException("The JSON field data plugin on server is older than the local plugin. " +
+                                        $"Please update the server JSON field data plugin to version {JsonPluginVersion}");
         }
 
-        private FieldDataPlugin GetServerPlugin(Func<FieldDataPlugin,bool> predicate)
+		private void ThrowJsonPluginNotInstalledMessage()
+		{
+			throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}." +
+			                            "Contact your system admin and install the latest JSON field data plugin.");
+		}
+
+		private FieldDataPlugin GetServerPlugin(Func<FieldDataPlugin,bool> predicate)
         {
             var plugins = Client.Provisioning.Get(new GetFieldDataPlugins())
                 .Results;
@@ -308,31 +312,7 @@ namespace FieldVisitHotFolderService
                 .FirstOrDefault(predicate);
         }
 
-        private void InstallJsonPlugin(int? pluginPriority = null)
-        {
-            if (string.IsNullOrEmpty(JsonPluginPath))
-                throw new ExpectedException($"The JSON field data plugin is not installed on {Context.Server}.\nDownload the latest plugin from https://github.com/AquaticInformatics/aquarius-field-data-framework/releases");
-
-            Log.Info($"Installing JSON field data plugin v{JsonPluginVersion} from '{JsonPluginPath}' ...");
-
-            var serverPlugin = Client.Provisioning.PostFileWithRequest(JsonPluginPath, new PostFieldDataPluginFile
-            {
-                PluginPriority = pluginPriority ?? 0
-            });
-
-            Log.Info($"Successfully installed v{PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName)} {serverPlugin.PluginFolderName}: {nameof(serverPlugin.PluginPriority)}={serverPlugin.PluginPriority}");
-        }
-
-        private void ReplaceJsonPlugin(FieldDataPlugin serverPlugin)
-        {
-            Log.Info($"Removing v{PluginLoader.GetPluginVersion(serverPlugin.AssemblyQualifiedTypeName)} {serverPlugin.PluginFolderName} ...");
-
-            Client.Provisioning.Delete(new DeleteFieldDataPlugin {UniqueId = serverPlugin.UniqueId});
-
-            InstallJsonPlugin(serverPlugin.PluginPriority);
-        }
-
-        private void EnableJsonPlugin(FieldDataPlugin serverPlugin)
+		private void EnableJsonPlugin(FieldDataPlugin serverPlugin)
         {
             if (serverPlugin.IsEnabled)
                 return;
@@ -362,7 +342,7 @@ namespace FieldVisitHotFolderService
 
                 using (Client = CreateConnectedClient())
                 {
-                    ThrowIfJsonPluginNotInstalled();
+                    ThrowIfJsonPluginNotInstalledOrOlder();
 
                     foreach (var file in files)
                     {
