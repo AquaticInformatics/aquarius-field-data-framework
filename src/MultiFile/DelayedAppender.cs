@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Common;
-using FieldDataPluginFramework;
+﻿using Common;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
@@ -14,8 +10,12 @@ using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
+using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MultiFile
 {
@@ -103,7 +103,7 @@ namespace MultiFile
             return ActualAppender.GetPluginConfigurations();
         }
 
-        private Dictionary<string,string> FilteredConfigurations { get; set; }
+        private Dictionary<string, string> FilteredConfigurations { get; set; }
 
         public void FilterConfigurationSettings(PluginLoader.LoadedPlugin plugin)
         {
@@ -262,7 +262,7 @@ namespace MultiFile
             fieldVisit.LevelSurveys.Add(levelSurvey);
 
             ExtendVisitPeriod(fieldVisit,
-                new []{levelSurvey.SurveyPeriod.Start, levelSurvey.SurveyPeriod.End}
+                new[] { levelSurvey.SurveyPeriod.Start, levelSurvey.SurveyPeriod.End }
                     .Concat(levelSurvey.LevelSurveyMeasurements.Select(lsm => lsm.MeasurementTime)));
         }
 
@@ -277,7 +277,7 @@ namespace MultiFile
         {
             if (dateTimeOffset.HasValue)
             {
-                ExtendVisitPeriod(fieldVisit, new []{dateTimeOffset.Value});
+                ExtendVisitPeriod(fieldVisit, new[] { dateTimeOffset.Value });
             }
         }
 
@@ -308,6 +308,19 @@ namespace MultiFile
                 : endTime;
 
             return new DateTimeInterval(minStart, maxEnd);
+        }
+
+        public void AddWellIntegrity(FieldVisitInfo fieldVisit, WellIntegrity wellIntegrity)
+        {
+            fieldVisit.WellIntegrity.Add(wellIntegrity);
+            var allActivityPeriods = wellIntegrity.WellRedevelopments.Select(s => s.StartDate)
+                .Concat(wellIntegrity.WellRepairs.Select(s => s.StartDate))
+                .Concat(wellIntegrity.WellInspections.Select(s => s.StartDate))
+                .Concat(wellIntegrity.WellAquiferConnections.Select(s => s.StartDate))
+                .Concat(wellIntegrity.WellRepairs.Select(s => s.EndDate))
+                .Concat(wellIntegrity.WellRedevelopments.Select(s => s.EndDate))
+                .Concat(wellIntegrity.WellRepairs.Select(s => s.EndDate));
+            ExtendVisitPeriod(fieldVisit, allActivityPeriods);
         }
     }
 }
