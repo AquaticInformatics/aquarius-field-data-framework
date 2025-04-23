@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Aquarius.TimeSeries.Client;
+﻿using Aquarius.TimeSeries.Client;
 using Aquarius.TimeSeries.Client.ServiceModels.Provisioning;
 using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using FieldDataPluginFramework;
@@ -11,10 +8,14 @@ using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
+using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using NodaTime;
 using ServiceStack;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Calibration = FieldDataPluginFramework.DataModel.Calibrations.Calibration;
 using DischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
 using Inspection = FieldDataPluginFramework.DataModel.Inspections.Inspection;
@@ -28,7 +29,7 @@ namespace FieldVisitHotFolderService
         public List<LocationInfo> LocationCache { get; set; }
         public Dictionary<string, string> LocationAliases { get; set; }
         public ILog Log { get; set; }
-        public Func<Dictionary<string,string>> SettingsFunc { get; set; }
+        public Func<Dictionary<string, string>> SettingsFunc { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -53,7 +54,7 @@ namespace FieldVisitHotFolderService
             }
 
             var locationDescriptions = Client.Publish.Get(new LocationDescriptionListServiceRequest
-                    {LocationIdentifier = locationIdentifier})
+            { LocationIdentifier = locationIdentifier })
                 .LocationDescriptions;
 
             var locationDescription = locationDescriptions
@@ -80,7 +81,7 @@ namespace FieldVisitHotFolderService
                 return AddUnknownLocationInfo(locationIdentifier);
             }
 
-            var location = Client.Provisioning.Get(new GetLocation {LocationUniqueId = locationDescription.UniqueId});
+            var location = Client.Provisioning.Get(new GetLocation { LocationUniqueId = locationDescription.UniqueId });
 
             return AddLocationInfo(location);
         }
@@ -133,7 +134,7 @@ namespace FieldVisitHotFolderService
 
             try
             {
-                var location = Client.Provisioning.Get(new GetLocation {LocationUniqueId = uniqueId});
+                var location = Client.Provisioning.Get(new GetLocation { LocationUniqueId = uniqueId });
 
                 return AddLocationInfo(location);
             }
@@ -197,6 +198,11 @@ namespace FieldVisitHotFolderService
         public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)
         {
             fieldVisit.LevelSurveys.Add(levelSurvey);
+        }
+
+        public void AddWellIntegrity(FieldVisitInfo fieldVisit, WellIntegrity wellIntegrity)
+        {
+            fieldVisit.WellIntegrity.Add(wellIntegrity);
         }
     }
 }
