@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FieldDataPluginFramework;
+﻿using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
@@ -12,8 +9,12 @@ using FieldDataPluginFramework.DataModel.GageZeroFlow;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
+using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PluginTester
 {
@@ -52,7 +53,7 @@ namespace PluginTester
 
         public LocationInfo ForcedLocationInfo { get; set; }
         public TimeSpan UtcOffset { get; set; }
-        public Dictionary<string,string> Settings { get; set; }
+        public Dictionary<string, string> Settings { get; set; }
 
         public AppendedResults AppendedResults { get; } = new AppendedResults
         {
@@ -136,6 +137,11 @@ namespace PluginTester
         public void AddLevelSurvey(FieldVisitInfo fieldVisit, LevelSurvey levelSurvey)
         {
             fieldVisit.LevelSurveys.Add(levelSurvey);
+        }
+
+        public void AddWellIntegrity(FieldVisitInfo fieldVisit, WellIntegrity wellIntegrity)
+        {
+            fieldVisit.WellIntegrity.Add(wellIntegrity);
         }
     }
 }
