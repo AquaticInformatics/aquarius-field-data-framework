@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using FieldDataPluginFramework.Context;
+﻿using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
 using FieldDataPluginFramework.DataModel.ChannelMeasurements;
@@ -17,6 +12,11 @@ using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
 using ServiceStack;
 using ServiceStack.Text;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 
 namespace FieldDataPluginFramework.Serialization
 {
@@ -175,7 +175,7 @@ namespace FieldDataPluginFramework.Serialization
                     continue;
                 }
 
-                var propertyValue = setter.PropertyParser.Invoke(parser, new object[] {propertyName});
+                var propertyValue = setter.PropertyParser.Invoke(parser, new object[] { propertyName });
 
                 setter.PropertyInfo.SetValue(item, propertyValue);
             }
@@ -248,6 +248,7 @@ namespace FieldDataPluginFramework.Serialization
                     json.AddItems(nameof(item.Calibrations), item.Calibrations);
                     json.AddItems(nameof(item.Inspections), item.Inspections);
                     json.AddItems(nameof(item.GageZeroFlowActivities), item.GageZeroFlowActivities);
+                    json.AddItems(nameof(item.WellIntegrity), item.WellIntegrity);
                 });
 
             Configure(json => new FieldVisitDetails(
@@ -315,7 +316,7 @@ namespace FieldDataPluginFramework.Serialization
                 (nameof(VolumetricDischarge.MeasurementContainerUnit), j => j.JsonText.FromJson<VolumetricDischarge>()),
                 (null, j => j.JsonText.FromJson<OtherDischargeSection>())));
 
-            Configure( json => FromDerivedClass<MeasurementConditionData>(json,
+            Configure(json => FromDerivedClass<MeasurementConditionData>(json,
                 (nameof(IceCoveredData.WaterSurfaceToBottomOfIce), j => j.JsonText.FromJson<IceCoveredData>()),
                 (null, j => j.JsonText.FromJson<OpenWaterData>())));
 
