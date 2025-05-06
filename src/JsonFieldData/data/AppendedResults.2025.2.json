@@ -29,74 +29,64 @@
                 "CollectionAgency": null,
                 "CompletedVisitActivities": null
             },
-            "DischargeActivities": [
-                
-            ],
-            "ControlConditions": [
-                
-            ],
-            "CrossSectionSurveys": [
-                
-            ],
-            "LevelSurveys": [
-                
-            ],
-            "Readings": [
-                
-            ],
-			"WellIntegrity": {
-			  "WellAquiferConnections": [
-				{
-				  "StartDate": "2025-04-08T00:00:00+00:00",
-				  "WellAquiferConnectivityType": {
-					"IdOrDisplayName": "Adequate"
-				  },
-				  "WellInspectionMethodType": {
-					"IdOrDisplayName": "HydraulicTest"
-				  },
-				  "Comments": "Integration test comment for WellAquiferConnection"
-				}
-			  ],
-			  "WellInspections": [
-				{
-				  "StartDate": "2025-04-08T00:00:00+00:00",
-				  "WellComponentType": {
-					"IdOrDisplayName": "Casing"
-				  },
-				  "WellConditionType": {
-					"IdOrDisplayName": "Clear"
-				  },
-				  "DistanceFrom": 0.0,
-				  "DistanceTo": 100.0,
-				  "DistanceUnitId": "ft",
-				  "Comments": "Integration test comment  for WellInspection",
-				  "WellInspectionMethod": {
-					"IdOrDisplayName": "BoreholeFlowmeter"
-				  }
-				}
-			  ],
-			  "WellRedevelopments": [
-				{
-				  "Attempt": 1,
-				  "StartDate": "2025-04-08T00:00:00+00:00",
-				  "EndDate": "2025-04-08T10:00:00+00:00",
-				  "WellRedevelopmentMethodType": {
-					"IdOrDisplayName": "Bailed"
-				  },
-				  "Comments": "Sample comment for WellRedevelopment"
-				}
-			  ],
-			  "WellRepairs": [
-				{
-				  "StartDate": "2025-04-08T00:00:00+00:00",
-				  "EndDate": "2025-04-08T00:00:00+00:00",
-				  "WellRepairType": {
-					"IdOrDisplayName": "BlockedOff"
-				  },
-				  "Comments": "Sample comment for WellRepair"
-				}
-			  ]
-			}
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
+            "Readings": [],
+            "WellIntegrity": {
+                "WellAquiferConnections": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "WellAquiferConnectivityType": {
+                            "IdOrDisplayName": "Adequate"
+                        },
+                        "WellInspectionMethodType": {
+                            "IdOrDisplayName": "HydraulicTest"
+                        },
+                        "Comments": "Integration test comment for WellAquiferConnection"
+                    }
+                ],
+                "WellInspections": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "WellComponentType": {
+                            "IdOrDisplayName": "Casing"
+                        },
+                        "WellConditionType": {
+                            "IdOrDisplayName": "Clear"
+                        },
+                        "DistanceFrom": 0.0,
+                        "DistanceTo": 100.0,
+                        "DistanceUnitId": "ft",
+                        "Comments": "Integration test comment  for WellInspection",
+                        "WellInspectionMethod": {
+                            "IdOrDisplayName": "BoreholeFlowmeter"
+                        }
+                    }
+                ],
+                "WellRedevelopments": [
+                    {
+                        "Attempt": 1,
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "EndDate": "2025-04-08T10:00:00+00:00",
+                        "WellRedevelopmentMethodType": {
+                            "IdOrDisplayName": "Bailed"
+                        },
+                        "Comments": "Sample comment for WellRedevelopment"
+                    }
+                ],
+                "WellRepairs": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "EndDate": "2025-04-08T00:00:00+00:00",
+                        "WellRepairType": {
+                            "IdOrDisplayName": "BlockedOff"
+                        },
+                        "Comments": "Sample comment for WellRepair"
+                    }
+                ]
+            }
         },
         {
             "LocationInfo": {
@@ -139,14 +129,12 @@
                     },
                     "Comments": null,
                     "GageHeightComments": "This gage height comment with a 3.14 adjustment to 5.23 manually calculated MGH",
-					"GageHeightAdjustmentAmount": 3.14,
-					"ManuallyCalculatedMeanGageHeight": {
-                                "Value": 5.23,
-                                "UnitId": "ft"
-                            },
-                    "GageHeightMeasurements": [
-                        
-                    ],
+                    "GageHeightAdjustmentAmount": 3.14,
+                    "ManuallyCalculatedMeanGageHeight": {
+                        "Value": 5.23,
+                        "UnitId": "ft"
+                    },
+                    "GageHeightMeasurements": [],
                     "ChannelMeasurements": [
                         {
                             "DischargeMethod": "MidSection",
@@ -1661,9 +1649,7 @@
                     ]
                 }
             ],
-            "CrossSectionSurveys": [
-                
-            ],
+            "CrossSectionSurveys": [],
             "Readings": [
                 {
                     "ParameterId": "TW",
@@ -1673,7 +1659,7 @@
                         "UnitId": "degF"
                     },
                     "Uncertainty": null,
-					"AdjustmentAmount": 2.75,
+                    "AdjustmentAmount": 2.75,
                     "ReadingType": "Unknown",
                     "MeasurementDevice": {
                         "Manufacturer": "SonTek",
@@ -1723,18 +1709,10 @@
                     "WaterQualitySample": false
                 }
             },
-            "DischargeActivities": [
-                
-            ],
-            "ControlConditions": [
-                
-            ],
-            "CrossSectionSurveys": [
-                
-            ],
-            "LevelSurveys": [
-                
-            ],
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
             "Readings": [
                 {
                     "Value": 18.5,
@@ -1755,23 +1733,15 @@
                     "ReferencePointName": null,
                     "UseLocationDatumAsReference": false,
                     "ReadingQualifier": null,
-                    "ReadingQualifiers": [
-                        
-                    ],
+                    "ReadingQualifiers": [],
                     "GroundWaterMeasurementDetails": null,
                     "SensorUniqueId": null,
                     "Grade": null
                 }
             ],
-            "Calibrations": [
-                
-            ],
-            "Inspections": [
-                
-            ],
-            "GageZeroFlowActivities": [
-                
-            ]
+            "Calibrations": [],
+            "Inspections": [],
+            "GageZeroFlowActivities": []
         },
         {
             "LocationInfo": {
@@ -1809,18 +1779,10 @@
                     "WaterQualitySample": false
                 }
             },
-            "DischargeActivities": [
-                
-            ],
-            "ControlConditions": [
-                
-            ],
-            "CrossSectionSurveys": [
-                
-            ],
-            "LevelSurveys": [
-                
-            ],
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
             "Readings": [
                 {
                     "Value": -4.5,
@@ -1842,23 +1804,15 @@
                     "ReferencePointName": null,
                     "UseLocationDatumAsReference": false,
                     "ReadingQualifier": null,
-                    "ReadingQualifiers": [
-                        
-                    ],
+                    "ReadingQualifiers": [],
                     "GroundWaterMeasurementDetails": null,
                     "SensorUniqueId": null,
                     "Grade": null
                 }
             ],
-            "Calibrations": [
-                
-            ],
-            "Inspections": [
-                
-            ],
-            "GageZeroFlowActivities": [
-                
-            ]
+            "Calibrations": [],
+            "Inspections": [],
+            "GageZeroFlowActivities": []
         }
     ]
 }
