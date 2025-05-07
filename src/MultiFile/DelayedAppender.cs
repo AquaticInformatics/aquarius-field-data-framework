@@ -81,6 +81,11 @@ namespace MultiFile
             {
                 ActualAppender.AddGageZeroFlowActivity(visit, gageZeroFlowActivity);
             }
+
+            foreach (var wellIntegrityActivity in delayedVisit.WellIntegrity)
+            {
+                ActualAppender.AddWellIntegrity(visit, wellIntegrityActivity);
+            }
         }
 
         public LocationInfo GetLocationByIdentifier(string locationIdentifier)

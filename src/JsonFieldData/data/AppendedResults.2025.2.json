@@ -1,0 +1,1818 @@
+{
+    "FrameworkAssemblyQualifiedName": "FieldDataPluginFramework.IFieldDataPlugin, FieldDataPluginFramework, Version=2.15.0.0, Culture=neutral, PublicKeyToken=null",
+    "PluginAssemblyQualifiedTypeName": "JsonFieldData.Plugin, JsonFieldData, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "AppendedVisits": [
+        {
+            "LocationInfo": {
+                "LocationId": 0,
+                "LocationIdentifier": "RKB003HK",
+                "LocationName": "DummyNameFor-RKB003HK",
+                "UniqueId": "00000000-0000-0000-0000-000000000000",
+                "UtcOffset": "PT0S"
+            },
+            "LocationId": 0,
+            "FieldVisitId": 0,
+            "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+            "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+            "Party": "Joe Fieldtech",
+            "FieldVisitIdentifier": "RKB003HK:05/08/2001 14:32:15 +07:00",
+            "FieldVisitDetails": {
+                "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                "FieldVisitPeriod": {
+                    "Start": "2025-04-08T14:32:15.0000000+07:00",
+                    "End": "2025-04-08T17:12:45.0000000+07:00"
+                },
+                "Party": "Joe Fieldtech",
+                "Comments": "A visit from the CrossSectionSurvey plugin v18.4.0",
+                "Weather": null,
+                "CollectionAgency": null,
+                "CompletedVisitActivities": null
+            },
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
+            "Readings": [],
+            "WellIntegrity": {
+                "WellAquiferConnections": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "WellAquiferConnectivityType": {
+                            "IdOrDisplayName": "Adequate"
+                        },
+                        "WellInspectionMethodType": {
+                            "IdOrDisplayName": "HydraulicTest"
+                        },
+                        "Comments": "Integration test comment for WellAquiferConnection"
+                    }
+                ],
+                "WellInspections": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "WellComponentType": {
+                            "IdOrDisplayName": "Casing"
+                        },
+                        "WellConditionType": {
+                            "IdOrDisplayName": "Clear"
+                        },
+                        "DistanceFrom": 0.0,
+                        "DistanceTo": 100.0,
+                        "DistanceUnitId": "ft",
+                        "Comments": "Integration test comment  for WellInspection",
+                        "WellInspectionMethod": {
+                            "IdOrDisplayName": "BoreholeFlowmeter"
+                        }
+                    }
+                ],
+                "WellRedevelopments": [
+                    {
+                        "Attempt": 1,
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "EndDate": "2025-04-08T10:00:00+00:00",
+                        "WellRedevelopmentMethodType": {
+                            "IdOrDisplayName": "Bailed"
+                        },
+                        "Comments": "Sample comment for WellRedevelopment"
+                    }
+                ],
+                "WellRepairs": [
+                    {
+                        "StartDate": "2025-04-08T00:00:00+00:00",
+                        "EndDate": "2025-04-08T00:00:00+00:00",
+                        "WellRepairType": {
+                            "IdOrDisplayName": "BlockedOff"
+                        },
+                        "Comments": "Sample comment for WellRepair"
+                    }
+                ]
+            }
+        },
+        {
+            "LocationInfo": {
+                "LocationId": 0,
+                "LocationIdentifier": "1",
+                "LocationName": "DummyNameFor-1",
+                "UniqueId": "00000000-0000-0000-0000-000000000000",
+                "UtcOffset": "PT0S"
+            },
+            "LocationId": 0,
+            "FieldVisitId": 0,
+            "StartDate": "2025-04-08T22:20:16.6060000+00:00",
+            "EndDate": "2025-04-08T23:16:46.9810000+00:00",
+            "Party": "Xf",
+            "FieldVisitIdentifier": "1:12/07/2015 22:20:16 +00:00",
+            "FieldVisitDetails": {
+                "StartDate": "2025-04-08T22:20:16.6060000+00:00",
+                "EndDate": "2025-04-08T23:16:46.9810000+00:00",
+                "FieldVisitPeriod": {
+                    "Start": "2025-04-08T22:20:16.6060000+00:00",
+                    "End": "2025-04-08T23:16:46.9810000+00:00"
+                },
+                "Party": "Xf",
+                "Comments": "A visit from the FlowTracker2 v17.4.42 plugin, but with 2021.3 features"
+            },
+            "DischargeActivities": [
+                {
+                    "MeasurementStartTime": "2025-04-08T22:20:16.6060000+00:00",
+                    "MeasurementEndTime": "2025-04-08T23:16:46.9810000+00:00",
+                    "MeasurementPeriod": {
+                        "Start": "2025-04-08T22:20:16.6060000+00:00",
+                        "End": "2025-04-08T23:16:46.9810000+00:00"
+                    },
+                    "Party": "Xf",
+                    "MeasurementId": null,
+                    "MeanIndexVelocity": null,
+                    "Discharge": {
+                        "Value": 49.2213884546782,
+                        "UnitId": "ft^3/s"
+                    },
+                    "Comments": null,
+                    "GageHeightComments": "This gage height comment with a 3.14 adjustment to 5.23 manually calculated MGH",
+                    "GageHeightAdjustmentAmount": 3.14,
+                    "ManuallyCalculatedMeanGageHeight": {
+                        "Value": 5.23,
+                        "UnitId": "ft"
+                    },
+                    "GageHeightMeasurements": [],
+                    "ChannelMeasurements": [
+                        {
+                            "DischargeMethod": "MidSection",
+                            "StartPoint": "RightEdgeOfWater",
+                            "VelocityObservationMethod": "OneAtPointSix",
+                            "DeploymentMethod": "Unknown",
+                            "MeterSuspension": "Unknown",
+                            "DistanceUnitId": "ft",
+                            "Width": {
+                                "Value": 23,
+                                "UnitId": "ft"
+                            },
+                            "AreaUnitId": "ft^2",
+                            "Area": {
+                                "Value": 32.65,
+                                "UnitId": "ft^2"
+                            },
+                            "VelocityUnitId": "ft/s",
+                            "VelocityAverage": {
+                                "Value": 1.5075463538952,
+                                "UnitId": "ft/s"
+                            },
+                            "Verticals": [
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 0.7,
+                                        "Velocity": 0,
+                                        "Discharge": 0.966476800724277,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 1.96353014627815
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2H1542004",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": null,
+                                            "SoftwareVersion": null,
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "Surface",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 0,
+                                                "Velocity": 0,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 0
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "StartEdgeNoWaterBefore",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 2,
+                                    "SoundedDepth": 0.7,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:20:16.6060000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.7
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1.5,
+                                        "Area": 1.05,
+                                        "Velocity": 1.38068114389182,
+                                        "Discharge": 1.44971520108642,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 2.94529521941722
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.42,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.635,
+                                                "Velocity": 1.38068114389182,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.38068114389182
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 4,
+                                    "SoundedDepth": 0.7,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:22:12.9240000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.7
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 0.9,
+                                        "Velocity": 1.39621722659668,
+                                        "Discharge": 1.25659550393701,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 2.55294607362417
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.54,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.657,
+                                                "Velocity": 1.39621722659668,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.39621722659668
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 5,
+                                    "SoundedDepth": 0.9,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:23:29.1030000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.9
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.2,
+                                        "Velocity": 1.82783166767616,
+                                        "Discharge": 2.19339800121139,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 4.4561888034325
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.72,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.658,
+                                                "Velocity": 1.82783166767616,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.82783166767616
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 6,
+                                    "SoundedDepth": 1.2,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:25:22.9070000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.2
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.4,
+                                        "Velocity": 1.59591599788007,
+                                        "Discharge": 2.2342823970321,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 4.53925105970827
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.84,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.669,
+                                                "Velocity": 1.59591599788007,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.59591599788007
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 7,
+                                    "SoundedDepth": 1.4,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:26:53.6790000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.4
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.4,
+                                        "Velocity": 1.21569435872881,
+                                        "Discharge": 1.70197210222033,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 3.45778970413942
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.84,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.65,
+                                                "Velocity": 1.21569435872881,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.21569435872881
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 8,
+                                    "SoundedDepth": 1.4,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:28:40.4240000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.4
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.7,
+                                        "Velocity": 1.6008391156819,
+                                        "Discharge": 2.72142649665923,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 5.52895109646298
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.34,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.646,
+                                                "Velocity": 1.9932814832805,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.36,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.665,
+                                                "Velocity": 1.2083967480833,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.6008391156819
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 9,
+                                    "SoundedDepth": 1.7,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:33:22.6860000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.7
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.8,
+                                        "Velocity": 1.49350627693978,
+                                        "Discharge": 2.6883112984916,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 5.46167303055039
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.36,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.648,
+                                                "Velocity": 2.06738783362307,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.44,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.661,
+                                                "Velocity": 0.919624720256487,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.49350627693978
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 10,
+                                    "SoundedDepth": 1.8,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:36:11.0890000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.8
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.9,
+                                        "Velocity": 1.55584684713445,
+                                        "Discharge": 2.95610900955545,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 6.00574080163821
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.38,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.674,
+                                                "Velocity": 2.24304929461942,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.52,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.667,
+                                                "Velocity": 0.868644399649468,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.55584684713445
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 11,
+                                    "SoundedDepth": 1.9,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:41:28.8790000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.9
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.9,
+                                        "Velocity": 1.4864836001554,
+                                        "Discharge": 2.82431884029526,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 5.73799100140342
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.38,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.555,
+                                                "Velocity": 2.15970744661985,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.52,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.675,
+                                                "Velocity": 0.813259753690945,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.4864836001554
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 12,
+                                    "SoundedDepth": 1.9,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:45:05.4540000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.9
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 2,
+                                        "Velocity": 1.79556396161417,
+                                        "Discharge": 3.59112792322835,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 7.29586880007452
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.4,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.677,
+                                                "Velocity": 2.36458912401575,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.6,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.641,
+                                                "Velocity": 1.2265387992126,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.79556396161417
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 13,
+                                    "SoundedDepth": 2,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:47:37.1550000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 2
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 0.999999999999999,
+                                        "Area": 1.9,
+                                        "Velocity": 1.68942835528972,
+                                        "Discharge": 3.20991387505047,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 6.52138018822058
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.38,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.666,
+                                                "Velocity": 2.28505078740157,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.52,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.667,
+                                                "Velocity": 1.09380592317787,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.68942835528972
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 14,
+                                    "SoundedDepth": 1.9,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:51:45.8900000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.9
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 0.999999999999999,
+                                        "Area": 2.1,
+                                        "Velocity": 1.63577736697686,
+                                        "Discharge": 3.43513247065139,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 6.97894264769548
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.42,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.659,
+                                                "Velocity": 2.27482414698163,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.68,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.545,
+                                                "Velocity": 0.996730586972083,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.63577736697686
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 15,
+                                    "SoundedDepth": 2.1,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:55:35.6560000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 2.1
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 2,
+                                        "Velocity": 1.61740049539245,
+                                        "Discharge": 3.2348009907849,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 6.5719417764158
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.4,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.662,
+                                                "Velocity": 2.04635293531347,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.6,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.679,
+                                                "Velocity": 1.18844805547143,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.61740049539245
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 16,
+                                    "SoundedDepth": 2,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T22:58:37.1830000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 2
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.9,
+                                        "Velocity": 1.51154179654212,
+                                        "Discharge": 2.87192941343003,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 5.8347184092022
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.38,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.639,
+                                                "Velocity": 2.0679484949147,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.52,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.67,
+                                                "Velocity": 0.955135098169547,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.51154179654212
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 17,
+                                    "SoundedDepth": 1.9,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:01:42.7040000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.9
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.7,
+                                        "Velocity": 1.36577623639122,
+                                        "Discharge": 2.32181960186508,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 4.71709489463702
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointTwoAndPointEight",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.34,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.664,
+                                                "Velocity": 1.76836338246181,
+                                                "IsVelocityEstimated": false
+                                            },
+                                            {
+                                                "Depth": 1.36,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.69,
+                                                "Velocity": 0.963189090320636,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.36577623639122
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 18,
+                                    "SoundedDepth": 1.7,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:04:30.7440000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.7
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1.6,
+                                        "Velocity": 1.31738287611885,
+                                        "Discharge": 2.10781260179016,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 4.28231032883395
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.96,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.653,
+                                                "Velocity": 1.31738287611885,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.31738287611885
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 19,
+                                    "SoundedDepth": 1.6,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:07:00.3020000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.6
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 0.999999999999999,
+                                        "Area": 1.5,
+                                        "Velocity": 1.59394925634296,
+                                        "Discharge": 2.39092388451443,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 4.85748972058343
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.9,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.668,
+                                                "Velocity": 1.59394925634296,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.59394925634296
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 20,
+                                    "SoundedDepth": 1.5,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:08:35.5500000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.5
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 0.999999999999999,
+                                        "Area": 1.3,
+                                        "Velocity": 1.40524531130602,
+                                        "Discharge": 1.82681890469783,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 3.71143310266414
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.78,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.667,
+                                                "Velocity": 1.40524531130602,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.40524531130602
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 21,
+                                    "SoundedDepth": 1.3,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:10:01.5800000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1.3
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 1,
+                                        "Velocity": 1.4672334864392,
+                                        "Discharge": 1.4672334864392,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 2.98088601826051
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.6,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.675,
+                                                "Velocity": 1.4672334864392,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.4672334864392
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 22,
+                                    "SoundedDepth": 1,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:11:16.2940000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 1
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 0.8,
+                                        "Velocity": 0.927740059907284,
+                                        "Discharge": 0.742192047925828,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 1.50786491650722
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.48,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.699,
+                                                "Velocity": 0.927740059907284,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 0.927740059907284
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 23,
+                                    "SoundedDepth": 0.8,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:12:33.4410000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.8
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 1,
+                                        "Area": 0.6,
+                                        "Velocity": 1.14341955898605,
+                                        "Discharge": 0.686051735391629,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 1.39380817350028
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2P1538012",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": "0.46",
+                                            "SoftwareVersion": "0.17.1",
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "OneAtPointSix",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0.36,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 39.62,
+                                                "Velocity": -1.14341955898605,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 1.14341955898605
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "MidRiver",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 24,
+                                    "SoundedDepth": 0.6,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:14:42.6210000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.6
+                                },
+                                {
+                                    "Segment": {
+                                        "Width": 0.5,
+                                        "Area": 0.3,
+                                        "Velocity": 0,
+                                        "Discharge": 0.343025867695815,
+                                        "IsDischargeEstimated": false,
+                                        "TotalDischargePortion": 0.696904086750142
+                                    },
+                                    "MeasurementConditionData": {
+                                        "SuspensionWeight": null,
+                                        "DistanceToMeter": null,
+                                        "DryLineAngle": 0,
+                                        "SurfaceCoefficient": null,
+                                        "DistanceToWaterSurface": null,
+                                        "DryLineCorrection": null,
+                                        "WetLineCorrection": null
+                                    },
+                                    "VelocityObservation": {
+                                        "MeterCalibration": {
+                                            "SerialNumber": "FT2H1542004",
+                                            "Manufacturer": "SonTek",
+                                            "Model": "FlowTracker2",
+                                            "MeterType": "Adv",
+                                            "Configuration": "FT2H1542004/004A73D9",
+                                            "FirmwareVersion": null,
+                                            "SoftwareVersion": null,
+                                            "Equations": [
+                                                {
+                                                    "RangeStart": null,
+                                                    "RangeEnd": null,
+                                                    "Slope": 0,
+                                                    "Intercept": 0,
+                                                    "InterceptUnitId": "ft"
+                                                }
+                                            ]
+                                        },
+                                        "VelocityObservationMethod": "Surface",
+                                        "DeploymentMethod": "Unspecified",
+                                        "Observations": [
+                                            {
+                                                "Depth": 0,
+                                                "RevolutionCount": 0,
+                                                "ObservationInterval": 0,
+                                                "Velocity": 0,
+                                                "IsVelocityEstimated": false
+                                            }
+                                        ],
+                                        "MeanVelocity": 0
+                                    },
+                                    "SequenceNumber": 0,
+                                    "VerticalType": "EndEdgeNoWaterAfter",
+                                    "FlowDirection": "Normal",
+                                    "TaglinePosition": 25,
+                                    "SoundedDepth": 0.6,
+                                    "IsSoundedDepthEstimated": false,
+                                    "MeasurementTime": "2025-04-08T23:16:46.9810000+00:00",
+                                    "ObliqueFlowCorrection": 0,
+                                    "Comments": null,
+                                    "EffectiveDepth": 0.6
+                                }
+                            ],
+                            "MeasurementStartTime": "2025-04-08T22:20:16.6060000+00:00",
+                            "MeasurementEndTime": "2025-04-08T23:16:46.9810000+00:00",
+                            "MeasurementPeriod": {
+                                "Start": "2025-04-08T22:20:16.6060000+00:00",
+                                "End": "2025-04-08T23:16:46.9810000+00:00"
+                            },
+                            "Party": null,
+                            "ChannelName": "Main",
+                            "Discharge": {
+                                "Value": 49.2213884546782,
+                                "UnitId": "ft^3/s"
+                            },
+                            "Comments": null
+                        }
+                    ]
+                }
+            ],
+            "CrossSectionSurveys": [],
+            "Readings": [
+                {
+                    "ParameterId": "TW",
+                    "Method": "DefaultNone",
+                    "Measurement": {
+                        "Value": 55.0882415803571,
+                        "UnitId": "degF"
+                    },
+                    "Uncertainty": null,
+                    "AdjustmentAmount": 2.75,
+                    "ReadingType": "Unknown",
+                    "MeasurementDevice": {
+                        "Manufacturer": "SonTek",
+                        "Model": "ProbeModel",
+                        "SerialNumber": "ProbeSerial"
+                    },
+                    "DateTimeOffset": "2025-04-08T22:48:31.7935000+00:00",
+                    "Publish": true,
+                    "SubLocation": null,
+                    "Comments": "55.088 degF water temp with 2.75 adjustment. A 2021.3 feature."
+                }
+            ]
+        },
+        {
+            "LocationInfo": {
+                "LocationId": 0,
+                "LocationIdentifier": "LOC1",
+                "LocationName": "DummyNameFor-LOC1",
+                "UniqueId": "00000000-0000-0000-0000-000000000000",
+                "UtcOffset": "-PT8H"
+            },
+            "LocationId": 0,
+            "FieldVisitId": 0,
+            "StartDate": "2020-01-11T12:35:00.0000000-08:00",
+            "EndDate": "2020-01-11T12:36:00.0000000-08:00",
+            "Party": null,
+            "FieldVisitIdentifier": "LOC1:01/11/2020 12:35:00 -08:00",
+            "FieldVisitDetails": {
+                "StartDate": "2020-01-11T12:35:00.0000000-08:00",
+                "EndDate": "2020-01-11T12:36:00.0000000-08:00",
+                "FieldVisitPeriod": {
+                    "Start": "2020-01-11T12:35:00.0000000-08:00",
+                    "End": "2020-01-11T12:36:00.0000000-08:00"
+                },
+                "Party": null,
+                "Comments": "",
+                "Weather": null,
+                "CollectionAgency": null,
+                "CompletedVisitActivities": {
+                    "GroundWaterLevels": false,
+                    "ConductedLevelSurvey": false,
+                    "RecorderDataCollected": false,
+                    "SafetyInspectionPerformed": false,
+                    "OtherSample": false,
+                    "BiologicalSample": false,
+                    "SedimentSample": false,
+                    "WaterQualitySample": false
+                }
+            },
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
+            "Readings": [
+                {
+                    "Value": 18.5,
+                    "UnitId": "degC",
+                    "ParameterId": "TA",
+                    "Method": "DefaultNone",
+                    "Measurement": {
+                        "Value": 18.5,
+                        "UnitId": "degC"
+                    },
+                    "Uncertainty": null,
+                    "ReadingType": "Unknown",
+                    "MeasurementDevice": null,
+                    "DateTimeOffset": "2020-01-11T12:35:00.0000000-08:00",
+                    "Publish": true,
+                    "SubLocation": null,
+                    "Comments": "",
+                    "ReferencePointName": null,
+                    "UseLocationDatumAsReference": false,
+                    "ReadingQualifier": null,
+                    "ReadingQualifiers": [],
+                    "GroundWaterMeasurementDetails": null,
+                    "SensorUniqueId": null,
+                    "Grade": null
+                }
+            ],
+            "Calibrations": [],
+            "Inspections": [],
+            "GageZeroFlowActivities": []
+        },
+        {
+            "LocationInfo": {
+                "LocationId": 0,
+                "LocationIdentifier": "LOC2",
+                "LocationName": "DummyNameFor-LOC2",
+                "UniqueId": "00000000-0000-0000-0000-000000000000",
+                "UtcOffset": "-PT8H"
+            },
+            "LocationId": 0,
+            "FieldVisitId": 0,
+            "StartDate": "1988-08-09T15:10:00.0000000-08:00",
+            "EndDate": "1988-08-09T15:11:00.0000000-08:00",
+            "Party": null,
+            "FieldVisitIdentifier": "LOC2:08/09/1988 15:10:00 -08:00",
+            "FieldVisitDetails": {
+                "StartDate": "1988-08-09T15:10:00.0000000-08:00",
+                "EndDate": "1988-08-09T15:11:00.0000000-08:00",
+                "FieldVisitPeriod": {
+                    "Start": "1988-08-09T15:10:00.0000000-08:00",
+                    "End": "1988-08-09T15:11:00.0000000-08:00"
+                },
+                "Party": null,
+                "Comments": "",
+                "Weather": null,
+                "CollectionAgency": null,
+                "CompletedVisitActivities": {
+                    "GroundWaterLevels": false,
+                    "ConductedLevelSurvey": false,
+                    "RecorderDataCollected": false,
+                    "SafetyInspectionPerformed": false,
+                    "OtherSample": false,
+                    "BiologicalSample": false,
+                    "SedimentSample": false,
+                    "WaterQualitySample": false
+                }
+            },
+            "DischargeActivities": [],
+            "ControlConditions": [],
+            "CrossSectionSurveys": [],
+            "LevelSurveys": [],
+            "Readings": [
+                {
+                    "Value": -4.5,
+                    "UnitId": "degC",
+                    "ParameterId": "TA",
+                    "Method": "DefaultNone",
+                    "Measurement": {
+                        "Value": -4.5,
+                        "UnitId": "degC"
+                    },
+                    "AdjustmentAmount": 2.25,
+                    "Uncertainty": null,
+                    "ReadingType": "Unknown",
+                    "MeasurementDevice": null,
+                    "DateTimeOffset": "1988-08-09T15:10:00.0000000-08:00",
+                    "Publish": true,
+                    "SubLocation": null,
+                    "Comments": "-4.5 measurement with 2.25 adjustment. A 2021.3 feature",
+                    "ReferencePointName": null,
+                    "UseLocationDatumAsReference": false,
+                    "ReadingQualifier": null,
+                    "ReadingQualifiers": [],
+                    "GroundWaterMeasurementDetails": null,
+                    "SensorUniqueId": null,
+                    "Grade": null
+                }
+            ],
+            "Calibrations": [],
+            "Inspections": [],
+            "GageZeroFlowActivities": []
+        }
+    ]
+}

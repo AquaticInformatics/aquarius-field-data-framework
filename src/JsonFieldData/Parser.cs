@@ -1,14 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using FieldDataPluginFramework;
+﻿using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.Results;
 using FieldDataPluginFramework.Serialization;
 using FieldDataPluginFramework.Validation;
 using ServiceStack;
+using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
 
 namespace JsonFieldData
 {
@@ -147,6 +147,11 @@ namespace JsonFieldData
             foreach (var gageZeroFlowActivity in importedVisit.GageZeroFlowActivities)
             {
                 ResultsAppender.AddGageZeroFlowActivity(visit, gageZeroFlowActivity);
+            }
+
+            foreach (var wellIntegrity in importedVisit.WellIntegrity)
+            {
+                ResultsAppender.AddWellIntegrity(visit, wellIntegrity);
             }
         }
 
