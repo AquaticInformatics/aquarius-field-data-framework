@@ -7,7 +7,6 @@ using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
-using FieldDataPluginFramework.DataModel.HydraulicTest;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.PickLists;
@@ -340,10 +339,6 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
                 visit.LevelSurveys.Add(item);
             }
 
-            foreach (var item in Fixture.CreateMany<HydraulicTest>())
-            {
-                visit.HydraulicTests.Add(item);
-            }
             visit.GageZeroFlowActivities.Add(Fixture.Create<GageZeroFlowActivity>());
 
             return visit;
