@@ -7,6 +7,7 @@ using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
+using FieldDataPluginFramework.DataModel.HydraulicTest;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FieldDataPluginFramework.Results;
@@ -203,6 +204,11 @@ namespace FieldVisitHotFolderService
         public void AddWellIntegrity(FieldVisitInfo fieldVisit, WellIntegrity wellIntegrity)
         {
             fieldVisit.WellIntegrity.Add(wellIntegrity);
+        }
+
+        public void AddHydraulicTest(FieldVisitInfo fieldVisit, HydraulicTest hydraulicTest)
+        {
+            fieldVisit.HydraulicTests.Add(hydraulicTest);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Aquarius.TimeSeries.Client.ServiceModels.Publish;
+﻿using Aquarius.TimeSeries.Client.ServiceModels.Publish;
 using Common;
 using FieldDataPluginFramework;
 using FieldDataPluginFramework.Context;
@@ -17,7 +14,40 @@ using FieldDataPluginFramework.DataModel.PickLists;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
 using FieldDataPluginFramework.Units;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CrossSectionPoint = Aquarius.TimeSeries.Client.ServiceModels.Publish.CrossSectionPoint;
+using FrameworkAdjustmentType = FieldDataPluginFramework.DataModel.DischargeActivities.AdjustmentType;
+using FrameworkCalibration = FieldDataPluginFramework.DataModel.Calibrations.Calibration;
+using FrameworkCalibrationType = FieldDataPluginFramework.DataModel.Calibrations.CalibrationType;
+using FrameworkControlCleanedType = FieldDataPluginFramework.DataModel.ControlConditions.ControlCleanedType;
+using FrameworkCrossSectionPoint = FieldDataPluginFramework.DataModel.CrossSection.CrossSectionPoint;
+using FrameworkDeploymentMethodType = FieldDataPluginFramework.DataModel.ChannelMeasurements.DeploymentMethodType;
+using FrameworkDischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
+using FrameworkDischargeMethodType = FieldDataPluginFramework.DataModel.ChannelMeasurements.DischargeMethodType;
+using FrameworkFlowDirectionType = FieldDataPluginFramework.DataModel.Verticals.FlowDirectionType;
+using FrameworkGrade = FieldDataPluginFramework.DataModel.DischargeActivities.Grade;
+using FrameworkIceCoveredData = FieldDataPluginFramework.DataModel.Verticals.IceCoveredData;
+using FrameworkInspection = FieldDataPluginFramework.DataModel.Inspections.Inspection;
+using FrameworkInspectionType = FieldDataPluginFramework.DataModel.Inspections.InspectionType;
+using FrameworkLevelSurveyMeasurement = FieldDataPluginFramework.DataModel.LevelSurveys.LevelSurveyMeasurement;
+using FrameworkMeterSuspensionType = FieldDataPluginFramework.DataModel.ChannelMeasurements.MeterSuspensionType;
+using FrameworkMeterType = FieldDataPluginFramework.DataModel.Meters.MeterType;
+using FrameworkOpenWaterData = FieldDataPluginFramework.DataModel.Verticals.OpenWaterData;
+using FrameworkPointVelocityObservationType = FieldDataPluginFramework.DataModel.Verticals.PointVelocityObservationType;
+using FrameworkQualitativeUncertaintyType = FieldDataPluginFramework.DataModel.DischargeActivities.QualitativeUncertaintyType;
+using FrameworkReading = FieldDataPluginFramework.DataModel.Readings.Reading;
+using FrameworkReadingType = FieldDataPluginFramework.DataModel.Readings.ReadingType;
+using FrameworkReasonForAdjustmentType = FieldDataPluginFramework.DataModel.DischargeActivities.ReasonForAdjustmentType;
+using FrameworkStandardDetails = FieldDataPluginFramework.DataModel.Calibrations.StandardDetails;
+using FrameworkStartPointType = FieldDataPluginFramework.DataModel.ChannelMeasurements.StartPointType;
+using FrameworkUncertaintyType = FieldDataPluginFramework.DataModel.DischargeActivities.UncertaintyType;
+using FrameworkVelocityDepthObservation = FieldDataPluginFramework.DataModel.Verticals.VelocityDepthObservation;
+using FrameworkVelocityObservation = FieldDataPluginFramework.DataModel.Verticals.VelocityObservation;
+using FrameworkVertical = FieldDataPluginFramework.DataModel.Verticals.Vertical;
+using FrameworkVerticalType = FieldDataPluginFramework.DataModel.Verticals.VerticalType;
+using FrameworkVolumetricDischargeReading = FieldDataPluginFramework.DataModel.ChannelMeasurements.VolumetricDischargeReading;
 using IceCoveredData = Aquarius.TimeSeries.Client.ServiceModels.Publish.IceCoveredData;
 using OpenWaterData = Aquarius.TimeSeries.Client.ServiceModels.Publish.OpenWaterData;
 using Reading = Aquarius.TimeSeries.Client.ServiceModels.Publish.Reading;
@@ -26,36 +56,6 @@ using UncertaintyType = Aquarius.TimeSeries.Client.ServiceModels.Publish.Uncerta
 using VelocityDepthObservation = Aquarius.TimeSeries.Client.ServiceModels.Publish.VelocityDepthObservation;
 using Vertical = Aquarius.TimeSeries.Client.ServiceModels.Publish.Vertical;
 using VolumetricDischargeReading = Aquarius.TimeSeries.Client.ServiceModels.Publish.VolumetricDischargeReading;
-using FrameworkCalibration = FieldDataPluginFramework.DataModel.Calibrations.Calibration;
-using FrameworkDischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
-using FrameworkGrade = FieldDataPluginFramework.DataModel.DischargeActivities.Grade;
-using FrameworkLevelSurveyMeasurement = FieldDataPluginFramework.DataModel.LevelSurveys.LevelSurveyMeasurement;
-using FrameworkPointVelocityObservationType = FieldDataPluginFramework.DataModel.Verticals.PointVelocityObservationType;
-using FrameworkVelocityObservation = FieldDataPluginFramework.DataModel.Verticals.VelocityObservation;
-using FrameworkVelocityDepthObservation = FieldDataPluginFramework.DataModel.Verticals.VelocityDepthObservation;
-using FrameworkVolumetricDischargeReading = FieldDataPluginFramework.DataModel.ChannelMeasurements.VolumetricDischargeReading;
-using FrameworkDeploymentMethodType = FieldDataPluginFramework.DataModel.ChannelMeasurements.DeploymentMethodType;
-using FrameworkMeterType = FieldDataPluginFramework.DataModel.Meters.MeterType;
-using FrameworkControlCleanedType = FieldDataPluginFramework.DataModel.ControlConditions.ControlCleanedType;
-using FrameworkInspectionType = FieldDataPluginFramework.DataModel.Inspections.InspectionType;
-using FrameworkInspection = FieldDataPluginFramework.DataModel.Inspections.Inspection;
-using FrameworkReading = FieldDataPluginFramework.DataModel.Readings.Reading;
-using FrameworkCalibrationType = FieldDataPluginFramework.DataModel.Calibrations.CalibrationType;
-using FrameworkStandardDetails = FieldDataPluginFramework.DataModel.Calibrations.StandardDetails;
-using FrameworkReadingType = FieldDataPluginFramework.DataModel.Readings.ReadingType;
-using FrameworkStartPointType = FieldDataPluginFramework.DataModel.ChannelMeasurements.StartPointType;
-using FrameworkCrossSectionPoint = FieldDataPluginFramework.DataModel.CrossSection.CrossSectionPoint;
-using FrameworkAdjustmentType = FieldDataPluginFramework.DataModel.DischargeActivities.AdjustmentType;
-using FrameworkReasonForAdjustmentType = FieldDataPluginFramework.DataModel.DischargeActivities.ReasonForAdjustmentType;
-using FrameworkUncertaintyType = FieldDataPluginFramework.DataModel.DischargeActivities.UncertaintyType;
-using FrameworkQualitativeUncertaintyType = FieldDataPluginFramework.DataModel.DischargeActivities.QualitativeUncertaintyType;
-using FrameworkDischargeMethodType = FieldDataPluginFramework.DataModel.ChannelMeasurements.DischargeMethodType;
-using FrameworkMeterSuspensionType = FieldDataPluginFramework.DataModel.ChannelMeasurements.MeterSuspensionType;
-using FrameworkVertical = FieldDataPluginFramework.DataModel.Verticals.Vertical;
-using FrameworkVerticalType = FieldDataPluginFramework.DataModel.Verticals.VerticalType;
-using FrameworkFlowDirectionType = FieldDataPluginFramework.DataModel.Verticals.FlowDirectionType;
-using FrameworkOpenWaterData = FieldDataPluginFramework.DataModel.Verticals.OpenWaterData;
-using FrameworkIceCoveredData = FieldDataPluginFramework.DataModel.Verticals.IceCoveredData;
 
 namespace FieldVisitHotFolderService
 {
@@ -692,7 +692,7 @@ namespace FieldVisitHotFolderService
                 .Verticals
                 .Select(v => v.VelocityObservation.MeterCalibration)
                 .GroupBy(m => $"{m.MeterType}/{m.Manufacturer}/{m.Model}/{m.SerialNumber}")
-                .Select( g => (g.Key, Items: g.ToList()))
+                .Select(g => (g.Key, Items: g.ToList()))
                 .OrderByDescending(x => x.Items.Count)
                 .ToList();
 

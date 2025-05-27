@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoFixture;
+﻿using AutoFixture;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
@@ -9,14 +7,18 @@ using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
+using FieldDataPluginFramework.DataModel.HydraulicTest;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.PickLists;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
+using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FluentAssertions;
 using NUnit.Framework;
 using ServiceStack;
+using System;
+using System.Collections.Generic;
 
 namespace FieldDataPluginFramework.Serialization.UnitTests
 {
@@ -240,7 +242,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
         {
             var channelMeasurement = CreateNextChannelMeasurement();
 
-            NextMeasurementType = (ChannelMeasurementType) ((1 + (int) NextMeasurementType) % ChannelMeasurementTypeCount);
+            NextMeasurementType = (ChannelMeasurementType)((1 + (int)NextMeasurementType) % ChannelMeasurementTypeCount);
 
             return channelMeasurement;
         }
@@ -339,6 +341,15 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
                 visit.LevelSurveys.Add(item);
             }
 
+            foreach (var item in Fixture.CreateMany<WellIntegrity>())
+            {
+                visit.WellIntegrity.Add(item);
+            }
+
+            foreach (var item in Fixture.CreateMany<HydraulicTest>())
+            {
+                visit.HydraulicTests.Add(item);
+            }
             visit.GageZeroFlowActivities.Add(Fixture.Create<GageZeroFlowActivity>());
 
             return visit;

@@ -6,6 +6,7 @@ using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
+using FieldDataPluginFramework.DataModel.HydraulicTest;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
@@ -142,6 +143,11 @@ namespace PluginTester
         public void AddWellIntegrity(FieldVisitInfo fieldVisit, WellIntegrity wellIntegrity)
         {
             fieldVisit.WellIntegrity.Add(wellIntegrity);
+        }
+
+        public void AddHydraulicTest(FieldVisitInfo fieldVisit, HydraulicTest hydraulicTest)
+        {
+            fieldVisit.HydraulicTests.Add(hydraulicTest);
         }
     }
 }
