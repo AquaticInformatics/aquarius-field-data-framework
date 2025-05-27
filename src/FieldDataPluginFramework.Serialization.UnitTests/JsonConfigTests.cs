@@ -13,7 +13,6 @@ using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.PickLists;
 using FieldDataPluginFramework.DataModel.Readings;
 using FieldDataPluginFramework.DataModel.Verticals;
-using FieldDataPluginFramework.DataModel.WellIntegrity;
 using FluentAssertions;
 using NUnit.Framework;
 using ServiceStack;
@@ -339,11 +338,6 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
             foreach (var item in Fixture.CreateMany<LevelSurvey>())
             {
                 visit.LevelSurveys.Add(item);
-            }
-
-            foreach (var item in Fixture.CreateMany<WellIntegrity>())
-            {
-                visit.WellIntegrity.Add(item);
             }
 
             foreach (var item in Fixture.CreateMany<HydraulicTest>())
