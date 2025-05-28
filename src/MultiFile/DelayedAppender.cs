@@ -7,6 +7,7 @@ using FieldDataPluginFramework.DataModel.ControlConditions;
 using FieldDataPluginFramework.DataModel.CrossSection;
 using FieldDataPluginFramework.DataModel.DischargeActivities;
 using FieldDataPluginFramework.DataModel.GageZeroFlow;
+using FieldDataPluginFramework.DataModel.HydraulicTest;
 using FieldDataPluginFramework.DataModel.Inspections;
 using FieldDataPluginFramework.DataModel.LevelSurveys;
 using FieldDataPluginFramework.DataModel.Readings;
@@ -85,6 +86,11 @@ namespace MultiFile
             foreach (var wellIntegrityActivity in delayedVisit.WellIntegrity)
             {
                 ActualAppender.AddWellIntegrity(visit, wellIntegrityActivity);
+            }
+
+            foreach (var hydraulicTestActivity in delayedVisit.HydraulicTests)
+            {
+                ActualAppender.AddHydraulicTest(visit, hydraulicTestActivity);
             }
         }
 
@@ -326,6 +332,12 @@ namespace MultiFile
                 .Concat(wellIntegrity.WellRedevelopments.Select(s => s.EndDate))
                 .Concat(wellIntegrity.WellRepairs.Select(s => s.EndDate));
             ExtendVisitPeriod(fieldVisit, allActivityPeriods);
+        }
+
+        public void AddHydraulicTest(FieldVisitInfo fieldVisit, HydraulicTest hydraulicTest)
+        {
+            fieldVisit.HydraulicTests.Add(hydraulicTest);
+            ExtendVisitPeriod(fieldVisit, new[] { hydraulicTest.StartDate, hydraulicTest.EndDate });
         }
     }
 }

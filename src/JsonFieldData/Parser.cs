@@ -153,6 +153,11 @@ namespace JsonFieldData
             {
                 ResultsAppender.AddWellIntegrity(visit, wellIntegrity);
             }
+
+            foreach (var hydraulicTest in importedVisit.HydraulicTests)
+            {
+                ResultsAppender.AddHydraulicTest(visit, hydraulicTest);
+            }
         }
 
         private static void UpgradeCrossSectionSurvey(CrossSectionSurvey survey)

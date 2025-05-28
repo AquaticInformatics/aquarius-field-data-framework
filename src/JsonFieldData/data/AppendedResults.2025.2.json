@@ -86,7 +86,30 @@
                         "Comments": "Sample comment for WellRepair"
                     }
                 ]
-            }
+            },
+			"HydraulicTests": 
+			[
+				{
+				
+					"TestName": "TestName28481138-4db5-4f44-83e2-8ea72caf25a3",
+					"TestContext": "Other",
+					"TestMethod": "Injection",
+					"AquiferCode": "AquiferCode25f074b7-c365-490d-b39c-878072c0d082",
+					"AquiferType": "Aquitard",
+					"RelatedTimeSeriesUniqueIds": [],
+					"RelatedFieldVisitIdentifiers": [],
+					"StartDate": "2025-05-27T16:35:47.2221096-07:00",
+					"EndDate": "2025-05-27T18:35:47.2221096-07:00",
+					"Results": [
+						{
+						"ParameterId": "Depth",
+						"UnitId": "ft",
+						"AnalysisMethod": "Hantush-Jacob",
+						"Value": 1.0
+						}
+					]
+				}
+			]
         },
         {
             "LocationInfo": {

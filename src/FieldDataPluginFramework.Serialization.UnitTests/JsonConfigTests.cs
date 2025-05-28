@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoFixture;
+﻿using AutoFixture;
 using FieldDataPluginFramework.Context;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Calibrations;
@@ -17,6 +15,8 @@ using FieldDataPluginFramework.DataModel.Verticals;
 using FluentAssertions;
 using NUnit.Framework;
 using ServiceStack;
+using System;
+using System.Collections.Generic;
 
 namespace FieldDataPluginFramework.Serialization.UnitTests
 {
@@ -240,7 +240,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
         {
             var channelMeasurement = CreateNextChannelMeasurement();
 
-            NextMeasurementType = (ChannelMeasurementType) ((1 + (int) NextMeasurementType) % ChannelMeasurementTypeCount);
+            NextMeasurementType = (ChannelMeasurementType)((1 + (int)NextMeasurementType) % ChannelMeasurementTypeCount);
 
             return channelMeasurement;
         }
