@@ -391,7 +391,20 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => new NavigationMethodPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
             Configure(json => new ReadingQualifierPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
             Configure(json => new TopEstimateMethodPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
-            Configure(BackwardsCompatibleControlConditionPicklistFactory);
+
+            Configure(json => CreatePickList(json, s => new ControlConditionPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestContextPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestAquiferTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestAnalysisMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new WellAquiferConnectivityTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellComponentTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellConditionTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellInspectionMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new WellInspectionMethodTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellRedevelopmentMethodTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellRepairTypePickList(s)));
+
         }
 
         public const int LegacyPointOrder = 0;
@@ -408,14 +421,19 @@ namespace FieldDataPluginFramework.Serialization
                 json.Get<double>(nameof(CrossSectionPoint.Elevation)));
         }
 
-        private static ControlConditionPickList BackwardsCompatibleControlConditionPicklistFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
 
-            return new ControlConditionPickList(conditionType);
+
+        private static T CreatePickList<T>(JsonParser json, Func<string, T> constructor) where T : PickList
+        {
+            var pickListValue = json.JsonText.StartsWith("{")
+            ? json.Get<string>(nameof(PickList.IdOrDisplayName))
+            : json.JsonText;
+
+            return constructor(pickListValue);
         }
+
+
+
 
         private static Reading ReadingFactory(JsonParser json)
         {

@@ -35,81 +35,141 @@
             "LevelSurveys": [],
             "Readings": [],
             "WellIntegrity": {
-                "WellAquiferConnections": [
-                    {
-                        "StartDate": "2025-04-08T00:00:00+00:00",
-                        "WellAquiferConnectivityType": {
-                            "IdOrDisplayName": "Adequate"
-                        },
-                        "WellInspectionMethodType": {
-                            "IdOrDisplayName": "HydraulicTest"
-                        },
-                        "Comments": "Integration test comment for WellAquiferConnection"
-                    }
-                ],
-                "WellInspections": [
-                    {
-                        "StartDate": "2025-04-08T00:00:00+00:00",
-                        "WellComponentType": {
-                            "IdOrDisplayName": "Casing"
-                        },
-                        "WellConditionType": {
-                            "IdOrDisplayName": "Clear"
-                        },
-                        "DistanceFrom": 0.0,
-                        "DistanceTo": 100.0,
-                        "DistanceUnitId": "ft",
-                        "Comments": "Integration test comment  for WellInspection",
-                        "WellInspectionMethod": {
-                            "IdOrDisplayName": "BoreholeFlowmeter"
-                        }
-                    }
-                ],
-                "WellRedevelopments": [
-                    {
-                        "Attempt": 1,
-                        "StartDate": "2025-04-08T00:00:00+00:00",
-                        "EndDate": "2025-04-08T10:00:00+00:00",
-                        "WellRedevelopmentMethodType": {
-                            "IdOrDisplayName": "Bailed"
-                        },
-                        "Comments": "Sample comment for WellRedevelopment"
-                    }
-                ],
-                "WellRepairs": [
-                    {
-                        "StartDate": "2025-04-08T00:00:00+00:00",
-                        "EndDate": "2025-04-08T00:00:00+00:00",
-                        "WellRepairType": {
-                            "IdOrDisplayName": "BlockedOff"
-                        },
-                        "Comments": "Sample comment for WellRepair"
-                    }
-                ]
+        "WellAquiferConnections": [
+            {
+                "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                "WellAquiferConnectivityType": {
+                    "IdOrDisplayName": "Adequate"
+                },
+                "WellInspectionMethodType": {
+                    "IdOrDisplayName": "HydraulicTest"
+                },
+                "Comments": "Sample comment for WellAquiferConnection"
+            }
+        ],
+        "WellInspections": [
+            {
+                "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                "WellComponentType": {
+                    "IdOrDisplayName": "Casing"
+                },
+                "WellConditionType": {
+                    "IdOrDisplayName": "Clear"
+                },
+                "DistanceFrom": 0.0,
+                "DistanceTo": 100.0,
+                "DistanceUnitId": "ft",
+                "Comments": "Sample comment for WellInspection",
+                "WellInspectionMethod": {
+                    "IdOrDisplayName": "BoreholeFlowmeter"
+                }
+            }
+        ],
+        "WellRedevelopments": [
+            {
+                "Attempt": 1,
+                "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                "WellRedevelopmentMethodType": {
+                    "IdOrDisplayName": "Bailed"
+                },
+                "Comments": "Sample comment for WellRedevelopment"
+            }
+        ],
+        "WellRepairs": [
+            {
+                "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                "EndDate": "2025-04-08T14:32:15.0000000+07:00",
+                "WellRepairType": {
+                    "IdOrDisplayName": "BlockedOff"
+                },
+                "Comments": "Sample comment for WellRepair"
+            }
+        ]
             },
-			"HydraulicTests": 
-			[
-				{
-				
-					"TestName": "TestName28481138-4db5-4f44-83e2-8ea72caf25a3",
-					"TestContext": "Other",
-					"TestMethod": "Injection",
-					"AquiferCode": "AquiferCode25f074b7-c365-490d-b39c-878072c0d082",
-					"AquiferType": "Aquitard",
-					"RelatedTimeSeriesUniqueIds": [],
-					"RelatedFieldVisitIdentifiers": [],
-					"StartDate": "2025-05-27T16:35:47.2221096-07:00",
-					"EndDate": "2025-05-27T18:35:47.2221096-07:00",
-					"Results": [
-						{
-						"ParameterId": "Depth",
-						"UnitId": "ft",
-						"AnalysisMethod": "Hantush-Jacob",
-						"Value": 1.0
-						}
-					]
-				}
-			]
+            "HydraulicTests": [
+                {
+                    "TestName": "TestName9666ee22-8abd-4790-9487-8dfc26ea36f3",
+                    "TestContext": {
+                        "IdOrDisplayName": "WellIntegrity"
+                    },
+                    "TestMethod": {
+                        "IdOrDisplayName": "SlugMechanical"
+                    },
+                    "AquiferCode": "AquiferCode6279ee7b-86a5-4bca-a7e3-017bcf5daf36",
+                    "AquiferType": {
+                        "IdOrDisplayName": "Unconfined"
+                    },
+                    "RelatedTimeSeriesUniqueIds": [],
+                    "RelatedFieldVisitIdentifiers": [],
+                    "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                    "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Results": [
+                        {
+                            "ParameterId": "HG",
+                            "UnitId": "m",
+                            "AnalysisMethod": {
+                                "IdOrDisplayName": "Storativity"
+                            },
+                            "Value": 63.0
+                        }
+                    ]
+                },
+                {
+                    "TestName": "TestNamee402db1f-1337-4e47-9b66-2fca7eb93cba",
+                    "TestContext": {
+                        "IdOrDisplayName": "WellIntegrity"
+                    },
+                    "TestMethod": {
+                        "IdOrDisplayName": "SlugMechanical"
+                    },
+                    "AquiferCode": "AquiferCode5969bfb7-3ebb-4538-8b8b-d7cf29c3b912",
+                    "AquiferType": {
+                        "IdOrDisplayName": "Unconfined"
+                    },
+                    "RelatedTimeSeriesUniqueIds": [],
+                    "RelatedFieldVisitIdentifiers": [],
+                    "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                    "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Results": [
+                        {
+                            "ParameterId": "HG",
+                            "UnitId": "m",
+                            "AnalysisMethod": {
+                                "IdOrDisplayName": "Storativity"
+                            },
+                            "Value": 249.0
+                        }
+                    ]
+                },
+                {
+                    "TestName": "TestName4aef95bd-0188-4eeb-b841-eab688c6d20e",
+                    "TestContext": {
+                        "IdOrDisplayName": "WellIntegrity"
+                    },
+                    "TestMethod": {
+                        "IdOrDisplayName": "SlugMechanical"
+                    },
+                    "AquiferCode": "AquiferCode41e3b36e-2781-46f7-8e80-0bf253b2efee",
+                    "AquiferType": {
+                        "IdOrDisplayName": "Unconfined"
+                    },
+                    "RelatedTimeSeriesUniqueIds": [],
+                    "RelatedFieldVisitIdentifiers": [],
+                    "StartDate": "2025-04-08T14:32:15.0000000+07:00",
+                    "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Results": [
+                        {
+                            "ParameterId": "HG",
+                            "UnitId": "m",
+                            "AnalysisMethod": {
+                                "IdOrDisplayName": "Storativity"
+                            },
+                            "Value": 14.0
+                        }
+                    ]
+                }
+            ]
         },
         {
             "LocationInfo": {
