@@ -391,18 +391,19 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => new NavigationMethodPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
             Configure(json => new ReadingQualifierPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
             Configure(json => new TopEstimateMethodPickList(json.Get<string>(nameof(PickList.IdOrDisplayName))));
-            Configure(BackwardsCompatibleControlConditionPicklistFactory);
-            Configure(BackwardsCompatibleHydraulicTestMethodPicklistFactory);
-            Configure(BackwardsCompatibleHydraulicTestContextPickListFactory);
-            Configure(BackwardsCompatibleHydraulicTestAquiferTypePickListFactory);
-            Configure(BackwardsCompatibleHydraulicTestAnalysisMethodPickListFactory);
-            Configure(BackwardsCompatibleWellAquiferConnectivityTypePickListFactory);
-            Configure(BackwardsCompatibleWellComponentTypePickListFactory);
-            Configure(BackwardsCompatibleWellConditionTypePickListFactory);
-            Configure(BackwardsCompatibleWellInspectionMethodPickListFactory);
-            Configure(BackwardsCompatibleWellInspectionMethodTypePickListFactory);
-            Configure(BackwardsCompatibleWellRedevelopmentMethodTypePickListFactory);
-            Configure(BackwardsCompatibleWellRepairTypePickListFactory);
+
+            Configure(json => CreatePickList(json, s => new ControlConditionPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestContextPickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestAquiferTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new HydraulicTestAnalysisMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new WellAquiferConnectivityTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellComponentTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellConditionTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellInspectionMethodPickList(s)));
+            Configure(json => CreatePickList(json, s => new WellInspectionMethodTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellRedevelopmentMethodTypePickList(s)));
+            Configure(json => CreatePickList(json, s => new WellRepairTypePickList(s)));
 
         }
 
@@ -420,113 +421,18 @@ namespace FieldDataPluginFramework.Serialization
                 json.Get<double>(nameof(CrossSectionPoint.Elevation)));
         }
 
-        private static ControlConditionPickList BackwardsCompatibleControlConditionPicklistFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
 
-            return new ControlConditionPickList(conditionType);
+
+        private static T CreatePickList<T>(JsonParser json, Func<string, T> constructor) where T : PickList
+        {
+            var pickListValue = json.JsonText.StartsWith("{")
+            ? json.Get<string>(nameof(PickList.IdOrDisplayName))
+            : json.JsonText;
+
+            return constructor(pickListValue);
         }
 
-        private static HydraulicTestMethodPickList BackwardsCompatibleHydraulicTestMethodPicklistFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
 
-            return new HydraulicTestMethodPickList(conditionType);
-        }
-
-        private static HydraulicTestContextPickList BackwardsCompatibleHydraulicTestContextPickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new HydraulicTestContextPickList(conditionType);
-        }
-
-        private static HydraulicTestAquiferTypePickList BackwardsCompatibleHydraulicTestAquiferTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new HydraulicTestAquiferTypePickList(conditionType);
-        }
-
-        private static HydraulicTestAnalysisMethodPickList BackwardsCompatibleHydraulicTestAnalysisMethodPickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new HydraulicTestAnalysisMethodPickList(conditionType);
-        }
-
-        private static WellAquiferConnectivityTypePickList BackwardsCompatibleWellAquiferConnectivityTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellAquiferConnectivityTypePickList(conditionType);
-        }
-
-        private static WellComponentTypePickList BackwardsCompatibleWellComponentTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellComponentTypePickList(conditionType);
-        }
-
-        private static WellConditionTypePickList BackwardsCompatibleWellConditionTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellConditionTypePickList(conditionType);
-        }
-
-        private static WellInspectionMethodPickList BackwardsCompatibleWellInspectionMethodPickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellInspectionMethodPickList(conditionType);
-        }
-
-        private static WellInspectionMethodTypePickList BackwardsCompatibleWellInspectionMethodTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellInspectionMethodTypePickList(conditionType);
-        }
-
-        private static WellRedevelopmentMethodTypePickList BackwardsCompatibleWellRedevelopmentMethodTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellRedevelopmentMethodTypePickList(conditionType);
-        }
-
-        private static WellRepairTypePickList BackwardsCompatibleWellRepairTypePickListFactory(JsonParser json)
-        {
-            var conditionType = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
-                : json.JsonText;
-
-            return new WellRepairTypePickList(conditionType);
-        }
 
 
         private static Reading ReadingFactory(JsonParser json)
