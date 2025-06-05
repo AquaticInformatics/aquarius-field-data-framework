@@ -248,8 +248,6 @@ namespace FieldDataPluginFramework.Serialization
                     json.AddItems(nameof(item.Calibrations), item.Calibrations);
                     json.AddItems(nameof(item.Inspections), item.Inspections);
                     json.AddItems(nameof(item.GageZeroFlowActivities), item.GageZeroFlowActivities);
-                    json.AddItems(nameof(item.WellIntegrity), item.WellIntegrity);
-                    json.AddItems(nameof(item.HydraulicTests), item.HydraulicTests);
                 });
 
             Configure(json => new FieldVisitDetails(
