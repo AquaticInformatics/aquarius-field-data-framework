@@ -394,7 +394,6 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => CreatePickList(json, s => new HydraulicTestMethodPickList(s)));
             Configure(json => CreatePickList(json, s => new HydraulicTestContextPickList(s)));
             Configure(json => CreatePickList(json, s => new HydraulicTestAquiferTypePickList(s)));
-            Configure(json => CreatePickList(json, s => new HydraulicTestAnalysisMethodPickList(s)));
             Configure(json => CreatePickList(json, s => new WellAquiferConnectivityTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellComponentTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellConditionTypePickList(s)));
@@ -402,7 +401,6 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => CreatePickList(json, s => new WellInspectionMethodTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellRedevelopmentMethodTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellRepairTypePickList(s)));
-
         }
 
         public const int LegacyPointOrder = 0;

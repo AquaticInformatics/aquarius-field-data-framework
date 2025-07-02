@@ -108,9 +108,7 @@
                         {
                             "ParameterId": "HG",
                             "UnitId": "m",
-                            "AnalysisMethod": {
-                                "IdOrDisplayName": "Storativity"
-                            },
+                            "AnalysisMethod": "HGCSG",
                             "Value": 63.0
                         }
                     ]
@@ -135,9 +133,7 @@
                         {
                             "ParameterId": "HG",
                             "UnitId": "m",
-                            "AnalysisMethod": {
-                                "IdOrDisplayName": "Storativity"
-                            },
+                            "AnalysisMethod": "HGETG",
                             "Value": 249.0
                         }
                     ]
@@ -162,9 +158,7 @@
                         {
                             "ParameterId": "HG",
                             "UnitId": "m",
-                            "AnalysisMethod": {
-                                "IdOrDisplayName": "Storativity"
-                            },
+                            "AnalysisMethod": "HGFLOAT",
                             "Value": 14.0
                         }
                     ]
