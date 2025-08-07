@@ -14,6 +14,9 @@ If you would like to see more examples of field data plug-ins, please visit our 
 
 ## Change Log
 
+### AQTS 2025.3 - Framework version 3.0
+- **Breaking change**: Removed `AquiferCode` property from `HydraulicTestActivity`.
+
 ### AQTS 2025.2 - Framework version 2.15
 - Added support for `WellIntegrityActivity` activities that can be used to reflect the state of the wells and performed sub-activities.
 - Added support for `HydraulicTestActivity` activities that can be used to reflect the state of aquifer tests and related results.
