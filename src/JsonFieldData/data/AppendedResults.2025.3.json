@@ -1,5 +1,5 @@
 ﻿{
-    "FrameworkAssemblyQualifiedName": "FieldDataPluginFramework.IFieldDataPlugin, FieldDataPluginFramework, Version=2.15.0.0, Culture=neutral, PublicKeyToken=null",
+    "FrameworkAssemblyQualifiedName": "FieldDataPluginFramework.IFieldDataPlugin, FieldDataPluginFramework, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null",
     "PluginAssemblyQualifiedTypeName": "JsonFieldData.Plugin, JsonFieldData, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
     "AppendedVisits": [
         {
