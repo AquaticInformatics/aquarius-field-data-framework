@@ -160,6 +160,28 @@
                         }
                     ]
                 }
+            ],
+            "ExtendedAttributes": [
+                {
+                    "IdOrDisplayName": "Attribute-1",
+                    "Value": "Value for Attribute-1"
+                },
+                {
+                    "IdOrDisplayName": "Attribute-2",
+                    "Value": "Value for Attribute-2"
+                },
+                {
+                    "IdOrDisplayName": "00000000-0000-0000-0000-000000000000",
+                    "Value": "Value for 00000000-0000-0000-0000-000000000000"
+                },
+                {
+                    "IdOrDisplayName": "4aef95bd-0188-4eeb-b841-eab688c6d20e",
+                    "Value": "Value for 4aef95bd-0188-4eeb-b841-eab688c6d20e"
+                },
+                {
+                    "IdOrDisplayName": "4aef95bd01884eebb841eab688c6d20e",
+                    "Value": "Value for 4aef95bd01884eebb841eab688c6d20e"
+                }
             ]
         },
         {

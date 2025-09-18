@@ -401,6 +401,8 @@ namespace FieldDataPluginFramework.Serialization
             Configure(json => CreatePickList(json, s => new WellInspectionMethodTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellRedevelopmentMethodTypePickList(s)));
             Configure(json => CreatePickList(json, s => new WellRepairTypePickList(s)));
+            
+            Configure(CreateExtendedAttribute);
         }
 
         public const int LegacyPointOrder = 0;
@@ -415,6 +417,17 @@ namespace FieldDataPluginFramework.Serialization
                 pointOrder,
                 json.Get<double>(nameof(CrossSectionPoint.Distance)),
                 json.Get<double>(nameof(CrossSectionPoint.Elevation)));
+        }
+
+
+
+        private static ExtendedAttribute CreateExtendedAttribute(JsonParser json)
+        {
+            var pickListValue = json.JsonText.StartsWith("{")
+                ? json.Get<string>(nameof(PickList.IdOrDisplayName))
+                : json.JsonText;
+            
+            return new ExtendedAttribute(pickListValue, json.Get<string>(nameof(ExtendedAttribute.Value)));
         }
 
 

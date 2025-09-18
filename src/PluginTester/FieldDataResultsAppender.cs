@@ -16,6 +16,7 @@ using FieldDataPluginFramework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FieldDataPluginFramework.DataModel.PickLists;
 
 namespace PluginTester
 {
@@ -148,6 +149,11 @@ namespace PluginTester
         public void AddHydraulicTest(FieldVisitInfo fieldVisit, HydraulicTest hydraulicTest)
         {
             fieldVisit.HydraulicTests.Add(hydraulicTest);
+        }
+
+        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttributePickList extendedAttribute)
+        {
+            fieldVisit.ExtendedAttributes.Add(extendedAttribute);
         }
     }
 }

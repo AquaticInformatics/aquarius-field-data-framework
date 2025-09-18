@@ -36,6 +36,7 @@ namespace JsonFieldData
             {
                 LocationInfo = locationInfo;
 
+                Log.Info(jsonText.Contains("ExtendedAttributes").ToString());
                 AppendedResults = ParseJson(jsonText);
 
                 if (AppendedResults == null)
@@ -157,6 +158,11 @@ namespace JsonFieldData
             foreach (var hydraulicTest in importedVisit.HydraulicTests)
             {
                 ResultsAppender.AddHydraulicTest(visit, hydraulicTest);
+            }
+            
+            foreach (var extendedAttribute in importedVisit.ExtendedAttributes)
+            {
+                ResultsAppender.AddExtendedAttribute(visit, extendedAttribute);
             }
         }
 
