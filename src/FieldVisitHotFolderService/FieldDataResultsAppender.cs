@@ -20,6 +20,7 @@ using System.Linq;
 using FieldDataPluginFramework.DataModel.PickLists;
 using Calibration = FieldDataPluginFramework.DataModel.Calibrations.Calibration;
 using DischargeActivity = FieldDataPluginFramework.DataModel.DischargeActivities.DischargeActivity;
+using ExtendedAttribute = FieldDataPluginFramework.DataModel.ExtendedAttribute;
 using Inspection = FieldDataPluginFramework.DataModel.Inspections.Inspection;
 using Reading = FieldDataPluginFramework.DataModel.Readings.Reading;
 
@@ -212,7 +213,7 @@ namespace FieldVisitHotFolderService
             fieldVisit.HydraulicTests.Add(hydraulicTest);
         }
 
-        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttributePickList extendedAttribute)
+        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttribute extendedAttribute)
         {
             fieldVisit.ExtendedAttributes.Add(extendedAttribute);
         }
