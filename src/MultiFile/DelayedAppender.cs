@@ -346,7 +346,7 @@ namespace MultiFile
             ExtendVisitPeriod(fieldVisit, new[] { hydraulicTest.StartDate, hydraulicTest.EndDate });
         }
 
-        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttribute extendedAttribute)
+        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttributeValue extendedAttribute)
         {
             fieldVisit.ExtendedAttributes.Add(extendedAttribute);
         }

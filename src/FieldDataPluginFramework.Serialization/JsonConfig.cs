@@ -421,13 +421,13 @@ namespace FieldDataPluginFramework.Serialization
 
 
 
-        private static ExtendedAttribute CreateExtendedAttribute(JsonParser json)
+        private static ExtendedAttributeValue CreateExtendedAttribute(JsonParser json)
         {
             var pickListValue = json.JsonText.StartsWith("{")
-                ? json.Get<string>(nameof(ExtendedAttribute.UniqueId))
+                ? json.Get<string>(nameof(ExtendedAttributeValue.UniqueId))
                 : json.JsonText;
             
-            return new ExtendedAttribute(pickListValue, json.Get<string>(nameof(ExtendedAttribute.Value)));
+            return new ExtendedAttributeValue(pickListValue, json.Get<string>(nameof(ExtendedAttributeValue.Value)));
         }
 
 
