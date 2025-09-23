@@ -160,6 +160,20 @@
                         }
                     ]
                 }
+            ],
+            "ExtendedAttributes": [
+                {
+                    "UniqueId": "f687f76e-13bf-4406-82dc-10cf388a51e7",
+                    "Value": "Value for Attribute-1"
+                },
+                {
+                    "UniqueId": "8458d6-e299-4ecd-8ce3-49fc4882c61f",
+                    "Value": "True"
+                },
+                {
+                    "UniqueId": "978462cf-c1d9-49a5-ac44-1085d1a87d61",
+                    "Value": "1234.1234"
+                }
             ]
         },
         {

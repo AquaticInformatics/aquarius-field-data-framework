@@ -149,5 +149,10 @@ namespace PluginTester
         {
             fieldVisit.HydraulicTests.Add(hydraulicTest);
         }
+
+        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttributeValue extendedAttribute)
+        {
+            fieldVisit.ExtendedAttributes.Add(extendedAttribute);
+        }
     }
 }

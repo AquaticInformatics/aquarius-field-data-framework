@@ -158,6 +158,11 @@ namespace JsonFieldData
             {
                 ResultsAppender.AddHydraulicTest(visit, hydraulicTest);
             }
+            
+            foreach (var extendedAttribute in importedVisit.ExtendedAttributes)
+            {
+                ResultsAppender.AddExtendedAttribute(visit, extendedAttribute);
+            }
         }
 
         private static void UpgradeCrossSectionSurvey(CrossSectionSurvey survey)

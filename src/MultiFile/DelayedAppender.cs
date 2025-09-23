@@ -17,6 +17,7 @@ using FieldDataPluginFramework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FieldDataPluginFramework.DataModel.PickLists;
 
 namespace MultiFile
 {
@@ -91,6 +92,11 @@ namespace MultiFile
             foreach (var hydraulicTestActivity in delayedVisit.HydraulicTests)
             {
                 ActualAppender.AddHydraulicTest(visit, hydraulicTestActivity);
+            }
+
+            foreach (var extendedAttribute in delayedVisit.ExtendedAttributes)
+            {
+                ActualAppender.AddExtendedAttribute(visit, extendedAttribute);
             }
         }
 
@@ -338,6 +344,11 @@ namespace MultiFile
         {
             fieldVisit.HydraulicTests.Add(hydraulicTest);
             ExtendVisitPeriod(fieldVisit, new[] { hydraulicTest.StartDate, hydraulicTest.EndDate });
+        }
+
+        public void AddExtendedAttribute(FieldVisitInfo fieldVisit, ExtendedAttributeValue extendedAttribute)
+        {
+            fieldVisit.ExtendedAttributes.Add(extendedAttribute);
         }
     }
 }
