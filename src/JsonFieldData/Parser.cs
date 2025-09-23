@@ -36,7 +36,6 @@ namespace JsonFieldData
             {
                 LocationInfo = locationInfo;
 
-                Log.Info(jsonText.Contains("ExtendedAttributes").ToString());
                 AppendedResults = ParseJson(jsonText);
 
                 if (AppendedResults == null)
