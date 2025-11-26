@@ -4,9 +4,10 @@ This page highlights some changes in the field data framework.
 
 Not all changes will be listed, but you can always [compare by version tags](https://github.com/AquaticInformatics/aquarius-field-data-framework/compare/v17.4.1...v17.4.0) to see the full source code difference.
 
-### 25.4.0
+### 25.4.1
 - JsonFieldData - Added support to add/update `ExtendedAttributes` for `FieldVisits`.
 - MultiFile - Added support to add/update `ExtendedAttributes` for `FieldVisits`.
+- JsonFieldData - Bugfix - Added support for Hydraulic Test activity comments (missing since the 25.3 release)
 
 ### 25.3.0
 - Removed `AquiferCode` property from `HydraulicTestActivity`.

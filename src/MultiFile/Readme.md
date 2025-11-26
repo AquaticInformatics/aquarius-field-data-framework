@@ -25,7 +25,7 @@ When you install the MultiFile plugin on your AQTS app server, it is recommended
 
 | AQTS Version                                   | Latest compatible plugin Version                                                                                            |
 |------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| AQTS 2025.4                                    | [v25.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v25.4.0/MultiFile.plugin)   |
+| AQTS 2025.4                                    | [v25.4.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v25.4.1/MultiFile.plugin)   |
 | AQTS 2025.3                                    | [v25.3.0](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v25.3.0/MultiFile.plugin)   |
 | AQTS 2025.2                                    | [v25.2.7](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v25.2.7/MultiFile.plugin)   |
 | AQTS 2021.4 Update 1+                          | [v21.4.10](https://github.com/AquaticInformatics/aquarius-field-data-framework/releases/download/v21.4.10/MultiFile.plugin) |
