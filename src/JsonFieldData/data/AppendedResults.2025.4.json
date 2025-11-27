@@ -103,6 +103,7 @@
                     "RelatedFieldVisitIdentifiers": [],
                     "StartDate": "2025-04-08T14:32:15.0000000+07:00",
                     "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Comments": "Sample comment for HydraulicTest",
                     "Results": [
                         {
                             "ParameterId": "HG",
@@ -127,6 +128,7 @@
                     "RelatedFieldVisitIdentifiers": [],
                     "StartDate": "2025-04-08T14:32:15.0000000+07:00",
                     "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Comments": "Sample comment for HydraulicTest",
                     "Results": [
                         {
                             "ParameterId": "HG",
@@ -151,6 +153,7 @@
                     "RelatedFieldVisitIdentifiers": [],
                     "StartDate": "2025-04-08T14:32:15.0000000+07:00",
                     "EndDate": "2025-04-08T17:12:45.0000000+07:00",
+                    "Comments": "Sample comment for HydraulicTest",
                     "Results": [
                         {
                             "ParameterId": "HG",
