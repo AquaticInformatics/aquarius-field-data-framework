@@ -17,7 +17,7 @@ If you would like to see more examples of field data plug-ins, please visit our 
 ### AQTS 2025.4 - Framework version 3.0
 - JsonFieldData - Added support to add/update `ExtendedAttributes` for `FieldVisits`.
 - MultiFile - Added support to add/update `ExtendedAttributes` for `FieldVisits`.
-- JsonFieldData - Added support to add/update `Comments` for `Hydraulic Tests`.
+- **Bug fix**: JsonFieldData - Added support to add/update `Comments` for `Hydraulic Tests`.
 
 ### AQTS 2025.3 - Framework version 3.0
 - **Breaking change**: Removed `AquiferCode` property from `HydraulicTestActivity`.
