@@ -3,7 +3,7 @@
 # Deploy to GitHub releases
 # Deploy to NuGet
 
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 pull_requests:
   do_not_increment_build_number: true
@@ -39,19 +39,20 @@ before_build:
   - ps: |
       (Get-Content src\Aquarius.FieldDataFramework.nuspec).
         Replace('0.0.0', $env:APPVEYOR_BUILD_VERSION) | Set-Content src\Aquarius.FieldDataFramework.nuspec
-  - nuget restore src\FieldDataFramework.sln
+  - dotnet restore src\FieldDataFramework.sln
 
-build:
-  project: src\FieldDataFramework.sln
+build_script:
+  - dotnet build src\FieldDataFramework.sln -c Release --no-restore
 
 after_build:
   - nuget pack src\Aquarius.FieldDataFramework.nuspec
 
 artifacts:
+  # Existing artifacts - unchanged for backward compatibility (net472)
   - path: src\Library
     name: FieldDataPluginFramework
     type: zip
-  
+
   - path: src\PluginPackager\bin\Release\PluginPackager.exe
     name: PluginPackager
     type: file
@@ -79,6 +80,31 @@ artifacts:
   - path: 'Aquarius.FieldDataFramework.*.nupkg'
     name: AllPackages
     type: NuGetPackage
+
+  # NEW: .NET 10 artifacts with -net10 suffix for future automation
+  - path: src\PluginPackager\bin\Release\net10.0
+    name: PluginPackager-net10
+    type: zip
+
+  - path: src\PluginTester\bin\Release\net10.0
+    name: PluginTester-net10
+    type: zip
+
+  - path: src\JsonFieldData\deploy\Release\net10.0\JsonFieldData.plugin
+    name: JsonPlugin-net10
+    type: file
+
+  - path: src\MultiFile\deploy\Release\net10.0\MultiFile.plugin
+    name: MultiFilePlugin-net10
+    type: file
+
+  - path: src\MultiFile.Configurator\bin\Release\net10.0
+    name: MultiFile.Configurator-net10
+    type: zip
+
+  - path: src\FieldVisitHotFolderService\bin\Release\net10.0
+    name: FieldVisitHotFolderService-net10
+    type: zip
 
 deploy:
   - provider: GitHub

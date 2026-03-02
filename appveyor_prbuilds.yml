@@ -4,7 +4,7 @@ version: 127.127.{build}
 pull_requests:
   do_not_increment_build_number: true
 
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 platform: Any CPU
 configuration: Release
@@ -13,7 +13,7 @@ shallow_clone: true
 skip_tags: true
 
 before_build:
-  - nuget restore src\FieldDataFramework.sln
+  - dotnet restore src\FieldDataFramework.sln
 
-build:
-  project: src\FieldDataFramework.sln
+build_script:
+  - dotnet build src\FieldDataFramework.sln -c Release --no-restore

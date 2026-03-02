@@ -735,7 +735,7 @@ namespace FieldVisitHotFolderService
                 Log.Info($"Archiving attachment '{attachmentFilename}' from {attachmentUrl}");
                 File.WriteAllBytes(
                     attachmentFilename,
-                    attachmentUrl.GetBytesFromUrl(requestFilter: SetAuthenticationHeaders));
+                    attachmentUrl.GetBytesFromUrl(requestFilter: request => SetAuthenticationHeaders(request)));
             }
         }
 
@@ -774,6 +774,13 @@ namespace FieldVisitHotFolderService
         {
             request.Headers[AuthenticationHeaders.AuthenticationHeaderNameKey] = GetSessionToken();
         }
+
+#if NET10_0_OR_GREATER
+        private void SetAuthenticationHeaders(System.Net.Http.HttpRequestMessage request)
+        {
+            request.Headers.Add(AuthenticationHeaders.AuthenticationHeaderNameKey, GetSessionToken());
+        }
+#endif
 
         private string GetSessionToken()
         {
