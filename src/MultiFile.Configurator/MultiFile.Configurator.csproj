@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net472;net48;net10.0</TargetFrameworks>
+    <TargetFrameworks>net472;net10.0</TargetFrameworks>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <AssemblyName>MultiFile.Configurator</AssemblyName>
     <RootNamespace>MultiFile.Configurator</RootNamespace>

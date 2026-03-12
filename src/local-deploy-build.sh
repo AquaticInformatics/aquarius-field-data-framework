@@ -86,15 +86,9 @@ copy_artifact() {
 if [ "$FRAMEWORK" = "net10" ]; then
     FW_PATH="net10.0"
     ARTIFACT_SUFFIX="-net10"
-elif [ "$FRAMEWORK" = "net472" ]; then
-    FW_PATH=""
-    ARTIFACT_SUFFIX=""
-elif [ "$FRAMEWORK" = "net48" ]; then
-    FW_PATH=""
-    ARTIFACT_SUFFIX=""
 else
-    FW_PATH="$FRAMEWORK"
-    ARTIFACT_SUFFIX="-$FRAMEWORK"
+    FW_PATH=""
+    ARTIFACT_SUFFIX=""
 fi
 
 if [ "$FRAMEWORK" = "net10" ]; then

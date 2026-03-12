@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net472;net48;net10.0</TargetFrameworks>
+    <TargetFrameworks>net472;net10.0</TargetFrameworks>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <AssemblyName>FieldVisitHotFolderService</AssemblyName>
     <RootNamespace>FieldVisitHotFolderService</RootNamespace>
@@ -10,8 +10,7 @@
     <NoWarn>CA1416</NoWarn>
   </PropertyGroup>
 
-  <!-- Only reference for .NET Framework -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'net48'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Reference Include="FieldDataPluginFramework">
       <HintPath>..\Library\FieldDataPluginFramework.dll</HintPath>
     </Reference>

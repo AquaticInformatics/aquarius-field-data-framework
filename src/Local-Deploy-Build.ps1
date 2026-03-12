@@ -99,15 +99,9 @@ function Copy-Artifact {
 if ($Framework -eq "net10") {
     $fwPath = "net10.0"
     $artifactSuffix = "-net10"
-} elseif ($Framework -eq "net472") {
-    $fwPath = ""
-    $artifactSuffix = ""
-} elseif ($Framework -eq "net48") {
-    $fwPath = ""
-    $artifactSuffix = ""
 } else {
-    $fwPath = $Framework
-    $artifactSuffix = "-$Framework"
+    $fwPath = ""
+    $artifactSuffix = ""
 }
 
 if ($Framework -eq "net10") {
