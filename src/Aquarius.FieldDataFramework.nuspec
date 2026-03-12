@@ -43,7 +43,9 @@
     <files>
         <file src="Library\FieldDataPluginFramework.dll" target="lib\net472" />
         <file src="Library\net10.0\FieldDataPluginFramework.dll" target="lib\net10.0" />
-        <file src="PluginPackager\bin\Release\net472\PluginPackager.exe" target="tools" />
-        <file src="PluginTester\bin\Release\net472\PluginTester.exe" target="tools" />
+        <file src="PluginPackager\bin\Release\net472\PluginPackager.exe" target="tools\net472" />
+        <file src="PluginTester\bin\Release\net472\PluginTester.exe" target="tools\net472" />
+        <file src="PluginPackager\bin\Release\net10.0\PluginPackager.exe" target="tools\net10.0" />
+        <file src="PluginTester\bin\Release\net10.0\PluginTester.exe" target="tools\net10.0" />
     </files>
 </package>
