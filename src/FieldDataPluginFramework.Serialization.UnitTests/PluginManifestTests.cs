@@ -8,7 +8,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
     [TestFixture]
     public class PluginManifestTests
     {
-        // This  validation is what ensures that the plugin manifest contains enough property members for the AQTS server to install the plugin
+        // This validation is what ensures that the plugin manifest contains enough property members for the AQTS server to install the plugin
         private static readonly string[] IgnoredTargetMembers =
         {
             nameof(FieldDataPlugin.IsEnabled),
