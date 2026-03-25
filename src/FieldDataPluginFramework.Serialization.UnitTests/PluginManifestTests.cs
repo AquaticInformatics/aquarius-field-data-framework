@@ -8,7 +8,7 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
     [TestFixture]
     public class PluginManifestTests
     {
-        // This  validation is what ensures that the plugin manifest contains enough property members for the AQTS server to install the plugin
+        // This validation is what ensures that the plugin manifest contains enough property members for the AQTS server to install the plugin
         private static readonly string[] IgnoredTargetMembers =
         {
             nameof(FieldDataPlugin.IsEnabled),
@@ -51,17 +51,13 @@ namespace FieldDataPluginFramework.Serialization.UnitTests
             foreach (var sourceProperty in sourceProperties)
             {
                 var targetProperty = typeof(FieldDataPlugin).GetProperty(sourceProperty.Name);
+                var expectedValue = sourceProperty.GetValue(manifest);
 
                 Assert.That(targetProperty, Is.Not.Null, sourceProperty.Name);
 
-                targetProperty.SetValue(dto, sourceProperty.GetValue(manifest));
-            }
+                targetProperty.SetValue(dto, expectedValue);
 
-            foreach (var sourceProperty in sourceProperties)
-            {
-                var targetProperty = typeof(FieldDataPlugin).GetProperty(sourceProperty.Name);
-
-                Assert.That(targetProperty.GetValue(dto), Is.EqualTo(sourceProperty.GetValue(manifest)), sourceProperty.Name);
+                Assert.That(targetProperty.GetValue(dto), Is.EqualTo(expectedValue), sourceProperty.Name);
             }
         }
     }
