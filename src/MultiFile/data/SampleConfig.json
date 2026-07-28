@@ -1,0 +1,7 @@
+{
+  "Plugins": [
+    {
+      "Path": "src\\JsonFieldData\\bin\\Debug\\net472\\JsonFieldData.dll"
+    }
+  ]
+}

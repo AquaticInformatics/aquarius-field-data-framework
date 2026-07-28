@@ -176,11 +176,12 @@ namespace MultiFile
 
             var pluginFolder = new DirectoryInfo(pluginDirectory);
             var parentFolder = pluginFolder.Parent;
+            var ownAssemblyFileName = Path.GetFileName(GetType().Assembly.Location);
 
             // ReSharper disable once PossibleNullReferenceException
             var sourceFolders = parentFolder
                 .GetDirectories()
-                .Where(di => IsPeerPluginFolder(di, pluginFolder))
+                .Where(di => IsPeerPluginFolder(di, pluginFolder, ownAssemblyFileName))
                 .ToList();
 
             var pluginCopyRoot = new DirectoryInfo(Path.Combine(pluginFolder.FullName, "PluginCopies"));
@@ -213,11 +214,12 @@ namespace MultiFile
                 .ToList();
         }
 
-        private static bool IsPeerPluginFolder(DirectoryInfo folder, DirectoryInfo pluginFolder)
+        private static bool IsPeerPluginFolder(DirectoryInfo folder, DirectoryInfo pluginFolder, string ownAssemblyFileName)
         {
             return !ExcludedFolderNames.Contains(folder.Name)
                    && folder.FullName != pluginFolder.FullName
-                   && folder.GetFiles("*.dll").Any();
+                   && folder.GetFiles("*.dll").Any()
+                   && !folder.GetFiles(ownAssemblyFileName).Any(); // Ignore dual-targeted versions of the same assembly
         }
 
         private static readonly HashSet<string> ExcludedFolderNames = new HashSet<string>

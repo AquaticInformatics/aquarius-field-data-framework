@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Security;
 using System.Text.RegularExpressions;
 using Common;
 using FieldDataPluginFramework;
@@ -61,94 +60,18 @@ namespace PluginPackager
 
         private void ResolveAssemblyPath()
         {
-            AllowReflectionLoadsFromAssemblyFolder();
+            var path = !string.IsNullOrEmpty(Context.AssemblyPath)
+                ? Context.AssemblyPath
+                : Context.AssemblyFolder;
 
-            if (!string.IsNullOrEmpty(Context.AssemblyPath))
-            {
-                var assembly = LoadAssembly(Context.AssemblyPath, message => Log.Error($"Can't load '{Context.AssemblyPath}': {message}"));
+            var pluginLoader = new PluginLoader {Log = Log4NetLogger.Create(Log)};
 
-                if (assembly == null)
-                    throw new ExpectedException($"Can't load plugin assembly.");
+            var loadedPlugin = pluginLoader.LoadPlugins(new List<string> {path}).Single();
 
-                Plugin = FindAllPluginImplementations(assembly).Single();
-                return;
-            }
+            Plugin = loadedPlugin.Plugin;
 
-            Plugin = GetSinglePluginOrThrow();
-
-            Context.AssemblyPath = Plugin.GetType().GetAssemblyPath();
-        }
-
-        private void AllowReflectionLoadsFromAssemblyFolder()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += LoadFromPluginFolder;
-        }
-
-        private Assembly LoadFromPluginFolder(object sender, ResolveEventArgs args)
-        {
-            var assemblyPath = Path.Combine(Context.AssemblyFolder, new AssemblyName(args.Name).Name + ".dll");
-
-            if (!File.Exists(assemblyPath)) return null;
-
-            return Assembly.LoadFrom(assemblyPath);
-        }
-
-        private Assembly LoadAssembly(string path, Action<string> exceptionAction)
-        {
-            try
-            {
-                return Assembly.LoadFile(path);
-            }
-            catch (Exception exception)
-            {
-                if (exception is ReflectionTypeLoadException loadException)
-                {
-                    exceptionAction(string.Join("\n", loadException.LoaderExceptions.Select(e => e.Message)));
-                }
-                else if (exception is BadImageFormatException || exception is FileLoadException || exception is SecurityException)
-                {
-                    exceptionAction(exception.Message);
-                }
-                else
-                {
-                    throw;
-                }
-
-                return null;
-            }
-        }
-
-        private IFieldDataPlugin GetSinglePluginOrThrow()
-        {
-            var directory = new DirectoryInfo(Context.AssemblyFolder);
-
-            var plugins = new List<IFieldDataPlugin>();
-
-            foreach (var file in directory.GetFiles("*.dll"))
-            {
-                var assembly = LoadAssembly(file.FullName, message => Log.Warn($"Skipping '{file.FullName}': {message}"));
-
-                if (assembly == null)
-                    continue;
-
-                plugins.AddRange(FindAllPluginImplementations(assembly));
-            }
-
-            if (plugins.Count > 1)
-                throw new ExpectedException(
-                    $"'{Context.AssemblyFolder}' contains multiple IFieldDataPlugin implementations. You'll need to explicitly specify an /{nameof(Context.AssemblyPath)} option.");
-
-            if (plugins.Count != 1)
-                throw new ExpectedException($"Can't find any IFieldDataPlugin implementations in '{Context.AssemblyFolder}'.");
-
-            return plugins.Single();
-        }
-
-        private static IEnumerable<IFieldDataPlugin> FindAllPluginImplementations(Assembly assembly)
-        {
-            return assembly.GetTypes()
-                .Where(type => typeof(IFieldDataPlugin).IsAssignableFrom(type))
-                .Select(type => (IFieldDataPlugin)Activator.CreateInstance(type));
+            if (string.IsNullOrEmpty(Context.AssemblyPath))
+                Context.AssemblyPath = Plugin.GetType().GetAssemblyPath();
         }
 
         private void ResolveAssemblyQualifiedTypeName()

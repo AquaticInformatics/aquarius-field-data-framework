@@ -42,7 +42,10 @@
 
     <files>
         <file src="Library\FieldDataPluginFramework.dll" target="lib\net472" />
-        <file src="PluginPackager\bin\Release\PluginPackager.exe" target="tools" />
-        <file src="PluginTester\bin\Release\PluginTester.exe" target="tools" />
+        <file src="PluginPackager\bin\Release\net472\PluginPackager.exe" target="tools" />
+        <file src="PluginPackager\bin\Release\net10.0\**" target="tools\net10.0" />
+        <file src="PluginTester\bin\Release\net472\PluginTester.exe" target="tools" />
+        <!-- exclude: already copied from PluginPackager\net10.0 above (identical shared dependencies) -->
+        <file src="PluginTester\bin\Release\net10.0\**" target="tools\net10.0" exclude="**\Common.dll;**\Common.pdb;**\FieldDataPluginFramework.dll;**\log4net.dll;**\ServiceStack.Text.dll;**\System.Configuration.ConfigurationManager.dll;**\System.Security.Cryptography.ProtectedData.dll;**\System.Security.Permissions.dll;**\runtimes\**" />
     </files>
 </package>

@@ -57,12 +57,14 @@ namespace Common
             public PluginManifest Manifest { get; }
             public string Path { get; }
             public int PluginPriority { get; set; }
-            public Dictionary<string,string> Settings { get; set; }
+            public Dictionary<string, string> Settings { get; set; }
         }
 
         public List<LoadedPlugin> LoadPlugins(List<string> paths)
         {
+#if NETFRAMEWORK
             AppDomain.CurrentDomain.AssemblyResolve += ResolvePluginAssembliesFromSameFolder;
+#endif
 
             return paths
                 .Select(LoadPlugin)
@@ -80,11 +82,11 @@ namespace Common
         private Assembly ResolvePluginAssembliesFromSameFolder(object sender, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name).Name + ".dll";
-            
+
             //A known issue where Humanizer is loading resources dll but actually we only need English which is embedded.
             if (assemblyName.Equals("Humanizer.resources.dll", StringComparison.OrdinalIgnoreCase))
             {
-	            return null;
+                return null;
             }
 
             var requestingAssembly = args.RequestingAssembly;
@@ -164,6 +166,9 @@ namespace Common
 
         private LoadedPlugin LoadPlugin(string path)
         {
+#if NETFRAMEWORK
+            path = Path.GetFullPath(path);
+
             if (IsZipPlugin(path))
                 return LoadPluginFromZip(path);
 
@@ -180,7 +185,118 @@ namespace Common
             };
 
             return new LoadedPlugin(plugin, manifest, path);
+#else
+            return LoadPluginIsolated(path);
+#endif
         }
+
+#if !NETFRAMEWORK
+        // net10.0: loads the plugin into its own collectible AssemblyLoadContext, the same way the
+        // Aquarius server host does (see PluginIsolatedLoadContext in Server.BusinessObjects.FieldDataPlugin),
+        // rather than the net472 in-process AppDomain.AssemblyResolve approach above.
+        private LoadedPlugin LoadPluginIsolated(string path)
+        {
+            var pluginDirectory = PreparePluginDirectory(path, out var explicitMainAssemblyPath);
+
+            var manifest = TryLoadManifest(pluginDirectory);
+
+            var mainAssemblyPath = explicitMainAssemblyPath ?? FindMainAssemblyPath(pluginDirectory, manifest);
+
+            if (mainAssemblyPath == null)
+                throw new ExpectedException($"No plugin assembly found in '{pluginDirectory}'.");
+
+            var friendlyName = new DirectoryInfo(pluginDirectory).Name;
+
+            var loadContext = new PluginIsolatedLoadContext(pluginDirectory, mainAssemblyPath, friendlyName);
+
+            var assembly = loadContext.LoadFromAssemblyPath(mainAssemblyPath);
+
+            var plugins = FindAllPluginImplementations(assembly).ToList();
+
+            var plugin = GetSinglePluginOrThrow(path, plugins);
+
+            manifest ??= new PluginManifest
+            {
+                AssemblyQualifiedTypeName = plugin.GetType().AssemblyQualifiedName,
+                PluginFolderName = friendlyName
+            };
+
+            return new LoadedPlugin(plugin, manifest, path);
+        }
+
+        // Returns the plugin's containing directory. When `path` is itself a specific .dll file
+        // (rather than a folder or a *.plugin bundle), that exact file is returned via
+        // `explicitMainAssemblyPath` so it is always used as the main plugin assembly — the folder
+        // it lives in (e.g. a raw "bin\Debug\net10.0" build output folder) may contain no manifest.json
+        // and other unrelated DLLs (dependencies, other projects' outputs, etc.), so guessing the main
+        // assembly from folder contents alone is unreliable in that case.
+        private static string PreparePluginDirectory(string path, out string explicitMainAssemblyPath)
+        {
+            explicitMainAssemblyPath = null;
+
+            if (Directory.Exists(path))
+                return Path.GetFullPath(path);
+
+            if (!File.Exists(path))
+                throw new ExpectedException($"Plugin file '{path}' does not exist.");
+
+            if (!IsZipPlugin(path))
+            {
+                explicitMainAssemblyPath = Path.GetFullPath(path);
+                return Path.GetDirectoryName(explicitMainAssemblyPath);
+            }
+
+            // Extract the *.plugin bundle to a scratch folder so it can be loaded from disk via an
+            // AssemblyDependencyResolver, the same way the Aquarius server host stages a plugin package
+            // before creating its isolated AssemblyLoadContext.
+            var extractDirectory = Path.Combine(
+                Path.GetTempPath(),
+                "PluginTester",
+                $"{Path.GetFileNameWithoutExtension(path)}-{Guid.NewGuid():N}");
+
+            Directory.CreateDirectory(extractDirectory);
+            ZipFile.ExtractToDirectory(path, extractDirectory);
+
+            AppDomain.CurrentDomain.ProcessExit += (_, __) =>
+            {
+                try { Directory.Delete(extractDirectory, recursive: true); }
+                catch { /* best-effort cleanup */ }
+            };
+
+            return extractDirectory;
+        }
+
+        private static PluginManifest TryLoadManifest(string pluginDirectory)
+        {
+            var manifestPath = Path.Combine(pluginDirectory, PluginManifest.EntryName);
+
+            return File.Exists(manifestPath)
+                ? File.ReadAllText(manifestPath).FromJson<PluginManifest>()
+                : null;
+        }
+
+        private static string FindMainAssemblyPath(string pluginDirectory, PluginManifest manifest)
+        {
+            if (!string.IsNullOrWhiteSpace(manifest?.AssemblyQualifiedTypeName))
+            {
+                var assemblyName = AssemblyQualifiedNameParser.Parse(manifest.AssemblyQualifiedTypeName).AssemblyName;
+                var manifestAssemblyPath = Path.Combine(pluginDirectory, $"{assemblyName}.dll");
+
+                if (File.Exists(manifestAssemblyPath))
+                    return manifestAssemblyPath;
+            }
+
+            var folderName = new DirectoryInfo(pluginDirectory).Name;
+            var byFolderName = Path.Combine(pluginDirectory, $"{folderName}.dll");
+
+            if (File.Exists(byFolderName))
+                return byFolderName;
+
+            return Directory.GetFiles(pluginDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault();
+        }
+#endif
 
         private IFieldDataPlugin LoadPluginFromFile(string path)
         {
@@ -275,7 +391,7 @@ namespace Common
         private byte[] LoadAssemblyBytes(ZipArchiveEntry entry)
         {
             using (var stream = entry.Open())
-            using(var reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream))
             {
                 return reader.ReadBytes((int)entry.Length);
             }
